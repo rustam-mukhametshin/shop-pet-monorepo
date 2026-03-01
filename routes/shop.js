@@ -9,10 +9,10 @@ shopRoutes.get('/', (req, res, next) => {
     
     <ul>
     <li>
-    <a href="/add-product">Add product</a>
+    <a href="/admin/add-product">Add product</a>
 </li>
     <li>
-    <a href="/product">Product</a>
+    <a href="/admin/product">Product</a>
 </li>
 </ul>
     
