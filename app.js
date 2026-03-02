@@ -10,11 +10,11 @@ const app = express();
 app.use('/css/index.css', (req, res, next) => {
     res
         .setHeader('Content-Type', 'text/css')
-        .sendFile(path.join(__dirname, 'css', 'index.css'));
+        .sendFile(path.join(__dirname,'public', 'css', 'index.css'));
 });
 // End adding styles
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 app.use('/', (req, res, next) => {
     next();
