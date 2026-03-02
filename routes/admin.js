@@ -4,14 +4,19 @@ const rootDir = require('../utils/path');
 
 const adminRoutes = express.Router();
 
+const products = [];
+
 
 adminRoutes.get('/add-product', (req, res, next) => {
     return res.sendFile(path.join(rootDir, 'views', 'add-product.html'));
 })
 
 adminRoutes.post('/add-product', (req, res, next) => {
+    products.push({
+        title:  req.body.title,
+    })
     res.redirect('/');
 })
 
-
-module.exports = adminRoutes;
+exports.adminRoutes = adminRoutes;
+exports.products = products;

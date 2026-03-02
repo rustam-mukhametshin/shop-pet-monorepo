@@ -1,18 +1,14 @@
 const express = require('express');
 const path = require('path');
 
-const adminRoutes = require('./routes/admin');
+const {adminRoutes} = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
 const app = express();
 
-// Start adding styles
-app.use('/css/index.css', (req, res, next) => {
-    res
-        .setHeader('Content-Type', 'text/css')
-        .sendFile(path.join(__dirname,'public', 'css', 'index.css'));
-});
-// End adding styles
+// Start public
+app.use(express.static(path.join(__dirname, 'public')))
+// End public
 
 app.use(express.urlencoded({extended: true}));
 
