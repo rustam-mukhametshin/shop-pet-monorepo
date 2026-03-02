@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -15,10 +16,9 @@ app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 
 app.use((req, res, next) => {
-    console.log('300')
     return res
         .status(404)
-        .send(`<h1>Not found</h1>`)
+        .sendFile(path.join(__dirname, 'views', '404.html'));
 })
 
 app.listen(3000);
