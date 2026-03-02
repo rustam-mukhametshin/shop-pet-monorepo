@@ -9,7 +9,7 @@ adminRoutes.get('/add-product', (req, res, next) => {
     return res.sendFile(path.join(rootDir, 'views', 'add-product.html'));
 })
 
-adminRoutes.post('/product', (req, res, next) => {
+adminRoutes.post('/add-product', (req, res, next) => {
     res.redirect('/');
 })
 
