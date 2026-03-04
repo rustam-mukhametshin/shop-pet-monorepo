@@ -1,5 +1,4 @@
 const express = require('express');
-const path = require('path');
 const shopRoutes = express.Router();
 const {products} = require('./admin');
 
