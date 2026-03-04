@@ -5,9 +5,9 @@ const {products} = require('./admin');
 
 
 shopRoutes.get('/', (req, res) => {
-    console.log(products);
-    res.render('shop', {
+    return res.render('shop', {
         pageTitle: 'Shop page',
+        url: '/',
         prods: products
     })
 })
