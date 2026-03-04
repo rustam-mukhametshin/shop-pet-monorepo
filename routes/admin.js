@@ -8,7 +8,9 @@ const products = [];
 
 
 adminRoutes.get('/add-product', (req, res, next) => {
-    return res.sendFile(path.join(rootDir, 'views', 'add-product.html'));
+    return res.render('add-product', {
+        pageTitle: 'Add product GET',
+    })
 })
 
 adminRoutes.post('/add-product', (req, res, next) => {

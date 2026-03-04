@@ -4,9 +4,12 @@ const shopRoutes = express.Router();
 const {products} = require('./admin');
 
 
-shopRoutes.get('/', (req, res, next) => {
+shopRoutes.get('/', (req, res) => {
     console.log(products);
-    res.sendFile(path.join(__dirname, '../', 'views', 'shop.html'));
+    res.render('shop', {
+        pageTitle: 'Shop page',
+        prods: products
+    })
 })
 
 module.exports = shopRoutes;
