@@ -3,6 +3,7 @@ const path = require('path');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const {notFound} = require("./controllers/public.controller");
 
 const app = express();
 
@@ -23,12 +24,6 @@ app.use('/', (req, res, next) => {
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 
-app.use((req, res, next) => {
-    res
-    .status(404)
-    .render('404', {
-        pageTitle: 'Not Found',
-    })
-})
+app.use(notFound)
 
 app.listen(3333);
