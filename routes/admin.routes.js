@@ -5,6 +5,6 @@ const adminRoutes = express.Router();
 
 adminRoutes.get('/add-product', AdminController.getAddProduct)
 adminRoutes.post('/add-product', AdminController.postAddProduct)
-adminRoutes.get('/products', AdminController.getAddProduct)
+adminRoutes.get('/products', AdminController.getProducts)
 
 module.exports = adminRoutes;

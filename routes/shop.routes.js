@@ -4,8 +4,9 @@ const shopRoutes = express.Router();
 
 
 shopRoutes.get('/products', ShopController.getProducts)
-shopRoutes.get('/cart', ShopController.getHomepage)
-shopRoutes.get('/checkout', ShopController.getHomepage)
-shopRoutes.get('/', ShopController.getHomepage)
+shopRoutes.get('/cart', ShopController.getCart)
+shopRoutes.get('/checkout', ShopController.getCheckout)
+
+shopRoutes.get('/', ShopController.getIndex)
 
 module.exports = shopRoutes;

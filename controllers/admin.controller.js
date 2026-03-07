@@ -12,3 +12,13 @@ exports.postAddProduct = (req, res) => {
     product.save();
     res.redirect('/');
 }
+
+exports.getProducts = (req, res) => {
+    return ProductModel.getAll((products) => {
+        return res.render('admin/products', {
+            pageTitle: 'Admin Products',
+            url: '/admin/products',
+            prods: products
+        })
+    });
+}
