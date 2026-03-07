@@ -1,8 +1,8 @@
 const express = require('express');
 const path = require('path');
 
-const adminRoutes = require('./routes/admin');
-const shopRoutes = require('./routes/shop');
+const adminRoutes = require('./routes/admin.routes');
+const shopRoutes = require('./routes/shop.routes');
 const {notFound} = require("./controllers/public.controller");
 
 const app = express();
