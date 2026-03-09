@@ -30,6 +30,16 @@ exports.getCart = (req, res) => {
     });
 }
 
+exports.getOrders = (req, res) => {
+    return ProductModel.getAll((products) => {
+        return res.render('shop/orders', {
+            pageTitle: 'Orders',
+            url: '/orders',
+            prods: products
+        })
+    });
+}
+
 exports.getCheckout = (req, res) => {
     return ProductModel.getAll((products) => {
         return res.render('shop/checkout', {

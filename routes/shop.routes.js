@@ -6,6 +6,7 @@ const shopRoutes = express.Router();
 shopRoutes.get('/products', ShopController.getProducts)
 shopRoutes.get('/cart', ShopController.getCart)
 shopRoutes.get('/checkout', ShopController.getCheckout)
+shopRoutes.get('/orders', ShopController.getOrders)
 
 shopRoutes.get('/', ShopController.getIndex)
 
