@@ -12,8 +12,6 @@
     </div>
     <h2><%= product.price %></h2>
     <p><%= product.description %></p>
-    <form action="/cart" method="post">
-        <button type="submit" class="btn">Add to cart</button>
-    </form>
+    <%- include('./../parts/add-to-cart', {product: product}) %>
 </main>
 <%- include('./../parts/body-end') %>
