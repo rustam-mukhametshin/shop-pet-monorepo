@@ -1,4 +1,5 @@
 const ProductModel = require("../models/product.model");
+const CartModel = require("../models/cart.model");
 
 exports.getIndex = (req, res) => {
     return ProductModel.getAll((products) => {
@@ -38,6 +39,14 @@ exports.getCart = (req, res) => {
             prods: products
         })
     });
+}
+
+exports.postCart = (req, res) => {
+    const id = req.body.id;
+    ProductModel.findById((product) => {
+        CartModel.addProduct(id, product.price);
+    }, id);
+    res.redirect('/');
 }
 
 exports.getOrders = (req, res) => {
