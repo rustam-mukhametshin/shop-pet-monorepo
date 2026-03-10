@@ -1,0 +1,48 @@
+<%- include('./../parts/head') %>
+<%- include('./../parts/head-end') %>
+<%- include('./../parts/body') %>
+<%- include('./../parts/navigation') %>
+
+<main>
+    <form class="product-form" action="/admin/<%- edit ? 'edit' : 'add' %>-product" method="POST">
+        <% if(edit) { %>
+            <input type="hidden" name="id" value="<%= product.id %>">
+        <% } %>
+
+        <div class="form-control">
+            <label for="title">Title</label>
+            <input type="text" name="title" id="title" required value="<%= product ? product.title : '' %>">
+        </div>
+
+        <div class="form-control">
+            <label for="imageUrl">Image URL</label>
+            <input type="url" name="imageUrl" id="imageUrl" required value="<%= product ? product.imageUrl : '' %>">
+            <% if(edit) { %>
+                <img src="<%= product.imageUrl %>" alt="<%= product.title %>" width="100px" height="100px">
+            <% } %>
+        </div>
+
+        <div class="form-control">
+            <label for="price">Price</label>
+            <input type="number" name="price" id="price" required step="0.01"
+                   value="<%= product ? product.price : '' %>">
+        </div>
+
+        <div class="form-control">
+            <label for="description">Description</label>
+            <textarea name="description" id="description" cols="30" rows="10"
+                      required><%= product ? product.description : '' %></textarea>
+        </div>
+
+        <button class="btn" type="submit">
+            <% if(edit) { %>
+                Update
+            <% } else { %>
+                Add
+            <% } %>
+            Product
+        </button>
+    </form>
+</main>
+
+<%- include('./../parts/body-end') %>
