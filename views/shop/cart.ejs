@@ -2,5 +2,15 @@
 <%- include('./../parts/head-end') %>
 <%- include('./../parts/body') %>
 <%- include('./../parts/navigation') %>
-
+<main>
+    <% if(products.length > 0) { %>
+        <ul>
+            <% products.forEach(p => { %>
+                <li><%= p.productData.title %> (<%= p.quantity %>)</li>
+            <% }) %>
+        </ul>
+    <% } else { %>
+        <h1>No products</h1>
+    <% } %>
+</main>
 <%- include('./../parts/body-end') %>

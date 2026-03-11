@@ -32,11 +32,26 @@ exports.getProductDetails = (req, res) => {
 }
 
 exports.getCart = (req, res) => {
-    return ProductModel.getAll((products) => {
-        return res.render('shop/cart', {
-            pageTitle: 'Cart',
-            url: '/cart',
-            prods: products
+    return CartModel.getCart((cart) => {
+        ProductModel.getAll(products => {
+            let cartProducts = [];
+            for (const product of products) {
+                const pData = cart.products.find((p) => p.id === product.id);
+                if (pData) {
+                    cartProducts.push({
+                        productData: product,
+                        quantity: pData.quantity,
+                    });
+                }
+            }
+
+
+            return res.render('shop/cart', {
+                pageTitle: 'Cart',
+                url: '/cart',
+                cart,
+                products: cartProducts,
+            })
         })
     });
 }
