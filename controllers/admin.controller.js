@@ -18,7 +18,7 @@ exports.postAddProduct = (req, res) => {
         req.body.price
     );
     product.save();
-    res.redirect('/');
+    res.redirect('/admin/products');
 }
 
 exports.getEditProduct = (req, res) => {
