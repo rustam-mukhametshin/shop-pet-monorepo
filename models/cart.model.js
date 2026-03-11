@@ -64,6 +64,11 @@ module.exports = class Cart {
                 ...cart
             }
             const product = updatedCart.products.find((item) => item.id === id);
+
+            if (!product) {
+                return;
+            }
+
             const productQty = product.quantity;
             updatedCart.products = updatedCart.products.filter((item) => item.id !== id);
             updatedCart.totalPrice = updatedCart.totalPrice - productPrice * productQty;
@@ -74,7 +79,7 @@ module.exports = class Cart {
         })
     }
 
-    static getCart(cb){
+    static getCart(cb) {
         fs.readFile(p, (err, fileContent) => {
             let cart = {
                 products: [],
