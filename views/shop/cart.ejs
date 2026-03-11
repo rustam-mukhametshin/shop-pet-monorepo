@@ -6,7 +6,14 @@
     <% if(products.length > 0) { %>
         <ul>
             <% products.forEach(p => { %>
-                <li><%= p.productData.title %> (<%= p.quantity %>)</li>
+                <li>
+                    <p><%= p.productData.title %> (<%= p.quantity %>)</p>
+                    <button class="btn">
+                        <a href="/cart-delete-item/<%= p.productData.id %>">
+                            Delete
+                        </a>
+                    </button>
+                </li>
             <% }) %>
         </ul>
     <% } else { %>

@@ -9,6 +9,8 @@ shopRoutes.get('/products/:id', ShopController.getProductDetails)
 shopRoutes.get('/cart', ShopController.getCart)
 shopRoutes.post('/cart', ShopController.postCart)
 
+shopRoutes.get('/cart-delete-item/:id', ShopController.deleteItem)
+
 shopRoutes.get('/checkout', ShopController.getCheckout)
 shopRoutes.get('/orders', ShopController.getOrders)
 

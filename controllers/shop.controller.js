@@ -22,13 +22,13 @@ exports.getProducts = (req, res) => {
 }
 
 exports.getProductDetails = (req, res) => {
-    return ProductModel.findById((product) => {
+    return ProductModel.findById(req.params.id, (product) => {
         return res.render('shop/product-detail', {
             pageTitle: product.title ?? 'Product',
             url: '/products',
             product,
         })
-    }, req.params.id);
+    });
 }
 
 exports.getCart = (req, res) => {
@@ -58,10 +58,19 @@ exports.getCart = (req, res) => {
 
 exports.postCart = (req, res) => {
     const id = req.body.id;
-    ProductModel.findById((product) => {
+    ProductModel.findById(id, (product) => {
         CartModel.addProduct(id, product.price);
-    }, id);
+    });
     res.redirect('/');
+}
+
+exports.deleteItem = (req, res) => {
+    const id = req.params.id;
+
+    return ProductModel.findById(id, product => {
+        CartModel.deleteProduct(id, product.price);
+        return res.redirect('/cart');
+    })
 }
 
 exports.getOrders = (req, res) => {
