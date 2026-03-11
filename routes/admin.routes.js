@@ -6,6 +6,7 @@ const adminRoutes = express.Router();
 adminRoutes.get('/add-product', AdminController.getAddProduct)
 adminRoutes.post('/add-product', AdminController.postAddProduct)
 adminRoutes.get('/edit-product/:id', AdminController.getEditProduct)
+adminRoutes.get('/delete-product/:id', AdminController.deleteProduct)
 adminRoutes.post('/edit-product', AdminController.postEditProduct)
 adminRoutes.get('/products', AdminController.getProducts)
 

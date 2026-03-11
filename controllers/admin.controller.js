@@ -38,6 +38,12 @@ exports.getEditProduct = (req, res) => {
     }, prodId);
 }
 
+exports.deleteProduct = (req, res) => {
+    return ProductModel.delete(req.params.id, () => {
+        return res.redirect('/admin/products');
+    })
+}
+
 exports.postEditProduct = (req, res) => {
     const product = new ProductModel(
         req.body.id,
