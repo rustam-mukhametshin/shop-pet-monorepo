@@ -21,7 +21,7 @@ exports.getProducts = (req, res) => {
     });
 }
 
-exports.getProductDetails = (req, res) => {
+exports.getProduct = (req, res) => {
     return ProductModel.findById(req.params.id).then(product => {
         return res.render('shop/product-detail', {
             pageTitle: product.title ?? 'Product',

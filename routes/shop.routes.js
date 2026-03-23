@@ -4,7 +4,7 @@ const shopRoutes = express.Router();
 
 
 shopRoutes.get('/products', ShopController.getProducts)
-shopRoutes.get('/products/:id', ShopController.getProductDetails)
+shopRoutes.get('/products/:id', ShopController.getProduct)
 
 shopRoutes.get('/cart', ShopController.getCart)
 shopRoutes.post('/cart', ShopController.postCart)
