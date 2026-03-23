@@ -10,15 +10,19 @@ exports.getAddProduct = (req, res) => {
 }
 
 exports.postAddProduct = (req, res) => {
-    const product = new ProductModel(
-        null,
+    return ProductModel.create(
         req.body.title,
         req.body.imageUrl,
         req.body.description,
         req.body.price
-    );
-    product.save();
-    res.redirect('/admin/products');
+    )
+        .then(() => {
+            return res.redirect('/admin/products');
+        })
+        .catch((err) => {
+            console.error(err);
+            return res.status(500).redirect('/admin/products');
+        });
 }
 
 exports.getEditProduct = (req, res) => {
@@ -45,15 +49,20 @@ exports.deleteProduct = (req, res) => {
 }
 
 exports.postEditProduct = (req, res) => {
-    const product = new ProductModel(
+    return ProductModel.update(
         req.body.id,
         req.body.title,
         req.body.imageUrl,
         req.body.description,
         req.body.price
-    );
-    product.save();
-    res.redirect('/admin/products');
+    )
+        .then(() => {
+            return res.redirect('/admin/products');
+        })
+        .catch((err) => {
+            console.error(err);
+            return res.status(500).redirect('/admin/products');
+        });
 }
 
 exports.getProducts = (req, res) => {

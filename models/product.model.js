@@ -25,25 +25,25 @@ module.exports = class Product {
         `);
     }
 
-    save() {
-        Product.#getAllProducts().then(([products]) => {
-            if (this.id) {
-                const productIndex = products.findIndex(product => product.id === this.id);
-                const updatedProducts = [
-                    ...products,
-                ]
-                updatedProducts[productIndex] = this;
-                // fs.writeFile(p, JSON.stringify(updatedProducts), e => {
-                //     console.log(e);
-                // });
-            } else {
-                this.id = Math.random().toString();
-                products.push(this);
-                // fs.writeFile(p, JSON.stringify(products), e => {
-                //     console.log(e);
-                // });
-            }
-        });
+    static create(title, imageUrl, description, price = 0) {
+        return db.execute(
+            `
+                INSERT INTO ${this.#tableName} (title, imageUrl, description, price)
+                VALUES (?, ?, ?, ?)
+            `,
+            [title, imageUrl, description, price]
+        );
+    }
+
+    static update(id, title, imageUrl, description, price = 0) {
+        return db.execute(
+            `
+                UPDATE ${this.#tableName}
+                SET title = ?, imageUrl = ?, description = ?, price = ?
+                WHERE id = ?
+            `,
+            [title, imageUrl, description, price, id]
+        );
     }
 
     static getAll() {
