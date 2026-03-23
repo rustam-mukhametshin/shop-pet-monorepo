@@ -24,7 +24,7 @@ exports.postAddProduct = (req, res) => {
 exports.getEditProduct = (req, res) => {
     const edit = req.query.edit === 'true';
     const prodId = req.params.id;
-    return ProductModel.findById(prodId, (product) => {
+    return ProductModel.findById(prodId).then((product) => {
         if (!product) {
             return res.status(404).redirect('/admin/products');
         }

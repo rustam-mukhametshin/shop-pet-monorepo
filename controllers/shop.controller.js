@@ -22,7 +22,7 @@ exports.getProducts = (req, res) => {
 }
 
 exports.getProductDetails = (req, res) => {
-    return ProductModel.findById(req.params.id, (product) => {
+    return ProductModel.findById(req.params.id).then(product => {
         return res.render('shop/product-detail', {
             pageTitle: product.title ?? 'Product',
             url: '/products',
@@ -58,7 +58,7 @@ exports.getCart = (req, res) => {
 
 exports.postCart = (req, res) => {
     const id = req.body.id;
-    ProductModel.findById(id, (product) => {
+    ProductModel.findById(id).then(product => {
         CartModel.addProduct(id, product.price);
     });
     res.redirect('/');
@@ -67,7 +67,7 @@ exports.postCart = (req, res) => {
 exports.deleteItem = (req, res) => {
     const id = req.params.id;
 
-    return ProductModel.findById(id, product => {
+    return ProductModel.findById(id).then(product => {
         CartModel.deleteProduct(id, product.price);
         return res.redirect('/cart');
     })

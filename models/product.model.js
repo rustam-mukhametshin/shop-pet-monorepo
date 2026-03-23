@@ -53,10 +53,16 @@ module.exports = class Product {
         `).then(([rows]) => rows);
     }
 
-    static findById(id, cb) {
-        return getProductsFromFile(products => {
-            cb(products.find(p => p.id === id));
-        });
+    static findById(id) {
+        return db.execute(
+            `
+                SELECT *
+                FROM ${this.#tableName}
+                WHERE id = ?
+                LIMIT 1
+            `,
+            [id]
+        ).then(([rows]) => rows[0]);
     }
 
     static delete(id, cb) {
