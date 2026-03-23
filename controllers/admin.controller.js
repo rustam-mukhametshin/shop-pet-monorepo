@@ -57,7 +57,7 @@ exports.postEditProduct = (req, res) => {
 }
 
 exports.getProducts = (req, res) => {
-    return ProductModel.getAll((products) => {
+    return ProductModel.getAll().then(products => {
         return res.render('admin/products', {
             pageTitle: 'Admin Products',
             url: '/admin/products',

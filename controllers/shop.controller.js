@@ -2,7 +2,7 @@ const ProductModel = require("../models/product.model");
 const CartModel = require("../models/cart.model");
 
 exports.getIndex = (req, res) => {
-    return ProductModel.getAll((products) => {
+    return ProductModel.getAll().then(products => {
         return res.render('shop/index', {
             pageTitle: 'Shop',
             url: '/',
@@ -12,7 +12,7 @@ exports.getIndex = (req, res) => {
 }
 
 exports.getProducts = (req, res) => {
-    return ProductModel.getAll((products) => {
+    return ProductModel.getAll().then(products => {
         return res.render('shop/product-list', {
             pageTitle: 'Products',
             url: '/products',
@@ -33,7 +33,7 @@ exports.getProductDetails = (req, res) => {
 
 exports.getCart = (req, res) => {
     return CartModel.getCart((cart) => {
-        ProductModel.getAll(products => {
+        ProductModel.getAll().then(products => {
             let cartProducts = [];
             for (const product of products) {
                 const pData = cart.products.find((p) => p.id === product.id);
@@ -74,7 +74,7 @@ exports.deleteItem = (req, res) => {
 }
 
 exports.getOrders = (req, res) => {
-    return ProductModel.getAll((products) => {
+    return ProductModel.getAll().then(products => {
         return res.render('shop/orders', {
             pageTitle: 'Orders',
             url: '/orders',
@@ -84,7 +84,7 @@ exports.getOrders = (req, res) => {
 }
 
 exports.getCheckout = (req, res) => {
-    return ProductModel.getAll((products) => {
+    return ProductModel.getAll().then(products => {
         return res.render('shop/checkout', {
             pageTitle: 'Checkout',
             url: '/checkout',

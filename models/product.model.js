@@ -1,23 +1,9 @@
-const fs = require('fs');
-const path = require('path');
 const Cart = require("./cart.model");
-
-const p = path.join(
-    path.dirname(process.mainModule.filename),
-    'data',
-    'products.json'
-);
-
-const getProductsFromFile = (cb) => {
-    fs.readFile(p, (err, fileContent) => {
-        if (err) {
-            return cb([]);
-        }
-        return cb(JSON.parse(fileContent));
-    });
-}
+const db = require("../util/database");
 
 module.exports = class Product {
+    static #tableName = "products";
+
     constructor(
         id,
         title,
@@ -32,29 +18,39 @@ module.exports = class Product {
         this.price = price;
     }
 
+    static #getAllProducts() {
+        return db.execute(`
+            SELECT *
+            FROM ${this.#tableName}
+        `);
+    }
+
     save() {
-        getProductsFromFile(products => {
+        Product.#getAllProducts().then(([products]) => {
             if (this.id) {
                 const productIndex = products.findIndex(product => product.id === this.id);
                 const updatedProducts = [
                     ...products,
                 ]
                 updatedProducts[productIndex] = this;
-                fs.writeFile(p, JSON.stringify(updatedProducts), e => {
-                    console.log(e);
-                });
+                // fs.writeFile(p, JSON.stringify(updatedProducts), e => {
+                //     console.log(e);
+                // });
             } else {
                 this.id = Math.random().toString();
                 products.push(this);
-                fs.writeFile(p, JSON.stringify(products), e => {
-                    console.log(e);
-                });
+                // fs.writeFile(p, JSON.stringify(products), e => {
+                //     console.log(e);
+                // });
             }
         });
     }
 
-    static getAll(cb) {
-        return getProductsFromFile(cb);
+    static getAll() {
+        return db.execute(`
+            SELECT *
+            FROM ${this.#tableName}
+        `).then(([rows]) => rows);
     }
 
     static findById(id, cb) {
@@ -64,7 +60,7 @@ module.exports = class Product {
     }
 
     static delete(id, cb) {
-        return getProductsFromFile(products => {
+        return this.#getAllProducts().then(([products]) => {
             const product = products.find(p => p.id === id);
             if (id) {
                 fs.writeFile(p, JSON.stringify(products.filter(product => product.id !== id)), err => {
