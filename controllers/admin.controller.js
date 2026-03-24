@@ -48,9 +48,10 @@ exports.getEditProduct = (req, res) => {
 }
 
 exports.deleteProduct = (req, res) => {
-    return ProductModel.delete(req.params.id, () => {
-        return res.redirect('/admin/products');
-    })
+    return ProductModel.findByPk(req.params.id)
+        .then((product) => product.destroy())
+        .then(() => res.redirect('/admin/products'))
+        .catch((err) => console.error('Error: ', err))
 }
 
 exports.postEditProduct = (req, res) => {
