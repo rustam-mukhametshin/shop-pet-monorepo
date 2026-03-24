@@ -4,6 +4,7 @@ const path = require('path');
 const adminRoutes = require('./routes/admin.routes');
 const shopRoutes = require('./routes/shop.routes');
 const {notFound} = require("./controllers/public.controller");
+const sequelize = require('./util/database');
 
 const app = express();
 
@@ -26,4 +27,6 @@ app.use(shopRoutes);
 
 app.use(notFound)
 
-app.listen(3333);
+sequelize.sync()
+    .then(() => app.listen(3333))
+    .catch(err => console.error(err));
