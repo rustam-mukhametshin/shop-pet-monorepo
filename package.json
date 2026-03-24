@@ -7,13 +7,17 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon app.js",
     "start-dev": "nodemon --inspect app.js",
-    "start-server": "nodemon app.js"
+    "start-server": "nodemon app.js",
+    "typecheck": "tsc --noEmit",
+    "build:ts": "tsc -p tsconfig.build.json"
   },
   "author": "Rustam",
   "license": "ISC",
   "devDependencies": {
     "nodemon": "^3.1.11",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.5.2"
   },
   "dependencies": {
     "ejs": "^4.0.1",
