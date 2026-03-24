@@ -20,6 +20,16 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(express.urlencoded({extended: true}));
 
+app.use((req, res, next) => {
+    User.findByPk('1')
+        .then((user) => {
+            req.user = user.dataValues;
+            next();
+        })
+        .catch(err => console.log(err));
+})
+
+
 app.use('/', (req, res, next) => {
     next();
 })
@@ -36,6 +46,16 @@ Product.belongsTo(User, {
 User.hasMany(Product);
 
 
-sequelize.sync()
+sequelize
+    .sync()
+    .then(() => User.findByPk('1'))
+    .then((user) => {
+        return !user ? User.create({
+            username: 'admin user',
+            password: 'admin password',
+            email: 'test@email.com',
+            role: 'admin',
+        }) : user;
+    })
     .then(() => app.listen(3333))
     .catch(err => console.error(err));
