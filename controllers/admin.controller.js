@@ -54,16 +54,14 @@ exports.deleteProduct = (req, res) => {
 }
 
 exports.postEditProduct = (req, res) => {
-    return ProductModel.update(
-        req.body.id,
-        req.body.title,
-        req.body.imageUrl,
-        req.body.description,
-        req.body.price
-    )
-        .then(() => {
-            return res.redirect('/admin/products');
-        })
+    return ProductModel.findByPk(req.params.id || req.body.id).then((product) => {
+        product.title = req.body.title;
+        product.description = req.body.description;
+        product.price = req.body.price;
+        product.imageUrl = req.body.imageUrl;
+        return product.save()
+    })
+        .then(() => res.redirect('/admin/products'))
         .catch((err) => {
             console.error(err);
             return res.status(500).redirect('/admin/products');
