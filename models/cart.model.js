@@ -1,5 +1,30 @@
 const fs = require('fs');
 const path = require('path');
+const Sequelize = require('sequelize');
+const sequelize = require('../util/database');
+
+const Cart = sequelize.define('cart', {
+    id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+    },
+    products: {
+        type: Sequelize.JSON,
+        allowNull: false,
+        defaultValue: [],
+    },
+    totalPrice: {
+        type: Sequelize.DOUBLE,
+        allowNull: false,
+        defaultValue: 0,
+    },
+});
+
+const DEFAULT_CART = {
+    products: [],
+    totalPrice: 0,
+};
 
 const p = path.join(
     path.dirname(process.mainModule.filename),
@@ -7,7 +32,7 @@ const p = path.join(
     'cart.json'
 );
 
-module.exports = class Cart {
+class CartOld {
     static addProduct(id, productPrice) {
         fs.readFile(p, (err, fileContent) => {
             let cart = {
