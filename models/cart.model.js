@@ -8,6 +8,7 @@ const Cart = sequelize.define('cart', {
         type: Sequelize.INTEGER,
         allowNull: false,
         primaryKey: true,
+        autoIncrement: true,
     },
     products: {
         type: Sequelize.JSON,
@@ -32,44 +33,57 @@ const p = path.join(
     'cart.json'
 );
 
-class CartOld {
-    static addProduct(id, productPrice) {
-        fs.readFile(p, (err, fileContent) => {
-            let cart = {
-                products: [],
-                totalPrice: 0,
-            }
-            if (!err) {
-                if (fileContent.length > 0) {
-                    cart = JSON.parse(fileContent);
+class CartModel {
+    static addProduct(productId, userId, product) {
+        return Cart.findOne({where: {userId}})
+            .then(cart => ({
+                cart,
+                productPrice: product.price,
+            }))
+            .then(({cart, productPrice}) => {
+                let isUpdate = false;
+
+                if (!cart) {
+                    cart = Object.assign({}, DEFAULT_CART)
                 }
-            }
 
-            const existingProductIndex = cart.products.findIndex((item) => item.id === id);
-            const existingProduct = cart.products[existingProductIndex];
+                const existingProductIndex = cart.products.findIndex((item) => item.id === productId);
+                const existingProduct = cart.products[existingProductIndex];
 
-            let updatedProduct;
-            if (existingProduct) {
-                updatedProduct = {
-                    ...existingProduct,
-                    quantity: existingProduct.quantity + 1,
+                let updatedProduct;
+                if (existingProduct) {
+                    isUpdate = true;
+                    updatedProduct = {
+                        ...existingProduct,
+                        quantity: existingProduct.quantity + 1,
+                    }
+                    cart.products = [...cart.products]
+                    cart.products[existingProductIndex] = updatedProduct;
+                } else {
+                    isUpdate = false;
+                    updatedProduct = {
+                        id: productId,
+                        quantity: 1,
+                    }
+                    cart.products = [...cart.products, updatedProduct];
                 }
-                cart.products = [...cart.products]
-                cart.products[existingProductIndex] = updatedProduct;
-            } else {
-                updatedProduct = {
-                    id,
-                    quantity: 1,
+
+                cart.totalPrice += parseFloat(productPrice) || 0;
+
+                if(isUpdate) {
+                    cart.update({
+                        products: cart.products,
+                        totalPrice: cart.totalPrice,
+                        userId, // TODO REMOVE
+                    })
+                } else {
+                    return Cart.create({
+                        products: cart.products,
+                        totalPrice: cart.totalPrice,
+                        userId,
+                    })
                 }
-                cart.products = [...cart.products, updatedProduct];
-            }
-
-            cart.totalPrice += parseFloat(productPrice) || 0;
-
-            fs.writeFile(p, JSON.stringify(cart), err => {
-                console.log(err);
             })
-        })
     }
 
     static deleteProduct(id, productPrice) {
@@ -121,3 +135,5 @@ class CartOld {
 
     }
 }
+
+module.exports = {CartModel, Cart};
