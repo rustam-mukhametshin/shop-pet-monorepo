@@ -10,7 +10,8 @@
     "resolveJsonModule": true,
     "allowJs": true,
     "checkJs": false,
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": "."
   },
   "include": [
     "**/*.ts",
