@@ -7,6 +7,7 @@ const {notFound} = require("./controllers/public.controller");
 const sequelize = require('./util/database');
 const Product = require('./models/product.model');
 const User = require('./models/user.model');
+const {Cart} = require("./models/cart.model");
 
 const app = express();
 
@@ -44,6 +45,13 @@ Product.belongsTo(User, {
     onDelete: 'CASCADE',
 });
 User.hasMany(Product);
+
+Cart.belongsTo(User, {
+    constraints: true,
+    onDelete: 'CASCADE',
+})
+
+User.hasOne(Cart);
 
 
 sequelize
