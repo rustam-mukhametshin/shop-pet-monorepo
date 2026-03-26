@@ -1,5 +1,5 @@
 const ProductModel = require("../models/product.model");
-const CartModel = require("../models/cart.model");
+const {CartModel} = require("../models/cart.model");
 
 exports.getIndex = (req, res) => {
     return ProductModel.findAll().then(products => {
@@ -58,10 +58,9 @@ exports.getCart = (req, res) => {
 
 exports.postCart = (req, res) => {
     const id = req.body.id;
-    ProductModel.findByPk(id).then(product => {
-        CartModel.addProduct(id, product.price);
-    });
-    res.redirect('/');
+    return ProductModel.findByPk(id)
+        .then(product => CartModel.addProduct(id, req.user.id, product))
+        .then(() => res.redirect('/'))
 }
 
 exports.deleteItem = (req, res) => {
