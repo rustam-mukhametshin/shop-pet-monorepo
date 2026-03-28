@@ -19,14 +19,14 @@ app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Body parsing
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 // Attach user to every request
 app.use((req: Request, _res: Response, next: NextFunction) => {
     User.findByPk('1')
         .then((user) => {
             if (user) {
-                req.user = user.get({ plain: true });
+                req.user = user;
             }
             next();
         })
