@@ -1,7 +1,14 @@
 import fs from 'fs';
 import path from 'path';
-import { DataTypes, Model, Optional } from 'sequelize';
+import {
+    DataTypes,
+    Model,
+    Optional,
+    BelongsToManyGetAssociationsMixin,
+    BelongsToManyAddAssociationMixin,
+} from 'sequelize';
 import sequelize from '../util/database';
+import type Product from './product.model';
 
 // ── Sequelize model ─────────────────────────────────────────────────────────
 
@@ -23,9 +30,24 @@ export interface CartItem {
 export interface CartData {
     products: CartItem[];
     totalPrice: number;
+
+    getProducts?(): any;
 }
 
-export const Cart = sequelize.define<Model<CartAttributes, CartCreationAttributes>>(
+export type CartProductWithThrough = Product & {
+    cartItem: {
+        quantity: number;
+        destroy: () => Promise<unknown>;
+    };
+};
+
+export interface CartWithProducts
+    extends Model<CartAttributes, CartCreationAttributes> {
+    getCartProducts: BelongsToManyGetAssociationsMixin<Product>;
+    addCartProduct: BelongsToManyAddAssociationMixin<Product, number>;
+}
+
+export const Cart = sequelize.define<CartWithProducts>(
     'cart',
     {
         id: {
@@ -159,4 +181,3 @@ export class CartModel {
         });
     }
 }
-

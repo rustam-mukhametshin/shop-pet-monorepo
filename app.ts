@@ -1,14 +1,15 @@
 /// <reference path="./types/global.d.ts" />
-import express, { Request, Response, NextFunction } from 'express';
+import express, {NextFunction, Request, Response} from 'express';
 import path from 'path';
 
 import adminRoutes from './routes/admin.routes';
 import shopRoutes from './routes/shop.routes';
-import { notFound } from './controllers/public.controller';
+import {notFound} from './controllers/public.controller';
 import sequelize from './util/database';
 import Product from './models/product.model';
 import User from './models/user.model';
-import { Cart } from './models/cart.model';
+import {Cart} from './models/cart.model';
+import {CartItem} from "./models/cart-item.model";
 
 
 const app = express();
@@ -42,18 +43,22 @@ app.use(notFound);
 
 // ── Sequelize associations ───────────────────────────────────────────────────
 
-Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
+Product.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
 User.hasMany(Product);
 
-Cart.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
 User.hasOne(Cart);
+Cart.belongsTo(User);
+
+Cart.belongsToMany(Product, {through: CartItem, as: 'cartProducts'});
+Product.belongsToMany(Cart, {through: CartItem, as: 'productCarts'});
 
 // ── Sync DB and start server ─────────────────────────────────────────────────
 
 sequelize
     .sync()
+    // .sync({force: true})
     .then(() => User.findByPk('1'))
-    .then((user) => {
+    .then((user: any) => {
         if (!user) {
             return User.create({
                 username: 'admin user',

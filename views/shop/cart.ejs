@@ -4,12 +4,13 @@
 <%- include('./../parts/navigation') %>
 <main>
     <% if(products.length > 0) { %>
-        <ul>
+        <ul class="cart">
             <% products.forEach(p => { %>
-                <li>
-                    <p><%= p.productData.title %> (<%= p.quantity %>)</p>
+                <li class="cart-product">
+                    <h1><%= p.title %></h1>
+                    <h2>Quantity: <%= p.cartItem.quantity %></h2>
                     <button class="btn">
-                        <a href="/cart-delete-item/<%= p.productData.id %>">
+                        <a href="/cart-delete-item/<%= p.id %>">
                             Delete
                         </a>
                     </button>

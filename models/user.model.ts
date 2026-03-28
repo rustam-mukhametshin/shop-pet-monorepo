@@ -1,5 +1,6 @@
-import { DataTypes, Model, Optional } from 'sequelize';
+import { DataTypes, HasOneCreateAssociationMixin, HasOneGetAssociationMixin, Model, Optional } from 'sequelize';
 import sequelize from '../util/database';
+import type { CartWithProducts } from './cart.model';
 
 export interface UserAttributes {
     id: number;
@@ -48,6 +49,11 @@ class User
     declare country: string | null;
     declare role: 'user' | 'admin';
     declare isActive: boolean;
+
+    // Sequelize association mixins from User.hasOne(Cart)
+    declare getCart: HasOneGetAssociationMixin<CartWithProducts>;
+    // @ts-ignore
+    declare createCart: HasOneCreateAssociationMixin<CartWithProducts, 'userId'>;
 }
 
 User.init(
@@ -88,4 +94,3 @@ User.init(
 );
 
 export default User;
-

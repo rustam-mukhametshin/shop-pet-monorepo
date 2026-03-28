@@ -1,12 +1,11 @@
-import type { UserAttributes } from '../models/user.model';
+import type User from '../models/user.model';
 
 declare global {
     namespace Express {
         interface Request {
-            user: UserAttributes;
+            user: User;
         }
     }
 }
 
 export {};
-
