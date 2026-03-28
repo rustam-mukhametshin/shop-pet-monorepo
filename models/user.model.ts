@@ -8,12 +8,6 @@ export interface UserAttributes {
     email: string;
     password: string;
     firstName?: string | null;
-    lastName?: string | null;
-    phone?: string | null;
-    address?: string | null;
-    city?: string | null;
-    zipCode?: string | null;
-    country?: string | null;
     role: 'user' | 'admin';
     isActive: boolean;
 }
@@ -23,12 +17,6 @@ interface UserCreationAttributes
         UserAttributes,
         | 'id'
         | 'firstName'
-        | 'lastName'
-        | 'phone'
-        | 'address'
-        | 'city'
-        | 'zipCode'
-        | 'country'
         | 'isActive'
     > {}
 
@@ -41,12 +29,6 @@ class User
     declare email: string;
     declare password: string;
     declare firstName: string | null;
-    declare lastName: string | null;
-    declare phone: string | null;
-    declare address: string | null;
-    declare city: string | null;
-    declare zipCode: string | null;
-    declare country: string | null;
     declare role: 'user' | 'admin';
     declare isActive: boolean;
 
@@ -73,12 +55,6 @@ User.init(
         },
         password: { type: DataTypes.STRING, allowNull: false },
         firstName: { type: DataTypes.STRING, allowNull: true },
-        lastName: { type: DataTypes.STRING, allowNull: true },
-        phone: { type: DataTypes.STRING, allowNull: true },
-        address: { type: DataTypes.STRING, allowNull: true },
-        city: { type: DataTypes.STRING, allowNull: true },
-        zipCode: { type: DataTypes.STRING, allowNull: true },
-        country: { type: DataTypes.STRING, allowNull: true },
         role: {
             type: DataTypes.ENUM('user', 'admin'),
             allowNull: false,
