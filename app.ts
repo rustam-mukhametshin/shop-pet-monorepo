@@ -69,6 +69,13 @@ sequelize
         }
         return user;
     })
+    .then((user: any) => {
+        if (user && !user.cart) {
+            // @ts-ignore
+            user.createCart();
+        }
+        return user;
+    })
     .then(() => app.listen(3333, () => console.log('Server running on port 3333')))
     .catch((err) => console.error(err));
 
