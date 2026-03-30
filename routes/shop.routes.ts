@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as ShopController from '../controllers/shop.controller';
+import {postCreateOrder} from "../controllers/shop.controller";
 
 const shopRoutes = Router();
 
@@ -11,8 +12,8 @@ shopRoutes.post('/cart', ShopController.postCart);
 
 shopRoutes.get('/cart-delete-item/:id', ShopController.postCartDeleteProduct);
 
-shopRoutes.get('/checkout', ShopController.getCheckout);
 shopRoutes.get('/orders', ShopController.getOrders);
+shopRoutes.post('/create-order', ShopController.postCreateOrder);
 
 shopRoutes.get('/', ShopController.getIndex);
 

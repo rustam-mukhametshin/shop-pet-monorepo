@@ -10,6 +10,8 @@ import Product from './models/product.model';
 import User from './models/user.model';
 import {Cart} from './models/cart.model';
 import {CartItem} from "./models/cart-item.model";
+import {Order} from "./models/order.model";
+import {OrderItem} from "./models/order-item.model";
 
 
 const app = express();
@@ -51,6 +53,9 @@ Cart.belongsTo(User);
 
 Cart.belongsToMany(Product, {through: CartItem, as: 'cartProducts'});
 Product.belongsToMany(Cart, {through: CartItem, as: 'productCarts'});
+Order.belongsTo(User);
+User.hasMany(Order);
+Order.belongsToMany(Product, {through: OrderItem, as: 'orderItems'});
 
 // ── Sync DB and start server ─────────────────────────────────────────────────
 

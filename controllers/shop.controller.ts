@@ -112,7 +112,7 @@ export const postCartDeleteProduct = (req: Request, res: Response): Promise<void
             }
 
             const cartWithProducts = cart as unknown as CartWithProductAccess;
-            return cartWithProducts.getCartProducts({ where: { id: productId } });
+            return cartWithProducts.getCartProducts({where: {id: productId}});
         })
         .then((products) => {
             const cartProduct = products?.[0];
@@ -128,22 +128,43 @@ export const postCartDeleteProduct = (req: Request, res: Response): Promise<void
         });
 };
 
-export const getOrders = (req: Request, res: Response): Promise<void> => {
-    return Product.findAll().then((products) => {
-        res.render('shop/orders', {
-            pageTitle: 'Orders',
-            url: '/orders',
-            prods: products,
-        });
+export const getOrders = async (req: Request, res: Response): Promise<void> => {
+    const orders = await req.user.getOrders({
+        include: ['orderItems']
+    })
+    res.render('shop/orders', {
+        pageTitle: 'Orders',
+        url: '/orders',
+        orders: orders,
     });
 };
 
-export const getCheckout = (req: Request, res: Response): Promise<void> => {
-    return Product.findAll().then((products) => {
-        res.render('shop/checkout', {
-            pageTitle: 'Checkout',
-            url: '/checkout',
-            prods: products,
-        });
+export const postCreateOrder = async (req: Request, res: Response): Promise<void> => {
+    const cart = await req.user.getCart();
+    if (!cart) {
+        return res.redirect('/cart');
+    }
+
+    const products = await cart.getCartProducts();
+    // @ts-ignore
+    const order = await req.user.createOrder();
+
+    await order.addOrderItems(
+        products.map((product: any) => {
+            product.orderItem = {
+                quantity: product.cartItem.quantity,
+            };
+            return product;
+        })
+    );
+
+    // Association alias is `cartProducts`, so the generated setter is `setCartProducts`.
+    // @ts-ignore
+    await cart.setCartProducts([]);
+
+    return res.render('shop/orders', {
+        pageTitle: 'Orders',
+        url: '/orders',
+        prods: products,
     });
 };

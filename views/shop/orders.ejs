@@ -3,6 +3,31 @@
 <%- include('./../parts/body') %>
 <%- include('./../parts/navigation') %>
 <main>
-    <h1>Nothing there</h1>
+    <% if(orders.length > 0) { %>
+        <ul class="cart">
+
+            <ul>
+                <% orders.forEach(order => { %>
+                    <li>
+                        <h1># <%= order.id %></h1>
+                        <ul>
+                            <% order.orderItems.forEach(product => { %>
+                                <li>
+                                    <h2><%= product.title %> (<%= product.orderItem.quantity %>)</h2>
+                                </li>
+                            <% }) %>
+                        </ul>
+                    </li>
+                <% }) %>
+            </ul>
+        </ul>
+
+        <!--        <form action="/create-order" method="post">-->
+        <!--            <button type="submit" class="btn">Order</button>-->
+        <!--        </form>-->
+
+    <% } else { %>
+        <h1>No orders</h1>
+    <% } %>
 </main>
 <%- include('./../parts/body-end') %>

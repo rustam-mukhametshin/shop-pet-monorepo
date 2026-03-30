@@ -1,6 +1,15 @@
-import { DataTypes, HasOneCreateAssociationMixin, HasOneGetAssociationMixin, Model, Optional } from 'sequelize';
+import {
+    DataTypes,
+    HasOneCreateAssociationMixin,
+    HasOneGetAssociationMixin,
+    HasManyGetAssociationsMixin,
+    HasManyCreateAssociationMixin,
+    Model,
+    Optional,
+} from 'sequelize';
 import sequelize from '../util/database';
 import type { CartWithProducts } from './cart.model';
+import type { OrderWithMixins } from './order.model';
 
 export interface UserAttributes {
     id: number;
@@ -36,6 +45,10 @@ class User
     declare getCart: HasOneGetAssociationMixin<CartWithProducts>;
     // @ts-ignore
     declare createCart: HasOneCreateAssociationMixin<CartWithProducts, 'userId'>;
+
+    // Sequelize association mixins from User.hasMany(Order)
+    declare getOrders: HasManyGetAssociationsMixin<OrderWithMixins>;
+    declare createOrder: HasManyCreateAssociationMixin<OrderWithMixins, 'userId'>;
 }
 
 User.init(
