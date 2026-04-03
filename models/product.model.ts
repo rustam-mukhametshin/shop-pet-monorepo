@@ -48,8 +48,25 @@ export class Product extends BaseModel {
     }
 
     static findByPk(id: string) {
-        return Product.collection('products').find({
-            _id: new ObjectId(id),
-        }).next()
+        return Product.collection('products')
+            .find({
+                _id: new ObjectId(id),
+            })
+            .next()
+            .then((data: any) => ({
+                ...data,
+                id: data._id.toString(),
+            }))
+    }
+
+    static updateProduct(id: string, product: any) {
+        return Product.collection('products').updateOne(
+            {
+                _id: new ObjectId(id)
+            },
+            {
+                $set: product
+            }
+        )
     }
 }

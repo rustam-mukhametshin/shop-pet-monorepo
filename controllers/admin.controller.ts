@@ -1,5 +1,6 @@
-import { Request, Response } from 'express';
-import Product from '../models/product.model';
+import {Request, Response} from 'express';
+import {Product} from "../models/product.model";
+// import Product from '../models/product.model';
 
 export const getAddProduct = (req: Request, res: Response): void => {
     res.render('admin/edit-product', {
@@ -10,27 +11,42 @@ export const getAddProduct = (req: Request, res: Response): void => {
     });
 };
 
-export const postAddProduct = (req: Request, res: Response): Promise<void> => {
-    const { title, imageUrl, description, price } = req.body as {
+export const postAddProduct = (req: Request, res: Response): any => {
+    const {title, imageUrl, description, price} = req.body as {
         title: string;
         imageUrl: string;
         description: string;
         price: string;
     };
 
-    return Product.create({
+    const product = new Product(
         title,
-        description,
-        price: parseFloat(price),
+        parseFloat(price),
         imageUrl,
-        userId: req.user.id,
-    })
+        description
+    );
+
+    product.save()
         .then(() => res.redirect('/admin/products'))
         .catch((err: unknown) => {
             console.error('Error: ', err);
             res.status(500).redirect('/admin/products');
         });
 };
+
+export const getProducts = (req: Request, res: Response): Promise<void> => {
+    return Product.findAll()
+        .then((products) => {
+            res.render('admin/products', {
+                pageTitle: 'Admin Products',
+                url: '/admin/products',
+                prods: products,
+            });
+        }).catch((err: unknown) => {
+            console.error('Error: ', err);
+        })
+};
+
 
 export const getEditProduct = (req: Request, res: Response): Promise<void> => {
     const edit = req.query['edit'] === 'true';
@@ -51,13 +67,6 @@ export const getEditProduct = (req: Request, res: Response): Promise<void> => {
         });
 };
 
-export const deleteProduct = (req: Request, res: Response): Promise<void> => {
-    return Product.findByPk(req.params['id'] as string)
-        .then((product) => product!.destroy())
-        .then(() => res.redirect('/admin/products'))
-        .catch((err: unknown) => console.error('Error: ', err)) as Promise<void>;
-};
-
 export const postEditProduct = (req: Request, res: Response): Promise<void> => {
     const id = ((req.params['id'] as string) || (req.body.id as string));
     const { title, description, price, imageUrl } = req.body as {
@@ -74,7 +83,7 @@ export const postEditProduct = (req: Request, res: Response): Promise<void> => {
             product.description = description;
             product.price = parseFloat(price);
             product.imageUrl = imageUrl;
-            return product.save();
+            return Product.updateProduct(id, product)
         })
         .then(() => res.redirect('/admin/products'))
         .catch((err: unknown) => {
@@ -83,15 +92,15 @@ export const postEditProduct = (req: Request, res: Response): Promise<void> => {
         });
 };
 
-export const getProducts = (req: Request, res: Response): Promise<void> => {
-    return Product.findAll().then((products) => {
-        res.render('admin/products', {
-            pageTitle: 'Admin Products',
-            url: '/admin/products',
-            prods: products,
-        });
-    });
-};
+//
+// export const deleteProduct = (req: Request, res: Response): Promise<void> => {
+//     return Product.findByPk(req.params['id'] as string)
+//         .then((product) => product!.destroy())
+//         .then(() => res.redirect('/admin/products'))
+//         .catch((err: unknown) => console.error('Error: ', err)) as Promise<void>;
+// };
+//
+
 
 
 
