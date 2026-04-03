@@ -1,44 +1,55 @@
-import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../util/database';
+import {BaseModel} from "./base.model";
+import {ObjectId} from "mongodb";
 
-export interface ProductAttributes {
-    id: number;
+
+export class Product extends BaseModel {
+    collectionName: string = 'products';
+
     title: string;
     price: number;
     imageUrl: string;
     description: string;
-    userId?: number | null;
+
+    constructor(
+        title: string,
+        price: number,
+        imageUrl: string,
+        description: string,
+    ) {
+        super();
+        this.title = title;
+        this.price = price;
+        this.imageUrl = imageUrl;
+        this.description = description;
+    }
+
+    async save() {
+        try {
+            const result_1 = await this.getCollection().insertOne({
+                title: this.title,
+                price: this.price,
+                imageUrl: this.imageUrl,
+                description: this.description,
+            });
+            console.log(result_1);
+        } catch (err) {
+            return console.log(err);
+        }
+    }
+
+    static findAll() {
+        return Product.collection('products').find().toArray()
+            .then((products) => {
+                return products.map((product) => ({
+                    ...product,
+                    id: product._id.toString(),
+                }));
+            })
+    }
+
+    static findByPk(id: string) {
+        return Product.collection('products').find({
+            _id: new ObjectId(id),
+        }).next()
+    }
 }
-
-interface ProductCreationAttributes extends Optional<ProductAttributes, 'id'> {}
-
-class Product
-    extends Model<ProductAttributes, ProductCreationAttributes>
-    implements ProductAttributes
-{
-    declare id: number;
-    declare title: string;
-    declare price: number;
-    declare imageUrl: string;
-    declare description: string;
-    declare userId: number | null;
-}
-
-Product.init(
-    {
-        id: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
-            allowNull: false,
-            primaryKey: true,
-        },
-        title: DataTypes.STRING,
-        price: { type: DataTypes.DOUBLE, allowNull: false },
-        imageUrl: { type: DataTypes.STRING, allowNull: false },
-        description: { type: DataTypes.STRING, allowNull: false },
-    },
-    { sequelize, modelName: 'product' }
-);
-
-export default Product;
-
