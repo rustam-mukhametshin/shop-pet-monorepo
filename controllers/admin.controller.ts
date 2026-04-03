@@ -92,14 +92,14 @@ export const postEditProduct = (req: Request, res: Response): Promise<void> => {
         });
 };
 
-//
-// export const deleteProduct = (req: Request, res: Response): Promise<void> => {
-//     return Product.findByPk(req.params['id'] as string)
-//         .then((product) => product!.destroy())
-//         .then(() => res.redirect('/admin/products'))
-//         .catch((err: unknown) => console.error('Error: ', err)) as Promise<void>;
-// };
-//
+
+export const deleteProduct = (req: Request, res: Response): Promise<void> => {
+    return Product.findByPk(req.params['id'] as string)
+        .then((product) => Product.deleteProduct(product.id))
+        .then(() => res.redirect('/admin/products'))
+        .catch((err: unknown) => console.error('Error: ', err)) as Promise<void>;
+};
+
 
 
 

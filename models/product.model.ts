@@ -24,17 +24,12 @@ export class Product extends BaseModel {
     }
 
     async save() {
-        try {
-            const result_1 = await this.getCollection().insertOne({
-                title: this.title,
-                price: this.price,
-                imageUrl: this.imageUrl,
-                description: this.description,
-            });
-            console.log(result_1);
-        } catch (err) {
-            return console.log(err);
-        }
+        return this.getCollection().insertOne({
+            title: this.title,
+            price: this.price,
+            imageUrl: this.imageUrl,
+            description: this.description,
+        });
     }
 
     static findAll() {
@@ -68,5 +63,12 @@ export class Product extends BaseModel {
                 $set: product
             }
         )
+    }
+
+    static deleteProduct(id: string) {
+        return Product.collection('products')
+            .deleteOne({
+                _id: new ObjectId(id),
+            })
     }
 }
