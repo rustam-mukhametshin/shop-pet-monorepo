@@ -9,18 +9,21 @@ export class Product extends BaseModel {
     price: number;
     imageUrl: string;
     description: string;
+    userId?: ObjectId;
 
     constructor(
         title: string,
         price: number,
         imageUrl: string,
         description: string,
+        userId?: ObjectId
     ) {
         super();
         this.title = title;
         this.price = price;
         this.imageUrl = imageUrl;
         this.description = description;
+        this.userId = userId
     }
 
     async save() {
@@ -29,6 +32,7 @@ export class Product extends BaseModel {
             price: this.price,
             imageUrl: this.imageUrl,
             description: this.description,
+            userId: this.userId
         });
     }
 

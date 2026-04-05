@@ -23,7 +23,8 @@ export const postAddProduct = (req: Request, res: Response): any => {
         title,
         parseFloat(price),
         imageUrl,
-        description
+        description,
+        req.user._id
     );
 
     product.save()
