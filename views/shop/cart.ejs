@@ -8,7 +8,7 @@
             <% products.forEach(p => { %>
                 <li class="cart-product">
                     <h1><%= p.title %></h1>
-                    <h2>Quantity: <%= p.cartItem.quantity %></h2>
+                    <h2>Quantity: <%= p.quantity %></h2>
                     <button class="btn">
                         <a href="/cart-delete-item/<%= p.id %>">
                             Delete

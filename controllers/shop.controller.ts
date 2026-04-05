@@ -1,15 +1,6 @@
 import {Request, Response} from 'express';
-import Product from '../models/product.model';
+import {Product} from '../models/product.model';
 
-type CartProductWithThrough = Product & {
-    cartItem: {
-        destroy: () => Promise<unknown>;
-    };
-};
-
-type CartWithProductAccess = {
-    getCartProducts: (options?: { where?: { id?: string } }) => Promise<CartProductWithThrough[]>;
-};
 
 export const getIndex = (req: Request, res: Response): Promise<void> => {
     return Product.findAll().then((products) => {
@@ -45,126 +36,86 @@ export const getCart = (req: Request, res: Response): Promise<unknown> => {
     return req.user
         .getCart()
         .then((cart: any) => {
-            return cart
-                .getCartProducts()
-                .then((products: Product[]) => {
-                    res.render('shop/cart', {
-                        pageTitle: 'Cart',
-                        url: '/cart',
-                        cart,
-                        products: products,
-                    });
-                })
-
+            return res.render('shop/cart', {
+                pageTitle: 'Cart',
+                url: '/cart',
+                cart,
+                products: cart.items,
+            });
         })
 };
 
 export const postCart = (req: Request, res: Response): Promise<void> => {
     const productId = req.body.id as string;
-    let fetchedCart: any;
-    // @ts-ignore
-    return req.user
-        .getCart()
-        .then((cart: any) => {
-            fetchedCart = cart;
-            return cart.getCartProducts({where: {id: productId}});
-        })
-        .then((products: any) => {
-            let product;
-            if (products && products.length > 0) {
-                product = products[0];
-            }
-            let newQuantity = 1;
-
-            if (product) {
-                const oldQuantity = product.cartItem.quantity;
-                newQuantity = oldQuantity + 1;
-
-                return {newQuantity, product,}
-            }
-
-            return Product.findByPk(productId)
-                .then((product) => ({product, newQuantity,}))
-
-        })
-        .then((data: any) => {
-            return fetchedCart
-                .addCartProduct(data.product, {
-                    through: {
-                        quantity: data.newQuantity,
-                    }
-                })
-        })
-        .then(() => res.redirect('/'))
-        .catch((err: Error) => {
-            console.error(err);
-        })
-};
-
-export const postCartDeleteProduct = (req: Request, res: Response): Promise<void> => {
-    const productId = req.params['id'] as string;
-    return req.user
-        .getCart()
-        .then((cart) => {
-            if (!cart) {
-                res.redirect('/cart');
-                return null;
-            }
-
-            const cartWithProducts = cart as unknown as CartWithProductAccess;
-            return cartWithProducts.getCartProducts({where: {id: productId}});
-        })
-        .then((products) => {
-            const cartProduct = products?.[0];
-            if (!cartProduct) {
-                res.redirect('/cart');
-                return null;
-            }
-            return cartProduct.cartItem.destroy();
-        })
+    return Product.findByPk(productId)
+        .then(product => req.user.addToCart(product))
         .then(() => res.redirect('/cart'))
-        .catch((err: Error) => {
-            console.error(err);
-        });
 };
 
-export const getOrders = async (req: Request, res: Response): Promise<void> => {
-    const orders = await req.user.getOrders({
-        include: ['orderItems']
-    })
-    res.render('shop/orders', {
-        pageTitle: 'Orders',
-        url: '/orders',
-        orders: orders,
-    });
-};
+// export const postCartDeleteProduct = (req: Request, res: Response): Promise<void> => {
+//     const productId = req.params['id'] as string;
+//     return req.user
+//         .getCart()
+//         .then((cart) => {
+//             if (!cart) {
+//                 res.redirect('/cart');
+//                 return null;
+//             }
+//
+//             const cartWithProducts = cart as unknown as CartWithProductAccess;
+//             return cartWithProducts.getCartProducts({where: {id: productId}});
+//         })
+//         .then((products) => {
+//             const cartProduct = products?.[0];
+//             if (!cartProduct) {
+//                 res.redirect('/cart');
+//                 return null;
+//             }
+//             return cartProduct.cartItem.destroy();
+//         })
+//         .then(() => res.redirect('/cart'))
+//         .catch((err: Error) => {
+//             console.error(err);
+//         });
+// };
+//
+// export const getOrders = async (req: Request, res: Response): Promise<void> => {
+//     const orders = await req.user.getOrders({
+//         include: ['orderItems']
+//     })
+//     res.render('shop/orders', {
+//         pageTitle: 'Orders',
+//         url: '/orders',
+//         orders: orders,
+//     });
+// };
 
-export const postCreateOrder = async (req: Request, res: Response): Promise<void> => {
-    const cart = await req.user.getCart();
-    if (!cart) {
-        return res.redirect('/cart');
-    }
-
-    const products = await cart.getCartProducts();
-    // @ts-ignore
-    const order = await req.user.createOrder();
-
-    await order.addOrderItems(
-        products.map((product: any) => {
-            product.orderItem = {
-                quantity: product.cartItem.quantity,
-            };
-            return product;
-        })
-    );
-
-    // Association alias is `cartProducts`, so the generated setter is `setCartProducts`.
-    // @ts-ignore
-    await cart.setCartProducts([]);
-
-    return res.render('shop/orders', {
-        pageTitle: 'Orders',
-        url: '/orders',
-        prods: products,
-    });
-};
+// export const postCreateOrder = async (req: Request, res: Response): Promise<void> => {
+//     const cart = await req.user.getCart();
+//     if (!cart) {
+//         return res.redirect('/cart');
+//     }
+//
+//     const products = await cart.getCartProducts();
+//     // @ts-ignore
+//     const order = await req.user.createOrder();
+//
+//     await order.addOrderItems(
+//         products.map((product: any) => {
+//             product.orderItem = {
+//                 quantity: product.cartItem.quantity,
+//             };
+//             return product;
+//         })
+//     );
+//
+//     // Association alias is `cartProducts`, so the generated setter is `setCartProducts`.
+//     // @ts-ignore
+//     await cart.setCartProducts([]);
+//
+//     return res.render('shop/orders', {
+//         pageTitle: 'Orders',
+//         url: '/orders',
+//         prods: products,
+//     });
+// };
