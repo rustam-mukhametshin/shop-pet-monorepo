@@ -74,9 +74,18 @@ export class UserModel extends BaseModel {
             )
     }
 
-    async getCart(){
-        return this.getCollection()
-            .findOne({_id: this.id})
-            .then(user => user?.cart);
+    async getCart() {
+        const ids = this.cart.items.map(item => new ObjectId(item.productId))
+
+        return Product.findAllByIds(ids)
+            .then((products: any[]) => {
+                this.cart.items = this.cart.items.map(item => {
+                    return {
+                        quantity: item.quantity,
+                        ...products.find((prod: any) => prod.id.toString() === item.productId.toString()),
+                    };
+                })
+                return this.cart;
+            })
     }
 }
