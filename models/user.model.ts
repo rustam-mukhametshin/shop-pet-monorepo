@@ -1,11 +1,15 @@
 import {BaseModel} from "./base.model";
 import {ObjectId} from "mongodb";
+import {Product} from "./product.model";
 
 export class UserModel extends BaseModel {
     private readonly email: string;
     private readonly username: string;
-    private readonly cart: {
-        items: { _id: string }[],
+    private cart: {
+        items: {
+            productId: any;
+            quantity: number;
+        }[],
     };
     id: ObjectId;
 
@@ -41,22 +45,31 @@ export class UserModel extends BaseModel {
     }
 
     addToCart(product: any) {
-        // const cartProduct = this.cart.items.findIndex(prod => {
-        //     return prod._id == product.id;
-        // });
+        let cartProductIndex = -1;
+        if (this.cart?.items && this.cart.items.length > 0) {
+            cartProductIndex = this.cart.items.findIndex(prod => {
+                return prod.productId.toString() == product.id;
+            });
+        } else {
+            this.cart = {
+                items: [],
+            };
+        }
 
-        const updatedCart = {
-            items: [{
+        if (cartProductIndex > -1) {
+            this.cart.items[cartProductIndex].quantity += 1;
+        } else {
+            this.cart.items.push({
                 productId: new ObjectId(product.id),
                 quantity: 1,
-            }]
-        };
+            })
+        }
 
         return this.getCollection()
             .updateOne(
                 {_id: this.id,},
                 {
-                    $set: {cart: updatedCart},
+                    $set: {cart: this.cart},
                 }
             )
     }
