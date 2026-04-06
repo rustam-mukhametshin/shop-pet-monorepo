@@ -46,6 +46,18 @@ export class Product extends BaseModel {
             })
     }
 
+    static findAllByIds(ids: ObjectId[]) {
+        return Product.collection('products')
+            .find({_id: {$in: ids}})
+            .toArray()
+            .then((products) => {
+                return products.map((product) => ({
+                    ...product,
+                    id: product._id.toString(),
+                }));
+            })
+    }
+
     static findByPk(id: string) {
         return Product.collection('products')
             .find({
