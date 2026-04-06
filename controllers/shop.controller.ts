@@ -43,6 +43,7 @@ export const getCart = (req: Request, res: Response): Promise<unknown> => {
                 products: cart.items,
             });
         })
+        .catch((err: any) => console.error(err));
 };
 
 export const postCart = (req: Request, res: Response): Promise<void> => {
@@ -50,35 +51,16 @@ export const postCart = (req: Request, res: Response): Promise<void> => {
     return Product.findByPk(productId)
         .then(product => req.user.addToCart(product))
         .then(() => res.redirect('/cart'))
+        .catch((err: any) => console.error(err));
 };
 
-// export const postCartDeleteProduct = (req: Request, res: Response): Promise<void> => {
-//     const productId = req.params['id'] as string;
-//     return req.user
-//         .getCart()
-//         .then((cart) => {
-//             if (!cart) {
-//                 res.redirect('/cart');
-//                 return null;
-//             }
-//
-//             const cartWithProducts = cart as unknown as CartWithProductAccess;
-//             return cartWithProducts.getCartProducts({where: {id: productId}});
-//         })
-//         .then((products) => {
-//             const cartProduct = products?.[0];
-//             if (!cartProduct) {
-//                 res.redirect('/cart');
-//                 return null;
-//             }
-//             return cartProduct.cartItem.destroy();
-//         })
-//         .then(() => res.redirect('/cart'))
-//         .catch((err: Error) => {
-//             console.error(err);
-//         });
-// };
-//
+export const postCartDeleteProduct = (req: Request, res: Response) => {
+    return req.user
+        .deleteProductFromCart(req.params['id'])
+        .then(() => res.redirect('/cart'))
+        .catch((err: any) => console.error(err));
+};
+
 // export const getOrders = async (req: Request, res: Response): Promise<void> => {
 //     const orders = await req.user.getOrders({
 //         include: ['orderItems']

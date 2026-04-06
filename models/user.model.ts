@@ -88,4 +88,12 @@ export class UserModel extends BaseModel {
                 return this.cart;
             })
     }
+
+    async deleteProductFromCart(productId: string) {
+        this.cart.items = this.cart.items.filter(prod => prod.productId.toString() !== productId.toString());
+        return this.getCollection().updateOne(
+            {_id: new ObjectId(this.id)},
+            {$set: {cart: this.cart}},
+        )
+    }
 }
