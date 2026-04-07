@@ -86,3 +86,11 @@ export const postCreateOrder = async (req: Request, res: Response) => {
         })
         .catch((err: any) => console.error(err));
 };
+
+export const postDeleteOrderItem = (req: Request, res: Response): Promise<void> => {
+    const { productId, orderId } = req.body as { productId: string; orderId: string };
+    return req.user
+        .deleteProductFromOrder(productId, orderId)
+        .then(() => res.redirect('/orders'))
+        .catch((err: any) => console.error(err));
+};

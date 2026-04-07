@@ -13,6 +13,11 @@
                             <% order.items.forEach(product => { %>
                                 <li>
                                     <h4><%= product.title %> (<%= product.quantity %>)</h4>
+                                    <form action="/order-delete-item" method="POST">
+                                        <input type="hidden" name="productId" value="<%= product.id %>">
+                                        <input type="hidden" name="orderId" value="<%= order._id %>">
+                                        <button type="submit" class="btn">Remove</button>
+                                    </form>
                                 </li>
                             <% }) %>
                         <% } else { %>

@@ -20,7 +20,8 @@ app.use(express.urlencoded({extended: true}));
 
 // Attach user to every request
 app.use((req: Request, _res: Response, next: NextFunction) => {
-    return UserModel.findByPk('69d25d8b7a2150418bf5eb67')
+    return Promise.resolve()
+        .then(() => UserModel.findByPk('69d25d8b7a2150418bf5eb67'))
         .then((user) => {
             if (user) {
                 req.user = new UserModel(
@@ -32,7 +33,10 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
             }
             next();
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+            console.error(err);
+            next();
+        });
 });
 
 app.use('/', (_req: Request, _res: Response, next: NextFunction) => next());

@@ -44,6 +44,32 @@ export class UserModel extends BaseModel {
             }))
     }
 
+    static removeProductFromAllOrders(productId: string) {
+        return UserModel.collection('orders').updateMany(
+            {},
+            {
+                $pull: {
+                    items: {
+                        id: productId,
+                    },
+                },
+            } as any
+        );
+    }
+
+    static removeProductFromAllCarts(productId: string) {
+        return UserModel.collection(UserModel.collectionName).updateMany(
+            {},
+            {
+                $pull: {
+                    'cart.items': {
+                        productId: new ObjectId(productId),
+                    },
+                },
+            } as any
+        );
+    }
+
     addToCart(product: any) {
         let cartProductIndex = -1;
         if (this.cart?.items && this.cart.items.length > 0) {
@@ -128,5 +154,37 @@ export class UserModel extends BaseModel {
         return this.getCollection('orders')
             .find({"user._id": this.id,})
             .toArray()
+    }
+
+    async deleteProductFromOrder(productId: string, orderId?: string) {
+        const filter: Record<string, any> = {
+            'user._id': this.id,
+        };
+
+        if (orderId) {
+            filter._id = new ObjectId(orderId);
+        }
+
+        return UserModel.collection('orders').updateMany(
+            filter,
+            {
+                $pull: {
+                    items: {
+                        id: productId,
+                    },
+                },
+            } as any
+        );
+    }
+
+    async isProductExistInOrder(productId: string) {
+        return this.getOrders()
+            .then((orders: any) => {
+                const length = orders.items.filter((prod: any) => prod.id.toString() !== productId.toString())
+                if (length > 0) {
+                    return 'yes';
+                }
+                return 'no';
+            })
     }
 }

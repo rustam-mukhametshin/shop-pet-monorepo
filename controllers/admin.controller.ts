@@ -1,5 +1,6 @@
 import {Request, Response} from 'express';
 import {Product} from "../models/product.model";
+import {UserModel} from "../models/user.model";
 // import Product from '../models/product.model';
 
 export const getAddProduct = (req: Request, res: Response): void => {
@@ -70,7 +71,7 @@ export const getEditProduct = (req: Request, res: Response): Promise<void> => {
 
 export const postEditProduct = (req: Request, res: Response): Promise<void> => {
     const id = ((req.params['id'] as string) || (req.body.id as string));
-    const { title, description, price, imageUrl } = req.body as {
+    const {title, description, price, imageUrl} = req.body as {
         title: string;
         description: string;
         price: string;
@@ -95,8 +96,18 @@ export const postEditProduct = (req: Request, res: Response): Promise<void> => {
 
 
 export const deleteProduct = (req: Request, res: Response): Promise<void> => {
-    return Product.findByPk(req.params['id'] as string)
-        .then((product) => Product.deleteProduct(product.id))
+    const productId = req.params['id'] as string;
+
+    return Product.findByPk(productId)
+        .then((product) => {
+            if (!product) {
+                throw new Error('Product not found');
+            }
+
+            return UserModel.removeProductFromAllOrders(productId);
+        })
+        .then(() => UserModel.removeProductFromAllCarts(productId))
+        .then(() => Product.deleteProduct(productId))
         .then(() => res.redirect('/admin/products'))
         .catch((err: unknown) => console.error('Error: ', err)) as Promise<void>;
 };

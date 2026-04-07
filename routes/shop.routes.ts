@@ -13,6 +13,7 @@ shopRoutes.get('/cart-delete-item/:id', ShopController.postCartDeleteProduct);
 
 shopRoutes.get('/orders', ShopController.getOrders);
 shopRoutes.post('/create-order', ShopController.postCreateOrder);
+shopRoutes.post('/order-delete-item', ShopController.postDeleteOrderItem);
 
 shopRoutes.get('/', ShopController.getIndex);
 
