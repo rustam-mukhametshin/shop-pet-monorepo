@@ -4,26 +4,44 @@
 <%- include('./../parts/navigation') %>
 <main>
     <% if(products.length > 0) { %>
-        <ul class="cart">
-            <% products.forEach(p => { %>
-                <li class="cart-product">
-                    <h1><%= p.title %></h1>
-                    <h2>Quantity: <%= p.quantity %></h2>
-                    <button class="btn">
-                        <a href="/cart-delete-item/<%= p.id %>">
-                            Delete
-                        </a>
-                    </button>
-                </li>
-            <% }) %>
-        </ul>
+        <div class="container py-4">
+            <div class="row justify-content-center">
+                <div class="col-12 col-lg-9">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <h1 class="h4 mb-0">Your Cart</h1>
+                            <span class="badge text-bg-success"><%= products.length %> item(s)</span>
+                        </div>
 
-        <form action="/create-order" method="post">
-            <button type="submit" class="btn">Order</button>
-        </form>
+                        <ul class="list-group list-group-flush">
+                            <% products.forEach(p => { %>
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                        <div>
+                                            <h2 class="h5 mb-1"><%= p.title %></h2>
+                                            <p class="mb-0 text-muted">Quantity: <%= p.quantity %></p>
+                                        </div>
+
+                                        <a href="/cart-delete-item/<%= p.id %>" class="btn btn-outline-danger">Delete</a>
+                                    </div>
+                                </li>
+                            <% }) %>
+                        </ul>
+
+                        <div class="card-body border-top d-flex justify-content-end">
+                            <form action="/create-order" method="post" class="m-0">
+                                <button type="submit" class="btn btn-success">Order</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     <% } else { %>
-        <h1>No products</h1>
+        <div class="container py-4">
+            <div class="alert alert-info mb-0">No products</div>
+        </div>
     <% } %>
 </main>
 <%- include('./../parts/body-end') %>

@@ -4,35 +4,41 @@
 <%- include('./../parts/navigation') %>
 
 <main>
-    <h1>My Products</h1>
-    <p>List of all the products...</p>
     <% if(prods.length > 0) { %>
-        <div class="grid">
-            <% for(let product of prods) { %>
-                <article class="card product-item">
-                    <header class="card__header">
-                        <h1 class="product__title">
-                            <%= product.title %>
-                        </h1>
-                    </header>
-                    <div class="card__image">
-                        <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
+        <div class="container py-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+                <div>
+                    <h1 class="h3 mb-1">Admin Products</h1>
+                    <p class="text-muted mb-0">Manage the products available in the store.</p>
+                </div>
+                <span class="badge text-bg-primary"><%= prods.length %> item(s)</span>
+            </div>
+
+            <div class="row g-4">
+                <% for(let product of prods) { %>
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <article class="card h-100 shadow-sm border-0 overflow-hidden">
+                            <img src="<%= product.imageUrl %>" class="card-img-top" alt="<%= product.title %>">
+                            <div class="card-body d-flex flex-column">
+                                <h2 class="card-title h5"><%= product.title %></h2>
+                                <p class="text-success fw-semibold mb-2">$ <%= product.price %></p>
+                                <p class="card-text text-muted flex-grow-1"><%= product.description %></p>
+                                <div class="d-flex gap-2 flex-wrap mt-3">
+                                    <a href="/admin/edit-product/<%= product.id %>?edit=true" class="btn btn-outline-primary">Edit</a>
+                                    <form action="/admin/delete-product/<%= product.id %>" method="get" class="m-0">
+                                        <button class="btn btn-outline-danger" type="submit">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </article>
                     </div>
-                    <div class="card__content">
-                        <h2 class="product__price">$ <%= product.price %></h2>
-                        <p class="product__description"> <%= product.description %></p>
-                    </div>
-                    <div class="card__actions">
-                        <a href="/admin/edit-product/<%= product.id %>?edit=true" class="btn">Edit</a>
-                        <form action="/admin/delete-product/<%= product.id %>" method="get">
-                            <button class="btn" type="submit">Delete</button>
-                        </form>
-                    </div>
-                </article>
-            <% } %>
+                <% } %>
+            </div>
         </div>
     <% } else { %>
-        <h1>No products found.</h1>
+        <div class="container py-4">
+            <div class="alert alert-info mb-0">No products found.</div>
+        </div>
     <% } %>
 </main>
 <%- include('./../parts/body-end') %>

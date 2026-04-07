@@ -4,36 +4,54 @@
 <%- include('./../parts/navigation') %>
 <main>
     <% if(orders.length > 0) { %>
-        <ul class="cart">
-            <% orders.forEach(order => { %>
-                <li>
-                    <h3>Order - # <%= order._id %></h3>
-                    <ul>
-                        <% if(order.items.length > 0) { %>
-                            <% order.items.forEach(product => { %>
-                                <li>
-                                    <h4><%= product.title %> (<%= product.quantity %>)</h4>
-                                    <form action="/order-delete-item" method="POST">
-                                        <input type="hidden" name="productId" value="<%= product.id %>">
-                                        <input type="hidden" name="orderId" value="<%= order._id %>">
-                                        <button type="submit" class="btn">Remove</button>
-                                    </form>
-                                </li>
-                            <% }) %>
-                        <% } else { %>
-                            <li>No products</li>
-                        <% } %>
-                    </ul>
-                </li>
-            <% }) %>
-        </ul>
+        <div class="container py-4">
+            <div class="row g-4">
+                <% orders.forEach(order => { %>
+                    <div class="col-12">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <h3 class="h5 mb-0">Order # <%= order._id %></h3>
+                                <span class="badge text-bg-success"><%= order.items.length %> item(s)</span>
+                            </div>
+
+                            <% if(order.items.length > 0) { %>
+                                <ul class="list-group list-group-flush">
+                                    <% order.items.forEach(product => { %>
+                                        <li class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                                <div>
+                                                    <h4 class="h6 mb-1"><%= product.title %></h4>
+                                                    <p class="mb-0 text-muted">Quantity: <%= product.quantity %></p>
+                                                </div>
+
+                                                <form action="/order-delete-item" method="POST" class="m-0">
+                                                    <input type="hidden" name="productId" value="<%= product.id %>">
+                                                    <input type="hidden" name="orderId" value="<%= order._id %>">
+                                                    <button type="submit" class="btn btn-outline-danger">Remove</button>
+                                                </form>
+                                            </div>
+                                        </li>
+                                    <% }) %>
+                                </ul>
+                            <% } else { %>
+                                <div class="card-body">
+                                    <p class="mb-0 text-muted">No products</p>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
 
         <!--        <form action="/create-order" method="post">-->
         <!--            <button type="submit" class="btn">Order</button>-->
         <!--        </form>-->
 
     <% } else { %>
-        <h1>No orders</h1>
+        <div class="container py-4">
+            <div class="alert alert-info mb-0">No orders</div>
+        </div>
     <% } %>
 </main>
 <%- include('./../parts/body-end') %>
