@@ -1,5 +1,5 @@
 import {Db} from "mongodb";
-import {getDb} from "../util/database";
+import {getDb} from "../database";
 
 export class BaseModel {
     private _db: Db;

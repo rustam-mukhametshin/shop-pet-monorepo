@@ -1,6 +1,5 @@
-import { Router } from 'express';
+import {Router} from 'express';
 import * as ShopController from '../controllers/shop.controller';
-import {postCreateOrder} from "../controllers/shop.controller";
 
 const shopRoutes = Router();
 

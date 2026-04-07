@@ -1,7 +1,7 @@
-/// <reference path="./types/global.d.ts" />
+/// <reference path="./global.d.ts" />
 import express, {NextFunction, Request, Response} from 'express';
 import path from 'path';
-import {mongoConnect} from "./util/database";
+import {mongoConnect} from "./database";
 import adminRoutes from "./routes/admin.routes";
 import {notFound} from "./controllers/public.controller";
 import shopRoutes from "./routes/shop.routes";
