@@ -76,10 +76,13 @@ export const getOrders = async (req: Request, res: Response): Promise<void> => {
 export const postCreateOrder = async (req: Request, res: Response) => {
     return req.user.createOrder()
         .then(() => {
-            return res.render('shop/orders', {
-                pageTitle: 'Orders',
-                url: '/orders',
-            });
+            return req.user.getOrders().then((orders: any) => {
+                return res.render('shop/orders', {
+                    pageTitle: 'Orders',
+                    url: '/orders',
+                    orders: orders,
+                });
+            })
         })
         .catch((err: any) => console.error(err));
 };
