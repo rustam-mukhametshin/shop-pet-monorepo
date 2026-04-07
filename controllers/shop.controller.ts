@@ -61,43 +61,25 @@ export const postCartDeleteProduct = (req: Request, res: Response) => {
         .catch((err: any) => console.error(err));
 };
 
-// export const getOrders = async (req: Request, res: Response): Promise<void> => {
-//     const orders = await req.user.getOrders({
-//         include: ['orderItems']
-//     })
-//     res.render('shop/orders', {
-//         pageTitle: 'Orders',
-//         url: '/orders',
-//         orders: orders,
-//     });
-// };
+export const getOrders = async (req: Request, res: Response): Promise<void> => {
+    return req.user.getOrders()
+        .then((orders: any[]) => {
+            return res.render('shop/orders', {
+                pageTitle: 'Orders',
+                url: '/orders',
+                orders: orders,
+            });
+        })
 
-// export const postCreateOrder = async (req: Request, res: Response): Promise<void> => {
-//     const cart = await req.user.getCart();
-//     if (!cart) {
-//         return res.redirect('/cart');
-//     }
-//
-//     const products = await cart.getCartProducts();
-//     // @ts-ignore
-//     const order = await req.user.createOrder();
-//
-//     await order.addOrderItems(
-//         products.map((product: any) => {
-//             product.orderItem = {
-//                 quantity: product.cartItem.quantity,
-//             };
-//             return product;
-//         })
-//     );
-//
-//     // Association alias is `cartProducts`, so the generated setter is `setCartProducts`.
-//     // @ts-ignore
-//     await cart.setCartProducts([]);
-//
-//     return res.render('shop/orders', {
-//         pageTitle: 'Orders',
-//         url: '/orders',
-//         prods: products,
-//     });
-// };
+};
+
+export const postCreateOrder = async (req: Request, res: Response) => {
+    return req.user.createOrder()
+        .then(() => {
+            return res.render('shop/orders', {
+                pageTitle: 'Orders',
+                url: '/orders',
+            });
+        })
+        .catch((err: any) => console.error(err));
+};

@@ -9,8 +9,8 @@ export class BaseModel {
         this._db = getDb();
     }
 
-    protected getCollection() {
-        return this._db.collection(this.collectionName);
+    protected getCollection(collection?: string) {
+        return this._db.collection(collection || this.collectionName);
     }
 
     public static collection(collectionName: string) {

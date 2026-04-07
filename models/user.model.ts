@@ -96,4 +96,37 @@ export class UserModel extends BaseModel {
             {$set: {cart: this.cart}},
         )
     }
+
+    createOrder() {
+        return this.getCart()
+            .then(products => {
+                const order = {
+                    items: products.items,
+                    user: {
+                        _id: new ObjectId(this.id),
+                        name: this.username,
+                        email: this.email,
+                    },
+                }
+
+                return this.getCollection('orders')
+                    .insertOne(order)
+            })
+            .then(insertedOrderDetails => {
+                this.cart = {items: []}
+                return this.getCollection()
+                    .updateOne(
+                        {_id: this.id,},
+                        {
+                            $set: {cart: {items: []}},
+                        }
+                    )
+            })
+    }
+
+    getOrders(): Promise<any[]> {
+        return this.getCollection('orders')
+            .find({"user._id": this.id,})
+            .toArray()
+    }
 }
