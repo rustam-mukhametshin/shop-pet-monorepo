@@ -21,15 +21,10 @@ app.use(express.urlencoded({extended: true}));
 // Attach user to every request
 app.use((req: Request, _res: Response, next: NextFunction) => {
     return Promise.resolve()
-        .then(() => UserModel.findByPk('69d25d8b7a2150418bf5eb67'))
+        .then(() => UserModel.findById('69d7b99b0e281ae57478ab63'))
         .then((user) => {
             if (user) {
-                req.user = new UserModel(
-                    user.username,
-                    user.email,
-                    user.cart,
-                    user._id,
-                );
+                req.user = user;
             }
             next();
         })
@@ -48,7 +43,22 @@ app.use(notFound);
 
 if (require.main === module) {
     mongoConnect(() => {
-        app.listen(3333);
+        UserModel.findOne()
+            .then(user => {
+                return !user ?
+                    new UserModel({
+                        name: 'Ru',
+                        email: 'test@app.com',
+                        cart: {
+                            items: [],
+                        }
+                    }).save()
+                    : user;
+            })
+            .then(() => {
+                app.listen(3333);
+            })
+
     })
 }
 
