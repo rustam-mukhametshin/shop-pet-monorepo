@@ -18,11 +18,11 @@
                                 <li class="list-group-item">
                                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                                         <div>
-                                            <h2 class="h5 mb-1"><%= p.title %></h2>
+                                            <h2 class="h5 mb-1"><%= p.productId.title %></h2>
                                             <p class="mb-0 text-muted">Quantity: <%= p.quantity %></p>
                                         </div>
 
-                                        <a href="/cart-delete-item/<%= p.id %>" class="btn btn-outline-danger">Delete</a>
+                                        <a href="/cart-delete-item/<%= p.productId.id %>" class="btn btn-outline-danger">Delete</a>
                                     </div>
                                 </li>
                             <% }) %>
