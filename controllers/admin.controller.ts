@@ -1,7 +1,5 @@
 import {Request, Response} from 'express';
 import {Product} from "../models/product.model";
-import {UserModel} from "../models/user.model";
-// import Product from '../models/product.model';
 
 export const getAddProduct = (req: Request, res: Response): void => {
     res.render('admin/edit-product', {
@@ -20,15 +18,14 @@ export const postAddProduct = (req: Request, res: Response): any => {
         price: string;
     };
 
-    const product = new Product(
+    return new Product({
         title,
-        parseFloat(price),
         imageUrl,
         description,
-        req.user._id
-    );
-
-    product.save()
+        price: parseFloat(price),
+        userId: req.user._id,
+    })
+        .save()
         .then(() => res.redirect('/admin/products'))
         .catch((err: unknown) => {
             console.error('Error: ', err);
@@ -37,7 +34,7 @@ export const postAddProduct = (req: Request, res: Response): any => {
 };
 
 export const getProducts = (req: Request, res: Response): Promise<void> => {
-    return Product.findAll()
+    return Product.find()
         .then((products) => {
             res.render('admin/products', {
                 pageTitle: 'Admin Products',
@@ -54,7 +51,7 @@ export const getEditProduct = (req: Request, res: Response): Promise<void> => {
     const edit = req.query['edit'] === 'true';
     const prodId = req.params['id'] as string;
 
-    return Product.findByPk(prodId)
+    return Product.findById(prodId)
         .then((product) => {
             if (!product) {
                 res.status(404).redirect('/admin/products');
@@ -78,14 +75,15 @@ export const postEditProduct = (req: Request, res: Response): Promise<void> => {
         imageUrl: string;
     };
 
-    return Product.findByPk(id)
+    return Product.findById(id)
         .then((product) => {
             if (!product) throw new Error('Product not found');
             product.title = title;
             product.description = description;
             product.price = parseFloat(price);
             product.imageUrl = imageUrl;
-            return Product.updateProduct(id, product)
+
+            return product.save()
         })
         .then(() => res.redirect('/admin/products'))
         .catch((err: unknown) => {
@@ -98,16 +96,17 @@ export const postEditProduct = (req: Request, res: Response): Promise<void> => {
 export const deleteProduct = (req: Request, res: Response): Promise<void> => {
     const productId = req.params['id'] as string;
 
-    return Product.findByPk(productId)
+    return Product.findByIdAndDelete(productId)
         .then((product) => {
             if (!product) {
                 throw new Error('Product not found');
             }
+            return product;
 
-            return UserModel.removeProductFromAllOrders(productId);
+            // return UserModel.removeProductFromAllOrders(productId);
         })
-        .then(() => UserModel.removeProductFromAllCarts(productId))
-        .then(() => Product.deleteProduct(productId))
+        // .then(() => UserModel.removeProductFromAllCarts(productId))
+        // .then(() => Product.deleteProduct(productId))
         .then(() => res.redirect('/admin/products'))
         .catch((err: unknown) => console.error('Error: ', err)) as Promise<void>;
 };
