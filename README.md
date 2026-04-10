@@ -8,7 +8,7 @@ Developer guide for running and working on this project.
 - Node.js + Express 5
 - EJS templates
 - TypeScript
-- MongoDB (`mongodb` driver)
+- MongoDB (Mongoose)
 - Bootstrap 5 (CDN in `views/parts/head.ejs`)
 
 ## Project Entry Points
@@ -16,7 +16,7 @@ Developer guide for running and working on this project.
 - DB connection: `database.ts`
 - Main startup path for development: `npm run start:ts`
 
-> Note: `package.json` still contains legacy scripts pointing to `app.js`; current active runtime is `app.ts`.
+> Note: some legacy scripts still point to `app.js`; the active TypeScript runtime path is `app.ts`.
 
 ## Prerequisites
 - Node.js and npm installed
@@ -87,7 +87,7 @@ Notes:
 ## Request Flow (High Level)
 1. Static files from `public/`
 2. `express.urlencoded`
-3. User middleware loads fixed user (`69d25d8b7a2150418bf5eb67`) and attaches `req.user`
+3. User middleware loads fixed user (`69d7b99b0e281ae57478ab63`) and attaches `req.user`
 4. `/admin` routes, then shop routes
 5. `notFound` handler renders `views/404.ejs`
 
@@ -113,7 +113,7 @@ Notes:
 
 ## Common Pitfalls
 - `ObjectId` throws on invalid IDs; validate/sanitize before `new ObjectId(...)`.
-- `getDb()` throws until `mongoConnect` runs.
+- Database calls fail if `mongoConnect` has not completed.
 - Navigation active-link checks depend on exact `url` strings in `views/parts/navigation.ejs`.
 - `global.d.ts` request typing should stay aligned with `UserModel` export usage.
 
