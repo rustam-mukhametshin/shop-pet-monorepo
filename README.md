@@ -1,5 +1,7 @@
 # Node Course Shop (TypeScript + MongoDB)
 
+[![Build](https://github.com/rustam-mukhametshin/Node_learn/actions/workflows/build.yml/badge.svg)](https://github.com/rustam-mukhametshin/Node_learn/actions/workflows/build.yml)
+
 Developer guide for running and working on this project.
 
 ## Stack
@@ -62,6 +64,10 @@ Run all tests:
 ```zsh
 npm test
 ```
+
+## CI
+- GitHub Actions workflow: `.github/workflows/build.yml`
+- It runs `npm ci` and `npm run build:ts` on pushes and pull requests to `main`/`master`.
 
 Watch mode:
 ```zsh
