@@ -52,6 +52,7 @@ userSchema.methods.addToCart = function (product: any) {
     }
 
     this.cart = newObjCart;
+    this.markModified('cart');
     return this.save()
 }
 
