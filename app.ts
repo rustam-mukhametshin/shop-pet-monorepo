@@ -6,6 +6,7 @@ import adminRoutes from "./routes/admin.routes";
 import {notFound} from "./controllers/public.controller";
 import shopRoutes from "./routes/shop.routes";
 import {UserModel} from "./models/user.model";
+import authRoutes from "./routes/auth.routes";
 
 
 const app = express();
@@ -37,6 +38,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 app.use('/', (_req: Request, _res: Response, next: NextFunction) => next());
 
 app.use('/admin', adminRoutes);
+app.use(authRoutes);
 app.use(shopRoutes);
 
 app.use(notFound);

@@ -1,0 +1,38 @@
+<%- include('./../parts/head') %>
+<%- include('./../parts/head-end') %>
+<%- include('./../parts/body') %>
+<%- include('./../parts/navigation') %>
+
+<main>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-5">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <h1 class="h4 mb-3">Login</h1>
+                        <p class="text-muted mb-4">Enter your credentials to access your account.</p>
+
+                        <form action="/login" method="get">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input id="email" name="email" type="email" class="form-control" placeholder="name@example.com" required>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="password" class="form-label">Password</label>
+                                <input id="password" name="password" type="password" class="form-control" placeholder="••••••••" required>
+                            </div>
+
+                            <div class="d-grid">
+                                <button class="btn btn-primary" type="submit">Sign In</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('./../parts/body-end') %>
+
