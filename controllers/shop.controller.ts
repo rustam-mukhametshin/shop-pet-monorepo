@@ -3,13 +3,13 @@ import {Product} from '../models/product.model';
 import {UserModel} from "../models/user.model";
 import {OrderModel} from "../models/order.model";
 
-
 export const getIndex = (req: Request, res: Response): Promise<void> => {
     return Product.find().then((products) => {
         res.render('shop/index', {
             pageTitle: 'Shop',
             url: '/',
             prods: products,
+            isLoggedIn: req.session.isLoggedIn || false
         });
     });
 };
@@ -23,6 +23,7 @@ export const getProducts = (req: Request, res: Response): Promise<void> => {
                 pageTitle: 'Products',
                 url: '/products',
                 prods: products,
+                isLoggedIn: req.session.isLoggedIn || false
             });
         });
 };
@@ -34,6 +35,7 @@ export const getProduct = (req: Request, res: Response): Promise<void> => {
                 pageTitle: product?.title ?? 'Product',
                 url: '/products',
                 product,
+                isLoggedIn: req.session.isLoggedIn || false
             });
         });
 };
@@ -50,6 +52,7 @@ export const getCart = (req: Request, res: Response): Promise<unknown> => {
                 url: '/cart',
                 cart: user.cart,
                 products: user.cart.items,
+                isLoggedIn: req.session.isLoggedIn || false
             });
         })
         .catch((err: any) => console.error(err));
@@ -84,6 +87,7 @@ export const getOrders = async (req: Request, res: Response): Promise<void> => {
                 pageTitle: 'Orders',
                 url: '/orders',
                 orders: orders,
+                isLoggedIn: req.session.isLoggedIn || false
             });
         })
 
@@ -125,6 +129,7 @@ export const postCreateOrder = async (req: Request, res: Response) => {
                         pageTitle: 'Orders',
                         url: '/orders',
                         orders: orders,
+                        isLoggedIn: req.session.isLoggedIn || false
                     });
                 })
         })

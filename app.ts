@@ -7,7 +7,8 @@ import {notFound} from "./controllers/public.controller";
 import shopRoutes from "./routes/shop.routes";
 import {UserModel} from "./models/user.model";
 import authRoutes from "./routes/auth.routes";
-
+import session from "express-session";
+import MongoStore from 'connect-mongo';
 
 const app = express();
 
@@ -18,6 +19,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Body parsing
 app.use(express.urlencoded({extended: true}));
+
+// Set session
+app.use(session({
+    secret: 'my secret',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGO_URI || 'mongodb+srv://:@cluster0.japfcdr.mongodb.net/?appName=Cluster0',
+        collectionName: 'sessions',
+    }),
+}));
 
 // Attach user to every request
 app.use((req: Request, _res: Response, next: NextFunction) => {
