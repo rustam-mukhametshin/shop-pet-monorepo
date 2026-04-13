@@ -1,6 +1,8 @@
 # Node Course Shop (TypeScript + MongoDB)
 
 [![Build](https://github.com/rustam-mukhametshin/Node_learn/actions/workflows/build.yml/badge.svg)](https://github.com/rustam-mukhametshin/Node_learn/actions/workflows/build.yml)
+[![Tests](https://github.com/rustam-mukhametshin/Node_learn/actions/workflows/test.yml/badge.svg)](https://github.com/rustam-mukhametshin/Node_learn/actions/workflows/test.yml)
+[![Coverage](https://codecov.io/gh/rustam-mukhametshin/Node_learn/branch/master/graph/badge.svg)](https://codecov.io/gh/rustam-mukhametshin/Node_learn)
 
 Developer guide for running and working on this project.
 
@@ -68,6 +70,9 @@ npm test
 ## CI
 - GitHub Actions workflow: `.github/workflows/build.yml`
 - It runs `npm ci` and `npm run build:ts` on pushes and pull requests to `main`/`master`.
+- GitHub Actions workflow: `.github/workflows/test.yml`
+- It runs `npm ci` and `npm run test:coverage`, then uploads `coverage/lcov.info` to Codecov.
+- Coverage badge reflects the latest Codecov upload and appears after the first successful test workflow run.
 
 Watch mode:
 ```zsh
