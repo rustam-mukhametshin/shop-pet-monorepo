@@ -28,6 +28,7 @@ export const postLogin = (req: Request | any, res: Response | any) => {
             .then(user => {
                 req.session.user = user;
                 req.session.isLoggedIn = true;
+                return req.session.save()
             })
             .then(() => {
                 res.redirect('/admin/products');
