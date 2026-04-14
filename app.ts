@@ -8,6 +8,7 @@ import shopRoutes from "./routes/shop.routes";
 import authRoutes from "./routes/auth.routes";
 import session from "express-session";
 import MongoStore from 'connect-mongo';
+import {UserModel} from "./models/user.model";
 
 const app = express();
 
@@ -29,6 +30,15 @@ app.use(session({
         collectionName: 'sessions',
     }),
 }));
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+    UserModel.findById(req.session?.user?._id)
+        .then((user: any) => {
+            req.user = user;
+            next();
+        })
+        .catch((err: unknown) => console.log(err))
+})
 
 app.use('/', (_req: Request, _res: Response, next: NextFunction) => next());
 

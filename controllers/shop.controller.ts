@@ -41,7 +41,7 @@ export const getProduct = (req: Request, res: Response): Promise<void> => {
 };
 
 export const getCart = (req: Request, res: Response): Promise<unknown> => {
-    return UserModel.findById(req.session?.user).populate({
+    return UserModel.findById(req?.user).populate({
         path: 'cart.items.productId',
         model: 'Product',
     })
@@ -71,7 +71,7 @@ export const getCart = (req: Request, res: Response): Promise<unknown> => {
 export const postAddProductToCart = (req: Request, res: Response): Promise<void> => {
     const productId = req.body.id as string;
     return Product.findById(productId)
-        .then(product => req.session?.user?.addToCart(product))
+        .then(product => req?.user?.addToCart(product))
         .then(() => res.redirect('/cart'))
         .catch((err: any) => console.error(err));
 };
@@ -86,7 +86,7 @@ export const postCartDeleteProduct = (req: Request, res: Response) => {
 export const getOrders = async (req: Request, res: Response): Promise<void> => {
     return OrderModel
         .find({
-            'userId': req.session?.user
+            'userId': req?.user
         })
         .populate({
             path: 'products.product',
@@ -104,7 +104,7 @@ export const getOrders = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const postCreateOrder = async (req: Request, res: Response) => {
-    return UserModel.findById(req.session?.user).populate({
+    return UserModel.findById(req?.user).populate({
         path: 'cart.items.productId',
         model: 'Product',
     })
