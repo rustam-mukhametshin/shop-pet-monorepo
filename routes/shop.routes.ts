@@ -7,7 +7,7 @@ shopRoutes.get('/products', ShopController.getProducts);
 shopRoutes.get('/products/:id', ShopController.getProduct);
 
 shopRoutes.get('/cart', ShopController.getCart);
-shopRoutes.post('/cart', ShopController.postCart);
+shopRoutes.post('/cart', ShopController.postAddProductToCart);
 
 shopRoutes.get('/cart-delete-item/:id', ShopController.postCartDeleteProduct);
 

@@ -24,7 +24,7 @@ export const postAddProduct = (req: Request, res: Response): any => {
         imageUrl,
         description,
         price: parseFloat(price),
-        userId: req.user._id,
+        userId: req.session?.user,
     })
         .save()
         .then(() => res.redirect('/admin/products'))

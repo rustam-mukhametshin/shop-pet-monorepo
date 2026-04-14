@@ -5,7 +5,6 @@ import {mongoConnect} from "./database";
 import adminRoutes from "./routes/admin.routes";
 import {notFound} from "./controllers/public.controller";
 import shopRoutes from "./routes/shop.routes";
-import {UserModel} from "./models/user.model";
 import authRoutes from "./routes/auth.routes";
 import session from "express-session";
 import MongoStore from 'connect-mongo';
@@ -31,22 +30,6 @@ app.use(session({
     }),
 }));
 
-// Attach user to every request
-app.use((req: Request, _res: Response, next: NextFunction) => {
-    return Promise.resolve()
-        .then(() => UserModel.findById('69d7b99b0e281ae57478ab63'))
-        .then((user) => {
-            if (user) {
-                req.user = user;
-            }
-            next();
-        })
-        .catch((err) => {
-            console.error(err);
-            next();
-        });
-});
-
 app.use('/', (_req: Request, _res: Response, next: NextFunction) => next());
 
 app.use('/admin', adminRoutes);
@@ -57,22 +40,7 @@ app.use(notFound);
 
 if (require.main === module) {
     mongoConnect(() => {
-        UserModel.findOne()
-            .then(user => {
-                return !user ?
-                    new UserModel({
-                        name: 'Ru',
-                        email: 'test@app.com',
-                        cart: {
-                            items: [],
-                        }
-                    }).save()
-                    : user;
-            })
-            .then(() => {
-                app.listen(3333);
-            })
-
+        app.listen(3333);
     })
 }
 
