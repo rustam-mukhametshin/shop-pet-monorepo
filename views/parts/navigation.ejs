@@ -29,9 +29,15 @@
         </ul>
 
         <ul class="main-header__item-list">
-            <li class="main-header__item">
-                <a class="<%= url === '/login ' ? 'active' : '' %>" href="/login">Login</a>
-            </li>
+            <% if(!isLoggedIn) { %>
+                <li class="main-header__item">
+                    <a class="<%= url === '/login ' ? 'active' : '' %>" href="/login">Login</a>
+                </li>
+            <% } else { %>
+                <li class="main-header__item">
+                    <a href="/logout">Logout</a>
+                </li>
+            <% } %>
         </ul>
     </nav>
 </header>

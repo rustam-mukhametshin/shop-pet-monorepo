@@ -43,3 +43,7 @@ export const postLogin = (req: Request | any, res: Response | any) => {
     }
 };
 
+export const getLogout = (req: Request, res: Response) => {
+    return req.session.destroy(() => res.redirect('/'))
+}
+
