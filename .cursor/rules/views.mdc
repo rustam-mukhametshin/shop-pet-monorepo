@@ -1,0 +1,29 @@
+# EJS Views & Bootstrap Rules
+
+## Layout Parts
+Shared partials live in `views/parts/` — always include them in this order:
+1. `head.ejs` → `head-end.ejs`
+2. `body.ejs` (navbar via `navigation.ejs`)
+3. Page content
+4. `body-end.ejs`
+
+## Bootstrap Usage
+- Use Bootstrap CDN (already included in `head.ejs`) — do not add a local copy.
+- Cards for product listings, `list-group` for cart/order items.
+- Use `btn btn-primary` / `btn btn-danger` for actions consistently.
+
+## Forms
+- Add-to-cart form is the shared partial `views/parts/add-to-cart.ejs` — reuse it, do not duplicate.
+- Hidden `<input name="id">` carries the product id to `POST /cart`.
+- All forms use `method="POST"`; no client-side fetch unless explicitly requested.
+
+## Variable Contract
+Each rendered view receives at minimum:
+- `pageTitle` — used in `<title>` tag inside `head.ejs`
+- `url` — used to highlight the active nav link in `navigation.ejs`
+- `isLoggedIn` — controls nav item visibility
+
+## Do Not
+- Do not add inline `<style>` blocks; use `public/css/*.css` instead.
+- Do not introduce a JS framework (React, Vue) — views are server-rendered EJS only.
+

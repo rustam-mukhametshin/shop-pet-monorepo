@@ -1,0 +1,20 @@
+# General Project Rules
+
+## Stack
+Node.js + Express 5 + EJS + TypeScript + Mongoose. Entry: `app.ts`, DB bootstrap: `database.ts`.
+
+## Code Style
+- Use TypeScript for all new files; keep strict mode compatible with `tsconfig.json`.
+- Follow existing controller pattern: named exports, `(req, res) => void` or returning `Promise`.
+- Use Mongoose model instance methods for cart/order mutations (see `user.model.ts`).
+
+## File Conventions
+- Controllers → `controllers/*.controller.ts`
+- Models → `models/*.model.ts`
+- Routes → `routes/*.routes.ts`
+- Views → `views/**/*.ejs` (Bootstrap-compatible markup)
+
+## Do Not
+- Do not reorder middleware in `app.ts` (tests depend on ordering).
+- Do not remove or rename `req.user` — it is augmented globally in `global.d.ts`.
+

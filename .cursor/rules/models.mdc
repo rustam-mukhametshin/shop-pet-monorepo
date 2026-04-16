@@ -1,0 +1,20 @@
+# Mongoose Model Rules
+
+## Schema Conventions
+- Define a TypeScript interface for document attributes (e.g., `ProductAttributes`).
+- Export both the interface and the model: `export const ProductModel = mongoose.model<...>()`.
+- Keep `userId` as a `ref` to `User` on product documents.
+
+## Instance Methods
+- Cart and order mutations belong on `userSchema.methods`, not in controllers.
+- Existing methods: `addToCart`, `deleteProductFromCart`, `clearCart`.
+- When adding a new method, also extend the `UserDocument` interface in `user.model.ts`.
+
+## Population Pattern
+- Cart products use nested populate: `cart.items.productId` (see `shop.controller.ts#getCart`).
+- Orders store snapshots: `products[].product` (embedded object, not a ref) + `products[].quantity`.
+
+## Do Not
+- Do not use `Model.find` with raw SQL-style syntax — use Mongoose query API.
+- Do not call `.save()` on a document fetched via `lean()` — it returns a plain object.
+

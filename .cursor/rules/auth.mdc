@@ -1,0 +1,20 @@
+# Auth & Session Rules
+
+## Session Shape
+- Session is extended in `global.d.ts` — add new session fields there, not inline.
+- Available session fields: `isLoggedIn: boolean`, `user: UserDocument`.
+- Always call `req.session.save()` before redirecting after mutating session state.
+
+## Auth Flow
+- Login lives in `controllers/auth.controller.ts` + `routes/auth.routes.ts`.
+- `postLogin` finds or creates a user by hardcoded id, sets session, then redirects.
+- `getLogout` destroys the session and redirects to `/`.
+
+## Middleware
+- `req.user` is populated for every request in `app.ts` middleware via `UserModel.findById`.
+- Do not duplicate user-loading logic in controllers — use `req.user` directly.
+
+## Do Not
+- Do not store raw passwords; this project currently has no hashing — do not add plain-text password comparisons either.
+- Do not bypass `req.session.save()` before a redirect; missing it causes lost session state.
+

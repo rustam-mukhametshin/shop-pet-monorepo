@@ -1,0 +1,45 @@
+# TDD Rule
+
+## Workflow — strictly follow this order for every new method in a `.ts` file
+
+1. **Write the test first** in `__tests__/<module>.test.js` (or `.test.ts`).
+   - Test must call the method and assert the expected output / side-effect.
+   - Run `npm test` — the test **must fail** (red) before moving on.
+
+2. **Implement the method** in the `.ts` source file with the minimum code needed to pass.
+   - Run `npm test` — the test **must pass** (green) before moving on.
+
+3. **Refactor** — clean up the implementation without breaking the test.
+   - Run `npm test` one final time to confirm still green.
+
+## Test File Conventions
+- Mirror the source path: `controllers/shop.controller.ts` → `__tests__/shop.controller.test.js`.
+- Use `jest` globals (`describe`, `it`, `expect`); config is in `jest.config.js`.
+- Mock Mongoose models with `jest.mock('../models/product.model')` — do not hit real DB in unit tests.
+
+## Example Skeleton
+
+```ts
+// __tests__/example.test.js  ← write this FIRST
+const { myMethod } = require('../controllers/example.controller');
+
+describe('myMethod', () => {
+  it('should return expected value', async () => {
+    const result = await myMethod(/* args */);
+    expect(result).toBe(/* expected */);
+  });
+});
+```
+
+```ts
+// controllers/example.controller.ts  ← implement AFTER test is red
+export const myMethod = async (/* args */): Promise<...> => {
+  // implementation
+};
+```
+
+## Do Not
+- Do not write implementation before the test exists.
+- Do not skip the failing-test (red) step — it proves the test actually covers the code.
+- Do not write multiple methods at once; apply the cycle once per method.
+
