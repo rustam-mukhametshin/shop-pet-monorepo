@@ -6,41 +6,47 @@ export const getLogin = (req: Request, res: Response): void => {
         pageTitle: 'Login',
         url: '/login',
         isLoggedIn: req.session.isLoggedIn || false,
+        errorMessage: undefined,
     });
 };
 
 export const postLogin = (req: Request | any, res: Response | any) => {
     if (req.body.email && req.body.password) {
         return Promise.resolve()
-            .then(() => UserModel.findById('69d7b99b0e281ae57478ab63'))
+            .then(() => UserModel.findOne({email: req.body.email, password: req.body.password}))
             .then(user => {
-                return !user
-                    ? new UserModel({
-                        name: req.body.email.split('@')[0],
-                        email: req.body.email,
-                        password: req.body.password,
-                        cart: {
-                            items: [],
-                        }
-                    }).save()
-                    : user;
-            })
-            .then(user => {
+                if (!user) {
+                    return res.status(500).render('auth/login', {
+                        pageTitle: 'Login',
+                        url: '/login',
+                        isLoggedIn: req.session.isLoggedIn || false,
+                        errorMessage: 'No user found.', // Todo: potential bruteforce attack, do not specify if email or password is wrong
+                    })
+                }
+
                 req.session.user = user;
                 req.session.isLoggedIn = true;
                 return req.session.save()
-            })
-            .then(() => {
-                res.redirect('/admin/products');
+                    .then(() => res.redirect('/admin/products'))
             })
             .catch(err => {
-                res.status(500).redirect('/login');
+                return res.status(500).render('auth/login', {
+                    pageTitle: 'Login',
+                    url: '/login',
+                    isLoggedIn: req.session.isLoggedIn || false,
+                    errorMessage: 'Unknown error. Please try again',
+                })
             })
 
     } else {
         req.session.isLoggedIn = false;
         req.session.user = undefined;
-        res.status(500).redirect('/login');
+        return res.status(500).render('auth/login', {
+            pageTitle: 'Login',
+            url: '/login',
+            isLoggedIn: req.session.isLoggedIn || false,
+            errorMessage: 'Unknown error. Please try again',
+        })
     }
 };
 
@@ -94,12 +100,7 @@ export const postSignup = (req: Request, res: Response) => {
         .findOne({email})
         .then(async userDoc => {
             if (userDoc) {
-                return res.status(422).render('auth/signup', {
-                    pageTitle: 'Sign Up',
-                    url: '/signup',
-                    isLoggedIn: req.session.isLoggedIn || false,
-                    errorMessage: 'User already exists',
-                })
+                return undefined;
             } else {
                 const user = new UserModel({
                     name: email.split('@')[0],
@@ -108,9 +109,26 @@ export const postSignup = (req: Request, res: Response) => {
                     confirmPassword,
                     cart: {items: [],}
                 })
-                return await user.save();
+                return user.save()
             }
-        }).catch(err => {
+        })
+        .then(user => {
+            if (!user) {
+                return res.status(422).render('auth/signup', {
+                    pageTitle: 'Sign Up',
+                    url: '/signup',
+                    isLoggedIn: req.session.isLoggedIn || false,
+                    errorMessage: 'User already exists', // Todo: potential bruteforce attack, do not specify if email or password is wrong
+                })
+            }
+
+            req.session.user = user;
+            req.session.isLoggedIn = true;
+
+            return Promise.resolve(() => req.session.save())
+                .then(() => res.redirect('/admin/products'))
+        })
+        .catch(err => {
             res.status(500).render('auth/signup', {
                 pageTitle: 'Sign Up',
                 url: '/signup',
