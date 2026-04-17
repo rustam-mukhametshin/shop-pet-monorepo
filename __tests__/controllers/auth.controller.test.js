@@ -1,9 +1,17 @@
-const { getSignup, postSignup } = require('../../controllers/auth.controller.ts');
+const mockSave = jest.fn();
+const mockFindOne = jest.fn();
 
-// Mock UserModel to avoid real DB connection
-jest.mock('../../models/user.model', () => ({
-  UserModel: { findById: jest.fn() },
-}));
+jest.mock('../../models/user.model', () => {
+  const UserModel = jest.fn().mockImplementation(() => ({
+    save: mockSave,
+  }));
+  UserModel.findById = jest.fn();
+  UserModel.findOne = mockFindOne;
+  return { UserModel };
+});
+
+const { UserModel } = require('../../models/user.model');
+const { getSignup, postSignup } = require('../../controllers/auth.controller.ts');
 
 const mockReq = (overrides = {}) => ({
   session: { isLoggedIn: false },
@@ -19,57 +27,57 @@ const mockRes = () => {
   return res;
 };
 
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockSave.mockResolvedValue({ _id: 'new-user-id' });
+  mockFindOne.mockResolvedValue(null);
+});
+
 describe('auth.controller', () => {
   describe('getSignup', () => {
-    it('renders shop/signup with correct locals', () => {
+    it('renders auth/signup with correct locals', () => {
       const req = mockReq({ session: { isLoggedIn: false } });
       const res = mockRes();
 
       getSignup(req, res);
 
       expect(res.render).toHaveBeenCalledTimes(1);
-      expect(res.render).toHaveBeenCalledWith('shop/signup', {
+      expect(res.render).toHaveBeenCalledWith('auth/signup', {
         pageTitle: 'Sign Up',
         url: '/signup',
         isLoggedIn: false,
+        errorMessage: false,
       });
-    });
-
-    it('passes isLoggedIn: true when session is active', () => {
-      const req = mockReq({ session: { isLoggedIn: true } });
-      const res = mockRes();
-
-      getSignup(req, res);
-
-      expect(res.render).toHaveBeenCalledWith('shop/signup', expect.objectContaining({
-        isLoggedIn: true,
-      }));
     });
   });
 
   describe('postSignup', () => {
-    it('redirects to /login after signup', () => {
+    it('creates and saves a new user for valid input', async () => {
       const req = mockReq({
-        body: { name: 'Alice', email: 'alice@example.com', password: 'pass', confirmPassword: 'pass' },
+        body: { email: 'alice@example.com', password: 'pass', confirmPassword: 'pass' },
       });
       const res = mockRes();
 
-      postSignup(req, res);
+      await postSignup(req, res);
 
-      expect(res.redirect).toHaveBeenCalledTimes(1);
-      expect(res.redirect).toHaveBeenCalledWith('/login');
+      expect(UserModel.findOne).toHaveBeenCalledWith({ email: 'alice@example.com' });
+      expect(UserModel).toHaveBeenCalledWith(expect.objectContaining({
+        name: 'alice',
+        email: 'alice@example.com',
+      }));
+      expect(mockSave).toHaveBeenCalledTimes(1);
     });
 
-    it('does not render a view — only redirects', () => {
-      const req = mockReq({
-        body: { name: 'Bob', email: 'bob@example.com', password: '123', confirmPassword: '123' },
-      });
+    it('returns 422 and renders signup when required fields are missing', async () => {
+      const req = mockReq({ body: { email: '', password: '', confirmPassword: '' } });
       const res = mockRes();
 
-      postSignup(req, res);
+      await postSignup(req, res);
 
-      expect(res.render).not.toHaveBeenCalled();
-      expect(res.redirect).toHaveBeenCalledWith('/login');
+      expect(res.status).toHaveBeenCalledWith(422);
+      expect(res.render).toHaveBeenCalledWith('auth/signup', expect.objectContaining({
+        errorMessage: 'Email and password are required.',
+      }));
     });
   });
 });

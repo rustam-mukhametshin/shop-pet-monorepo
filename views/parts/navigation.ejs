@@ -30,7 +30,10 @@
         <ul class="main-header__item-list">
             <% if(!isLoggedIn) { %>
                 <li class="main-header__item">
-                    <a class="<%= url === '/login ' ? 'active' : '' %>" href="/login">Login</a>
+                    <a class="<%= url === '/login' ? 'active' : '' %>" href="/login">Login</a>
+                </li>
+                <li class="main-header__item">
+                    <a class="<%= url === '/signup' ? 'active' : '' %>" href="/signup">Sign Up</a>
                 </li>
             <% } else { %>
                 <li class="main-header__item">
