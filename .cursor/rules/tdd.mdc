@@ -13,15 +13,18 @@
    - Run `npm test` one final time to confirm still green.
 
 ## Test File Conventions
-- Mirror the source path: `controllers/shop.controller.ts` → `__tests__/shop.controller.test.js`.
+- Mirror the **full source path** inside `__tests__/`:
+  - `controllers/admin.controller.ts` → `__tests__/controllers/admin.controller.test.ts`
+  - `models/user.model.ts` → `__tests__/models/user.model.test.ts`
+  - `routes/auth.routes.ts` → `__tests__/routes/auth.routes.test.ts`
 - Use `jest` globals (`describe`, `it`, `expect`); config is in `jest.config.js`.
-- Mock Mongoose models with `jest.mock('../models/product.model')` — do not hit real DB in unit tests.
+- Mock Mongoose models with `jest.mock('../../models/product.model')` — adjust relative path depth to match the mirrored folder — do not hit real DB in unit tests.
 
 ## Example Skeleton
 
 ```ts
-// __tests__/example.test.js  ← write this FIRST
-const { myMethod } = require('../controllers/example.controller');
+// __tests__/controllers/example.controller.test.ts  ← write this FIRST
+const { myMethod } = require('../../controllers/example.controller');
 
 describe('myMethod', () => {
   it('should return expected value', async () => {
