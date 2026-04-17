@@ -1,5 +1,6 @@
 import {Request, Response} from 'express';
 import {UserModel} from "../models/user.model";
+import bcrypt from "bcryptjs";
 
 export const getLogin = (req: Request, res: Response): void => {
     res.render('auth/login', {
@@ -11,9 +12,14 @@ export const getLogin = (req: Request, res: Response): void => {
 };
 
 export const postLogin = (req: Request | any, res: Response | any) => {
+    // Todo: check email
+    // Todo: check valid email
+    // Todo: check length of password
+    const {email, password} = req.body;
+
     if (req.body.email && req.body.password) {
         return Promise.resolve()
-            .then(() => UserModel.findOne({email: req.body.email, password: req.body.password}))
+            .then(() => UserModel.findOne({email: email}))
             .then(user => {
                 if (!user) {
                     return res.status(500).render('auth/login', {
@@ -21,6 +27,15 @@ export const postLogin = (req: Request | any, res: Response | any) => {
                         url: '/login',
                         isLoggedIn: req.session.isLoggedIn || false,
                         errorMessage: 'No user found.', // Todo: potential bruteforce attack, do not specify if email or password is wrong
+                    })
+                }
+
+                if (!bcrypt.compareSync(password, user.password)) {
+                    return res.status(500).render('auth/login', {
+                        pageTitle: 'Login',
+                        url: '/login',
+                        isLoggedIn: req.session.isLoggedIn || false,
+                        errorMessage: 'Incorrect user or password', // Todo: potential bruteforce attack, do not specify if email or password is wrong
                     })
                 }
 
@@ -76,6 +91,8 @@ export const postSignup = (req: Request, res: Response) => {
         return;
     }
 
+    // Todo: check limit of password to make valid for bcrypt(72bytes)
+
     if (!UserModel.isValidEmail(email)) {
         res.status(422).render('auth/signup', {
             pageTitle: 'Sign Up',
@@ -102,11 +119,14 @@ export const postSignup = (req: Request, res: Response) => {
             if (userDoc) {
                 return undefined;
             } else {
+                const hashedPassword: string = await bcrypt.hash(password, 12)
+                const hashedConfirmPassword: string = await bcrypt.hash(confirmPassword, 12)
+
                 const user = new UserModel({
                     name: email.split('@')[0],
                     email,
-                    password,
-                    confirmPassword,
+                    password: hashedPassword,
+                    confirmPassword: hashedConfirmPassword,
                     cart: {items: [],}
                 })
                 return user.save()
