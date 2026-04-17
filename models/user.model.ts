@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, {Model} from "mongoose";
 
 const Schema = mongoose.Schema;
 
@@ -77,5 +77,12 @@ userSchema.methods.clearCart = function () {
     return this.save();
 }
 
+userSchema.statics.isValidEmail = function (email: string): boolean {
+    return /^\S+@\S+\.\S+$/.test(email);
+};
 
-export const UserModel = mongoose.model('User', userSchema);
+export const UserModel = mongoose.model<any, UserModelStatic>('User', userSchema);
+
+type UserModelStatic = Model<any> & {
+    isValidEmail(email: string): boolean;
+};

@@ -1,5 +1,6 @@
 const mockSave = jest.fn();
 const mockFindOne = jest.fn();
+const mockIsValidEmail = jest.fn();
 
 jest.mock('../../models/user.model', () => {
   const UserModel = jest.fn().mockImplementation(() => ({
@@ -7,6 +8,7 @@ jest.mock('../../models/user.model', () => {
   }));
   UserModel.findById = jest.fn();
   UserModel.findOne = mockFindOne;
+  UserModel.isValidEmail = mockIsValidEmail;
   return { UserModel };
 });
 
@@ -29,6 +31,7 @@ const mockRes = () => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockIsValidEmail.mockReturnValue(true);
   mockSave.mockResolvedValue({ _id: 'new-user-id' });
   mockFindOne.mockResolvedValue(null);
 });

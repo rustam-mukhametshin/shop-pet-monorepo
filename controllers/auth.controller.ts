@@ -76,7 +76,7 @@ export const postSignup = (req: Request, res: Response) => {
         return;
     }
 
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
+    if (!UserModel.isValidEmail(email)) {
         res.status(422).render('auth/signup', {
             pageTitle: 'Sign Up',
             url: '/signup',
