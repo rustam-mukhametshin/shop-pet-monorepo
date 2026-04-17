@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.routes";
 import session from "express-session";
 import MongoStore from 'connect-mongo';
 import {UserModel} from "./models/user.model";
+import {isAuth} from "./middleware/is-auth";
 
 const app = express();
 
@@ -42,7 +43,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use('/', (_req: Request, _res: Response, next: NextFunction) => next());
 
-app.use('/admin', adminRoutes);
+app.use('/admin', isAuth, adminRoutes);
 app.use(authRoutes);
 app.use(shopRoutes);
 
