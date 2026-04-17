@@ -41,10 +41,11 @@ export const postLogin = (req: Request | any, res: Response | any) => {
 
                 req.session.user = user;
                 req.session.isLoggedIn = true;
-                return req.session.save()
+                return Promise.resolve(() => req.session.save())
                     .then(() => res.redirect('/admin/products'))
             })
             .catch(err => {
+                console.error(err);
                 return res.status(500).render('auth/login', {
                     pageTitle: 'Login',
                     url: '/login',
