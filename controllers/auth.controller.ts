@@ -6,7 +6,6 @@ export const getLogin = (req: Request, res: Response): void => {
     res.render('auth/login', {
         pageTitle: 'Login',
         url: '/login',
-        isLoggedIn: req.session.isLoggedIn || false,
         errorMessage: undefined,
     });
 };

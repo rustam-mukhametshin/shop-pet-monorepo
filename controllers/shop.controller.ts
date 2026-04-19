@@ -9,7 +9,6 @@ export const getIndex = (req: Request, res: Response): Promise<void> => {
             pageTitle: 'Shop',
             url: '/',
             prods: products,
-            isLoggedIn: req.session.isLoggedIn || false
         });
     });
 };
@@ -23,7 +22,6 @@ export const getProducts = (req: Request, res: Response): Promise<void> => {
                 pageTitle: 'Products',
                 url: '/products',
                 prods: products,
-                isLoggedIn: req.session.isLoggedIn || false
             });
         });
 };
@@ -47,7 +45,7 @@ export const getCart = (req: Request, res: Response): Promise<unknown> => {
     })
         .select('cart')
         .then((user: any) => {
-            if(user && user.cart){
+            if (user && user.cart) {
                 return res.render('shop/cart', {
                     pageTitle: 'Cart',
                     url: '/cart',
@@ -147,7 +145,7 @@ export const postCreateOrder = async (req: Request, res: Response) => {
 };
 
 export const postDeleteOrderItem = (req: Request, res: Response): Promise<void> => {
-    const { productId, orderId } = req.body as { productId: string; orderId: string };
+    const {productId, orderId} = req.body as { productId: string; orderId: string };
     return req.user
         .deleteProductFromOrder(productId, orderId)
         .then(() => res.redirect('/orders'))
