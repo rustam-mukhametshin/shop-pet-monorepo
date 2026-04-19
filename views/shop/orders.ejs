@@ -25,6 +25,7 @@
                                                 </div>
 
                                                 <form action="/order-delete-item" method="POST" class="m-0">
+                                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                                     <input type="hidden" name="productId" value="<%= product.product.id %>">
                                                     <input type="hidden" name="orderId" value="<%= order._id %>">
                                                     <button type="submit" class="btn btn-outline-danger">Remove</button>

@@ -26,6 +26,7 @@
                                 <div class="d-flex gap-2 flex-wrap mt-3">
                                     <a href="/admin/edit-product/<%= product.id %>?edit=true" class="btn btn-outline-primary">Edit</a>
                                     <form action="/admin/delete-product/<%= product.id %>" method="get" class="m-0">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                         <button class="btn btn-outline-danger" type="submit">Delete</button>
                                     </form>
                                 </div>
