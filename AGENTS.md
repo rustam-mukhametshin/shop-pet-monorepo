@@ -3,16 +3,22 @@
 ## Project Snapshot
 - Current stack is `Node.js + Express 5 + EJS + TypeScript + Mongoose`.
 - Runtime entry is `app.ts`; database bootstrap is `database.ts` (`mongoConnect`).
+- Sessions use `express-session` + `connect-mongo` (Mongo-backed session store).
+- CSRF protection uses `csrf-sync` (`csrfSynchronisedProtection` + `generateToken`).
 - UI is server-rendered EJS with Bootstrap CDN + custom styles in `public/css/*.css`.
-- CI build is GitHub Actions in `.github/workflows/build.yml`.
+- CI uses GitHub Actions: `.github/workflows/build.yml` and `.github/workflows/test.yml`.
 
 ## Request Flow (`app.ts`)
 1. `express.static('public')`
 2. `express.urlencoded({ extended: true })`
-3. Middleware loads a fixed Mongo user by id and assigns `req.user`
-4. Mount `/admin` routes, then shop routes
-5. Fallback `notFound` handler renders `views/404.ejs`
-6. App listens only when `require.main === module` (safe to import in tests)
+3. `express-session` with `connect-mongo` store (`collectionName: 'sessions'`)
+4. Global CSRF middleware: `csrfSynchronisedProtection`
+5. Middleware loads user from `req.session.user._id` and assigns `req.user`
+6. Locals middleware sets `res.locals.isLoggedIn` and `res.locals.csrfToken`
+7. Mount routes in this order: `/admin` (with `isAuth`) -> `authRoutes` -> `shopRoutes`
+8. Fallback `notFound` handler renders `views/404.ejs`
+9. Error handler maps `EBADCSRFTOKEN` to HTTP 403 response
+10. App listens only when `require.main === module` (safe to import in tests)
 
 ## Route Surface
 - Admin (`routes/admin.routes.ts`):
@@ -25,6 +31,9 @@
   - `GET /`, `GET /products`, `GET /products/:id`
   - `GET /cart`, `POST /cart`, `GET /cart-delete-item/:id`
   - `GET /orders`, `POST /create-order`, `POST /order-delete-item`
+- Auth (`routes/auth.routes.ts`):
+  - `GET /login`, `POST /login`, `POST /logout`
+  - `GET /signup`, `POST /signup`
 
 ## Data Model Conventions (Mongoose)
 - `models/product.model.ts`: product document with `userId` ref to `User`.
@@ -49,5 +58,7 @@
 ## Guardrails For Agents
 - Keep `req.user` augmentation in `global.d.ts` aligned with `UserModel` usage in `app.ts`.
 - Preserve the middleware ordering in `app.ts`; tests rely on 404 fallback behavior.
-- Existing code contains legacy/transition snippets (commented blocks and mixed query style); follow active Mongoose paths used by controllers.
+- Do not bypass `isAuth` for `/admin` routes; mount under `/admin` only.
+- Every POST form must include hidden `_csrf` from `res.locals.csrfToken`.
+- Keep session writes followed by `req.session.save()` before redirects in auth flows.
 - Use Bootstrap-compatible markup in EJS views; shared add-to-cart form is `views/parts/add-to-cart.ejs` posting hidden `id` to `/cart`.

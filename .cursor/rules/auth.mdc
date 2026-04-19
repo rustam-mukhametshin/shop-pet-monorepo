@@ -7,14 +7,17 @@
 
 ## Auth Flow
 - Login lives in `controllers/auth.controller.ts` + `routes/auth.routes.ts`.
-- `postLogin` finds or creates a user by hardcoded id, sets session, then redirects.
+- `postLogin` sets `req.session.isLoggedIn` and `req.session.user`, then redirects.
+- Signup endpoints exist as controller stubs (`getSignup`/`postSignup`) and are mounted in `auth.routes.ts`.
 - `getLogout` destroys the session and redirects to `/`.
 
 ## Middleware
 - `req.user` is populated for every request in `app.ts` middleware via `UserModel.findById`.
+- `req.user` comes from `req.session.user._id`; avoid alternate user source logic in controllers.
 - Do not duplicate user-loading logic in controllers — use `req.user` directly.
 
 ## Do Not
 - Do not store raw passwords; this project currently has no hashing — do not add plain-text password comparisons either.
 - Do not bypass `req.session.save()` before a redirect; missing it causes lost session state.
+- Do not expose `/admin` handlers outside `isAuth` protected route mounting.
 

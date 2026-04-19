@@ -11,6 +11,8 @@ Developer guide for running and working on this project.
 - EJS templates
 - TypeScript
 - MongoDB (Mongoose)
+- Sessions: `express-session` + `connect-mongo`
+- CSRF protection: `csrf-sync`
 - Bootstrap 5 (CDN in `views/parts/head.ejs`)
 
 ## Project Entry Points
@@ -29,6 +31,10 @@ Create a `.env` file or export variables in your shell:
 
 - `MONGO_URI` (optional)
   - If not set, `database.ts` uses the default Atlas URI in code.
+
+Notes:
+- Session store in `app.ts` also uses `MONGO_URI` via `connect-mongo`.
+- Session `secret` is currently hardcoded in `app.ts` (`my secret`) and should be moved to env for production.
 
 Example (zsh):
 ```zsh
@@ -92,9 +98,13 @@ Notes:
 ## Request Flow (High Level)
 1. Static files from `public/`
 2. `express.urlencoded`
-3. User middleware loads fixed user (`69d7b99b0e281ae57478ab63`) and attaches `req.user`
-4. `/admin` routes, then shop routes
-5. `notFound` handler renders `views/404.ejs`
+3. Session middleware (`express-session`) with Mongo-backed store (`connect-mongo`)
+4. CSRF middleware (`csrfSynchronisedProtection`)
+5. User middleware loads by `req.session.user._id` and attaches `req.user`
+6. Locals middleware sets `res.locals.isLoggedIn` and `res.locals.csrfToken`
+7. Routes mounted in order: `/admin` (guarded by `isAuth`) -> auth routes -> shop routes
+8. Fallback `notFound` handler renders `views/404.ejs`
+9. Error middleware returns `403` for `EBADCSRFTOKEN`
 
 ## Important Routes
 ### Admin
@@ -116,11 +126,20 @@ Notes:
 - `POST /create-order`
 - `POST /order-delete-item`
 
+### Auth
+- `GET /login`
+- `POST /login`
+- `POST /logout`
+- `GET /signup`
+- `POST /signup`
+
 ## Common Pitfalls
 - `ObjectId` throws on invalid IDs; validate/sanitize before `new ObjectId(...)`.
 - Database calls fail if `mongoConnect` has not completed.
 - Navigation active-link checks depend on exact `url` strings in `views/parts/navigation.ejs`.
 - `global.d.ts` request typing should stay aligned with `UserModel` export usage.
+- Any `POST` form without hidden `_csrf` token will fail with `403 Invalid CSRF token`.
+- Missing `req.session.save()` before redirect after login/logout can lose session updates.
 
 ## UI Notes
 - Bootstrap is globally included.

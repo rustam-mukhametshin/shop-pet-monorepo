@@ -16,12 +16,14 @@ Shared partials live in `views/parts/` — always include them in this order:
 - Add-to-cart form is the shared partial `views/parts/add-to-cart.ejs` — reuse it, do not duplicate.
 - Hidden `<input name="id">` carries the product id to `POST /cart`.
 - All forms use `method="POST"`; no client-side fetch unless explicitly requested.
+- Every POST form must include hidden `_csrf` with value from `csrfToken` local.
 
 ## Variable Contract
 Each rendered view receives at minimum:
 - `pageTitle` — used in `<title>` tag inside `head.ejs`
 - `url` — used to highlight the active nav link in `navigation.ejs`
 - `isLoggedIn` — controls nav item visibility
+- `csrfToken` — required by forms to pass global CSRF middleware
 
 ## Do Not
 - Do not add inline `<style>` blocks; use `public/css/*.css` instead.
