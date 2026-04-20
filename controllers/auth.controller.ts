@@ -6,63 +6,50 @@ export const getLogin = (req: Request, res: Response): void => {
     res.render('auth/login', {
         pageTitle: 'Login',
         url: '/login',
-        errorMessage: undefined,
+        errorMessage: req.flash('error'),
     });
 };
 
-export const postLogin = (req: Request | any, res: Response | any) => {
-    // Todo: check email
-    // Todo: check valid email
-    // Todo: check length of password
+export const postLogin = (req: Request, res: Response) => {
     const {email, password} = req.body;
 
-    if (req.body.email && req.body.password) {
-        return Promise.resolve()
-            .then(() => UserModel.findOne({email: email}))
-            .then(user => {
-                if (!user) {
-                    return res.status(500).render('auth/login', {
-                        pageTitle: 'Login',
-                        url: '/login',
-                        isLoggedIn: req.session.isLoggedIn || false,
-                        errorMessage: 'No user found.', // Todo: potential bruteforce attack, do not specify if email or password is wrong
-                    })
-                }
-
-                if (!bcrypt.compareSync(password, user.password)) {
-                    return res.status(500).render('auth/login', {
-                        pageTitle: 'Login',
-                        url: '/login',
-                        isLoggedIn: req.session.isLoggedIn || false,
-                        errorMessage: 'Incorrect user or password', // Todo: potential bruteforce attack, do not specify if email or password is wrong
-                    })
-                }
-
-                req.session.user = user;
-                req.session.isLoggedIn = true;
-                return Promise.resolve(() => req.session.save())
-                    .then(() => res.redirect('/admin/products'))
-            })
-            .catch(err => {
-                console.error(err);
-                return res.status(500).render('auth/login', {
-                    pageTitle: 'Login',
-                    url: '/login',
-                    isLoggedIn: req.session.isLoggedIn || false,
-                    errorMessage: 'Unknown error. Please try again',
-                })
-            })
-
-    } else {
-        req.session.isLoggedIn = false;
-        req.session.user = undefined;
-        return res.status(500).render('auth/login', {
-            pageTitle: 'Login',
-            url: '/login',
-            isLoggedIn: req.session.isLoggedIn || false,
-            errorMessage: 'Unknown error. Please try again',
-        })
+    if (!req.body.email || !req.body.password) {
+        req.flash('error', 'Invalid email or password');
+        return res.status(422).redirect('/login');
     }
+
+    if (!UserModel.isValidEmail(email)) {
+        req.flash('error', 'Invalid email format');
+        return res.status(422).redirect('/login')
+    }
+
+    if (!UserModel.isPasswordLengthIsOk(password)) {
+        req.flash('error', 'Invalid password');
+        return res.status(422).redirect('/login');
+    }
+
+    return UserModel.findOne({email: email})
+        .then(user => {
+            if (!user) {
+                req.flash('error', 'No user found.');
+                return res.status(422).redirect('/login');
+            }
+
+            if (!bcrypt.compareSync(password, user.password)) {
+                req.flash('error', 'Incorrect user or password');
+                return res.status(422).redirect('/login');
+            }
+
+            req.session.user = user;
+            req.session.isLoggedIn = true;
+            return Promise.resolve(() => req.session.save())
+                .then(() => res.redirect('/admin/products'))
+        })
+        .catch(err => {
+            console.error(err);
+            req.flash('error', 'Unknown error. Please try again');
+            return res.status(500).redirect('/login');
+        })
 };
 
 export const getLogout = (req: Request, res: Response) => {
@@ -73,7 +60,6 @@ export const getSignup = (req: Request, res: Response): void => {
     res.render('auth/signup', {
         pageTitle: 'Sign Up',
         url: '/signup',
-        isLoggedIn: req.session.isLoggedIn || false,
         errorMessage: false,
     });
 };
@@ -82,34 +68,23 @@ export const postSignup = (req: Request, res: Response) => {
     const {email, password, confirmPassword} = req.body;
 
     if (!email || !password || !confirmPassword) {
-        res.status(422).render('auth/signup', {
-            pageTitle: 'Sign Up',
-            url: '/signup',
-            isLoggedIn: req.session.isLoggedIn || false,
-            errorMessage: 'Email and password are required.',
-        });
-        return;
+        req.flash('error', 'All fields are required.');
+        return res.status(422).redirect('/signup');
     }
 
-    // Todo: check limit of password to make valid for bcrypt(72bytes)
+    if (!UserModel.isPasswordLengthIsOk(password) || !UserModel.isPasswordLengthIsOk(confirmPassword)) {
+        req.flash('error', 'Invalid passwords');
+        return res.status(422).redirect('/signup');
+    }
 
     if (!UserModel.isValidEmail(email)) {
-        res.status(422).render('auth/signup', {
-            pageTitle: 'Sign Up',
-            url: '/signup',
-            isLoggedIn: req.session.isLoggedIn || false,
-            errorMessage: 'Invalid email format.',
-        });
-        return;
+        req.flash('error', 'Invalid email format');
+        return res.status(422).redirect('/signup')
     }
 
     if (password !== confirmPassword) {
-        res.status(422).render('auth/signup', {
-            pageTitle: 'Sign Up',
-            url: '/signup',
-            isLoggedIn: req.session.isLoggedIn || false,
-            errorMessage: 'Passwords do not match',
-        })
+        req.flash('error', 'Passwords do not match');
+        return res.status(422).redirect('/signup')
     }
 
     // If user already exists
@@ -134,12 +109,8 @@ export const postSignup = (req: Request, res: Response) => {
         })
         .then(user => {
             if (!user) {
-                return res.status(422).render('auth/signup', {
-                    pageTitle: 'Sign Up',
-                    url: '/signup',
-                    isLoggedIn: req.session.isLoggedIn || false,
-                    errorMessage: 'User already exists', // Todo: potential bruteforce attack, do not specify if email or password is wrong
-                })
+                req.flash('error', 'User or password are incorrect');
+                return res.status(422).redirect('/signup')
             }
 
             req.session.user = user;
@@ -149,11 +120,8 @@ export const postSignup = (req: Request, res: Response) => {
                 .then(() => res.redirect('/admin/products'))
         })
         .catch(err => {
-            res.status(500).render('auth/signup', {
-                pageTitle: 'Sign Up',
-                url: '/signup',
-                isLoggedIn: req.session.isLoggedIn || false,
-                errorMessage: 'Unknown error. Please try again',
-            })
+            console.error(err);
+            req.flash('error', 'Unknown error. Please try again')
+            return res.status(500).redirect('/signup');
         })
 };
