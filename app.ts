@@ -10,10 +10,13 @@ import session from "express-session";
 import MongoStore from 'connect-mongo';
 import {UserModel} from "./models/user.model";
 import {isAuth} from "./middleware/is-auth";
-import {csrfSync} from 'csrf-sync';
+import csrf from 'csurf'; // TODO Remove deprecated package
+// import {csrfSync} from 'csrf-sync';
+import flash from "connect-flash";
 
 const app = express();
-export const {generateToken, csrfSynchronisedProtection} = csrfSync();
+const csrfProtection = csrf()
+// export const {generateToken, csrfSynchronisedProtection} = csrfSync();
 
 app.set('view engine', 'ejs');
 
@@ -34,7 +37,9 @@ app.use(session({
     }),
 }));
 
-app.use(csrfSynchronisedProtection);
+app.use(csrfProtection);
+// app.use(csrfSynchronisedProtection);
+app.use(flash());
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     UserModel.findById(req.session?.user?._id)
@@ -47,15 +52,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     res.locals.isLoggedIn = req.session?.isLoggedIn || false;
-    res.locals.csrfToken = generateToken(req);
+    // res.locals.csrfToken = generateToken(req);
+    res.locals.csrfToken = req.csrfToken();
     next();
 });
-
-app.use('/', (_req: Request, _res: Response, next: NextFunction) => next());
-app.use('/admin', isAuth, adminRoutes);
-app.use(authRoutes);
-app.use(shopRoutes);
-app.use(notFound);
 
 app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     if (err && err.code === 'EBADCSRFTOKEN') {
@@ -64,6 +64,13 @@ app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
         next(err);
     }
 });
+
+// Routes
+app.use('/', (_req: Request, _res: Response, next: NextFunction) => next());
+app.use('/admin', isAuth, adminRoutes);
+app.use(authRoutes);
+app.use(shopRoutes);
+app.use(notFound);
 
 if (require.main === module) {
     mongoConnect(() => {

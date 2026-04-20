@@ -19,6 +19,8 @@
   "author": "Rustam",
   "license": "ISC",
   "devDependencies": {
+    "@types/connect-flash": "^0.0.40",
+    "@types/csurf": "^1.11.5",
     "@types/express": "^5.0.3",
     "@types/express-session": "^1.18.2",
     "@types/jest": "^29.5.11",
@@ -34,8 +36,10 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "connect-flash": "^0.1.1",
     "connect-mongo": "^6.0.0",
     "csrf-sync": "^4.2.1",
+    "csurf": "^1.11.0",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
