@@ -102,7 +102,7 @@ export const getOrders = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const postCreateOrder = async (req: Request, res: Response) => {
-    return UserModel.findById(req?.user).populate({
+    return UserModel.findById(req?.user.id).populate({
         path: 'cart.items.productId',
         model: 'Product',
     })
@@ -115,32 +115,13 @@ export const postCreateOrder = async (req: Request, res: Response) => {
                         product: item.productId,
                     }
                 }),
-                userId: req.user
+                userId: req.user.id
             });
 
             return order.save();
         })
         .then(_ => req.user.clearCart())
-        .then(() => {
-            return OrderModel
-                .find({
-                    where: {
-                        userId: req.user.id,
-                    }
-                })
-                .populate('userId')
-                .populate({
-                    path: 'items.productId',
-                    model: 'Product',
-                }).then((orders: any) => {
-                    return res.render('shop/orders', {
-                        pageTitle: 'Orders',
-                        url: '/orders',
-                        orders: orders,
-                        isLoggedIn: req.session.isLoggedIn || false
-                    });
-                })
-        })
+        .then(() => res.redirect('/orders'))
         .catch((err: any) => console.error(err));
 };
 
