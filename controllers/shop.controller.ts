@@ -33,7 +33,6 @@ export const getProduct = (req: Request, res: Response): Promise<void> => {
                 pageTitle: product?.title ?? 'Product',
                 url: '/products',
                 product,
-                isLoggedIn: req.session.isLoggedIn || false
             });
         });
 };
@@ -51,7 +50,6 @@ export const getCart = (req: Request, res: Response): Promise<unknown> => {
                     url: '/cart',
                     cart: user.cart,
                     products: user.cart.items,
-                    isLoggedIn: req.session.isLoggedIn || false
                 });
             } else {
                 return res.render('shop/cart', {
@@ -59,7 +57,6 @@ export const getCart = (req: Request, res: Response): Promise<unknown> => {
                     url: '/cart',
                     cart: {},
                     products: [],
-                    isLoggedIn: req.session.isLoggedIn || false
                 });
             }
         })
@@ -95,7 +92,6 @@ export const getOrders = async (req: Request, res: Response): Promise<void> => {
                 pageTitle: 'Orders',
                 url: '/orders',
                 orders: orders,
-                isLoggedIn: req.session.isLoggedIn || false
             });
         })
 

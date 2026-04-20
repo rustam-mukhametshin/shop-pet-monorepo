@@ -7,7 +7,6 @@ export const getAddProduct = (req: Request, res: Response): void => {
         url: '/admin/add-product',
         edit: false,
         product: undefined,
-        isLoggedIn: req.session.isLoggedIn || false,
     });
 };
 
@@ -41,7 +40,6 @@ export const getProducts = (req: Request, res: Response): Promise<void> => {
                 pageTitle: 'Admin Products',
                 url: '/admin/products',
                 prods: products,
-                isLoggedIn: req.session.isLoggedIn || false,
             });
         }).catch((err: unknown) => {
             console.error('Error: ', err);
@@ -64,7 +62,6 @@ export const getEditProduct = (req: Request, res: Response): Promise<void> => {
                 url: '/admin/edit-product',
                 edit,
                 product,
-                isLoggedIn: req.session.isLoggedIn || false,
             });
         });
 };
