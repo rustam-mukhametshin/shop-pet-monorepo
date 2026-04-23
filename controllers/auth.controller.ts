@@ -1,6 +1,7 @@
 import {Request, Response} from 'express';
 import {UserModel} from "../models/user.model";
 import bcrypt from "bcryptjs";
+import {NodeMailModel} from "../models/node-mail.model";
 
 export const getLogin = (req: Request, res: Response): void => {
     res.render('auth/login', {
@@ -118,6 +119,7 @@ export const postSignup = (req: Request, res: Response) => {
 
             return Promise.resolve(() => req.session.save())
                 .then(() => res.redirect('/admin/products'))
+                .then(() => sendWelcomeEmail(user.email, user.name))
         })
         .catch(err => {
             console.error(err);
@@ -125,3 +127,15 @@ export const postSignup = (req: Request, res: Response) => {
             return res.status(500).redirect('/signup');
         })
 };
+
+async function sendWelcomeEmail(email: string, name: string) {
+    try {
+        return await new NodeMailModel().sendMail({
+            to: email,
+            subject: `Welcome to Your Account ${name}`,
+            text: `Hello and welcome to Your Account ${name}`,
+        });
+    } catch (err) {
+        console.error('Error sending welcome email:', err);
+    }
+}
