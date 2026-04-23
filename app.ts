@@ -55,6 +55,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     res.locals.isLoggedIn = req.session?.isLoggedIn || false;
     // res.locals.csrfToken = generateToken(req);
     res.locals.csrfToken = req.csrfToken();
+    res.locals.error = req.flash('error');
+    res.locals.success = req.flash('success');
     next();
 });
 

@@ -62,4 +62,109 @@ describe('user.model', () => {
       expect(UserModel.isPasswordLengthIsOk('a'.repeat(100))).toBe(false);
     });
   });
+
+  describe('getUserByEmail', () => {
+    it('calls findOne with the provided email and returns the user document', async () => {
+      const user = { _id: 'u1', email: 'user@example.com' };
+      const findOneSpy = jest.spyOn(UserModel, 'findOne').mockResolvedValue(user);
+
+      const result = await UserModel.getUserByEmail('user@example.com');
+
+      expect(findOneSpy).toHaveBeenCalledWith({ email: 'user@example.com' });
+      expect(result).toBe(user);
+      findOneSpy.mockRestore();
+    });
+  });
+
+  describe('isUserExistByEmail', () => {
+    it('returns true when findOne resolves with a user', async () => {
+      const findOneSpy = jest.spyOn(UserModel, 'findOne').mockResolvedValue({ _id: 'u1' });
+
+      const result = await UserModel.isUserExistByEmail('user@example.com');
+
+      expect(result).toBe(true);
+      findOneSpy.mockRestore();
+    });
+
+    it('returns false when findOne resolves with null', async () => {
+      const findOneSpy = jest.spyOn(UserModel, 'findOne').mockResolvedValue(null);
+
+      const result = await UserModel.isUserExistByEmail('missing@example.com');
+
+      expect(result).toBe(false);
+      findOneSpy.mockRestore();
+    });
+  });
+
+  describe('addToCart', () => {
+    it('adds a new product to an empty cart with quantity 1', async () => {
+      const user = new UserModel({
+        name: 'john',
+        email: 'john@example.com',
+        password: 'secret',
+        confirmPassword: 'secret',
+        cart: { items: [] },
+      });
+      user.save = jest.fn().mockResolvedValue(user);
+
+      await user.addToCart({ _id: 'p1', id: 'p1' });
+
+      expect(user.cart.items).toHaveLength(1);
+      expect(user.cart.items[0].quantity).toBe(1);
+      expect(user.save).toHaveBeenCalledTimes(1);
+    });
+
+    it('increments quantity when the same product already exists in cart', async () => {
+      const user = new UserModel({
+        name: 'john',
+        email: 'john@example.com',
+        password: 'secret',
+        confirmPassword: 'secret',
+        cart: { items: [{ productId: 'p1', quantity: 1 }] },
+      });
+      user.save = jest.fn().mockResolvedValue(user);
+
+      await user.addToCart({ _id: 'p1', id: 'p1' });
+
+      expect(user.cart.items[0].quantity).toBe(2);
+      expect(user.save).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('deleteProductFromCart', () => {
+    it('removes only the requested product from cart items', async () => {
+      const user = new UserModel({
+        name: 'john',
+        email: 'john@example.com',
+        password: 'secret',
+        confirmPassword: 'secret',
+        cart: { items: [{ productId: 'p1', quantity: 1 }, { productId: 'p2', quantity: 2 }] },
+      });
+      user.save = jest.fn().mockResolvedValue(user);
+
+      await user.deleteProductFromCart('p1');
+
+      expect(user.cart.items).toHaveLength(1);
+      expect(user.cart.items[0].productId.toString()).toBe('p2');
+      expect(user.save).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('clearCart', () => {
+    it('resets cart items to an empty array', async () => {
+      const user = new UserModel({
+        name: 'john',
+        email: 'john@example.com',
+        password: 'secret',
+        confirmPassword: 'secret',
+        cart: { items: [{ productId: 'p1', quantity: 1 }] },
+      });
+      user.save = jest.fn().mockResolvedValue(user);
+
+      await user.clearCart();
+
+      expect(user.cart.items).toEqual([]);
+      expect(user.save).toHaveBeenCalledTimes(1);
+    });
+  });
 });

@@ -4,6 +4,10 @@ jest.mock('../../controllers/auth.controller', () => ({
   getLogout: jest.fn(),
   getSignup: jest.fn(),
   postSignup: jest.fn(),
+  getReset: jest.fn(),
+  postReset: jest.fn(),
+  getResetPassword: jest.fn(),
+  postResetPassword: jest.fn(),
 }));
 
 const authRoutes = require('../../routes/auth.routes.ts').default;
@@ -23,6 +27,10 @@ describe('auth.routes', () => {
       { path: '/logout', methods: ['get'] },
       { path: '/signup', methods: ['get'] },
       { path: '/signup', methods: ['post'] },
+      { path: '/reset', methods: ['get'] },
+      { path: '/reset', methods: ['post'] },
+      { path: '/reset-password', methods: ['get'] },
+      { path: '/reset-password', methods: ['post'] },
     ]));
   });
 });

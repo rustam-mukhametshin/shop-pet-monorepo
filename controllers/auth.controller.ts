@@ -2,6 +2,7 @@ import {Request, Response} from 'express';
 import {UserModel} from "../models/user.model";
 import bcrypt from "bcryptjs";
 import {NodeMailModel} from "../models/node-mail.model";
+import {TokenModel} from "../models/token.model";
 
 export const getLogin = (req: Request, res: Response): void => {
     res.render('auth/login', {
@@ -89,8 +90,7 @@ export const postSignup = (req: Request, res: Response) => {
     }
 
     // If user already exists
-    return UserModel
-        .findOne({email})
+    return UserModel.isUserExistByEmail(email)
         .then(async userDoc => {
             if (userDoc) {
                 return undefined;
@@ -119,7 +119,7 @@ export const postSignup = (req: Request, res: Response) => {
 
             return Promise.resolve(() => req.session.save())
                 .then(() => res.redirect('/admin/products'))
-                .then(() => sendWelcomeEmail(user.email, user.name))
+                .then(() => NodeMailModel.sendWelcomeEmail(user.email, user.name))
         })
         .catch(err => {
             console.error(err);
@@ -128,14 +128,84 @@ export const postSignup = (req: Request, res: Response) => {
         })
 };
 
-async function sendWelcomeEmail(email: string, name: string) {
-    try {
-        return await new NodeMailModel().sendMail({
-            to: email,
-            subject: `Welcome to Your Account ${name}`,
-            text: `Hello and welcome to Your Account ${name}`,
-        });
-    } catch (err) {
-        console.error('Error sending welcome email:', err);
+export const getReset = (req: Request, res: Response) => {
+    res.render('auth/reset', {
+        pageTitle: 'Reset Password',
+        url: '/reset',
+        errorMessage: req.flash('error'),
+    });
+}
+
+export const postReset = async (req: Request, res: Response) => {
+    const {email} = req.body;
+    if (!email || !UserModel.isValidEmail(email)) {
+        req.flash('error', 'Invalid email format');
+        return res.status(500).redirect('/reset');
     }
+
+    const user = await UserModel.getUserByEmail(email)
+
+    if (!user) {
+        req.flash('error', 'Invalid email format');
+        return res.status(500).redirect('/reset');
+    }
+
+    const token = NodeMailModel.createResetPasswordToken(email);
+
+    // Save to db
+    await new TokenModel({
+        userId: user._id,
+        token,
+    }).save()
+
+    return NodeMailModel
+        .sendResetPasswordEmail(email, NodeMailModel.getResetPasswordTokenLink(email, token))
+        .then(() => req.flash('success', 'Success. Check your email'))
+        .then(() => res.redirect('/'))
+}
+
+export const getResetPassword = (req: Request, res: Response) => {
+    const token = req.query['token'] as string;
+
+    const payload = NodeMailModel.verifyResetPasswordToken(token);
+
+    if (!token || !payload) {
+        req.flash('error', 'Invalid token');
+        return res.status(422).redirect('/reset');
+    }
+
+    // Todo: check validation
+    if (!payload) {
+        req.flash('error', 'Invalid token');
+        return res.status(422).redirect('/reset');
+    }
+
+    return res.render('auth/reset-password', {
+        pageTitle: 'Reset Password',
+        url: '/reset-password',
+        errorMessage: req.flash('error'),
+        _email: payload.email,
+        _token: token,
+    });
+}
+
+export const postResetPassword = async (req: Request, res: Response) => {
+    const {password, confirmPassword, _email, _token} = req.body;
+
+    // Todo: validate password
+
+    const user = await UserModel.findOne({email: _email})
+
+    if (!user) {
+        req.flash('error', 'Unable to find user');
+        return res.status(422).redirect('/reset-password');
+    }
+
+    user.password = await bcrypt.hash(password, 12);
+    user.confirmPassword = await bcrypt.hash(confirmPassword, 12);
+    await user.save()
+        .then(() => TokenModel.deleteOne({token: _token}));
+
+    req.flash('success', 'Success. Password reset successfully')
+    res.redirect('/login');
 }

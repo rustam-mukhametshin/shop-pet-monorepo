@@ -1,5 +1,6 @@
 import nodemailer, {Transporter} from "nodemailer";
 import {env} from "../env";
+import jwt from 'jsonwebtoken';
 
 export class NodeMailModel {
     private _transporterOptions = {
@@ -37,5 +38,52 @@ export class NodeMailModel {
         return this._transporter.sendMail(
             this._mailOptions
         )
+    }
+
+    static async sendWelcomeEmail(email: string, name: string) {
+        try {
+            return await new NodeMailModel().sendMail({
+                to: email,
+                subject: `Welcome to Your Account ${name}`,
+                text: `Hello and welcome to Your Account ${name}`,
+            });
+        } catch (err) {
+            console.error('Error sending welcome email:', err);
+        }
+    }
+
+    static async sendResetPasswordEmail(email: string, link: string) {
+        try {
+            return await new NodeMailModel().sendMail({
+                to: email,
+                subject: `Reset Password Reset for ${email}`,
+                text: `
+        You requested a password reset. Please click the link below to reset your password.
+        ${link}
+        `
+            });
+        } catch (err) {
+            console.error('Error sending welcome email:', err);
+        }
+    }
+
+    static getResetPasswordTokenLink(email: string, token: string) {
+        return [
+            env.url,
+            'reset-password',
+            `?token=${token ?? NodeMailModel.createResetPasswordToken(email)}`,
+        ].join('');
+    }
+
+    static createResetPasswordToken(email: string) {
+        return jwt.sign(
+            {email: email,},
+            env.sessionSecret,
+            {expiresIn: '1h',}
+        )
+    }
+
+    static verifyResetPasswordToken(token: string): { email: string, iat: number, exp: number } | null {
+        return jwt.verify(token, env.sessionSecret) as { email: string, iat: number, exp: number } | null;
     }
 }

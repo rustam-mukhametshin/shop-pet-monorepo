@@ -8,6 +8,9 @@ authRoutes.post('/login', AuthController.postLogin);
 authRoutes.get('/logout', AuthController.getLogout);
 authRoutes.get('/signup', AuthController.getSignup);
 authRoutes.post('/signup', AuthController.postSignup);
-
+authRoutes.get('/reset', AuthController.getReset);
+authRoutes.post('/reset', AuthController.postReset);
+authRoutes.get('/reset-password', AuthController.getResetPassword);
+authRoutes.post('/reset-password', AuthController.postResetPassword);
 export default authRoutes;
 

@@ -85,9 +85,19 @@ userSchema.statics.isPasswordLengthIsOk = function (password: string): boolean {
     return password.length <= 72;
 };
 
+userSchema.statics.getUserByEmail = async function (email: string) {
+    return UserModel.findOne({email: email})
+};
+
+userSchema.statics.isUserExistByEmail = async function (email: string) {
+    return UserModel.findOne({email: email}).then(user => !!user)
+};
+
 export const UserModel = mongoose.model<any, UserModelStatic>('User', userSchema);
 
 type UserModelStatic = Model<any> & {
     isValidEmail(email: string): boolean;
     isPasswordLengthIsOk(password: string): boolean;
+    getUserByEmail(email: string): Promise<any>;
+    isUserExistByEmail(email: string): Promise<boolean>;
 };
