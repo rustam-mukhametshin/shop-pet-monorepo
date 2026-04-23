@@ -82,7 +82,7 @@ userSchema.statics.isValidEmail = function (email: string): boolean {
 };
 
 userSchema.statics.isPasswordLengthIsOk = function (password: string): boolean {
-    return password.length >= 72;
+    return password.length <= 72;
 };
 
 export const UserModel = mongoose.model<any, UserModelStatic>('User', userSchema);

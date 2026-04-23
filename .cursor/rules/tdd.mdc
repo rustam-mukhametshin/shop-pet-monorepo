@@ -20,16 +20,32 @@
 - Use `jest` globals (`describe`, `it`, `expect`); config is in `jest.config.js`.
 - Mock Mongoose models with `jest.mock('../../models/product.model')` — adjust relative path depth to match the mirrored folder — do not hit real DB in unit tests.
 
-## Example Skeleton
+## Test Structure — mandatory nesting
+
+Every test file **must** follow this three-level structure:
+
+```
+describe('<fileName>')          ← outer: mirrors the source file name, e.g. 'user.model'
+  describe('<methodName>')      ← middle: exact method / function being tested
+    it('<expected behaviour>')  ← inner: one behaviour per it-block
+```
+
+### Example Skeleton
 
 ```ts
 // __tests__/controllers/example.controller.test.ts  ← write this FIRST
 const { myMethod } = require('../../controllers/example.controller');
 
-describe('myMethod', () => {
-  it('should return expected value', async () => {
-    const result = await myMethod(/* args */);
-    expect(result).toBe(/* expected */);
+describe('example.controller', () => {
+  describe('myMethod', () => {
+    it('returns expected value for valid input', async () => {
+      const result = await myMethod(/* args */);
+      expect(result).toBe(/* expected */);
+    });
+
+    it('throws when required argument is missing', async () => {
+      await expect(myMethod()).rejects.toThrow();
+    });
   });
 });
 ```
