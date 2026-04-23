@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
+import {env} from "./env";
 
 export const mongoConnect = (cb: any) => {
     return mongoose.connect(
-        process.env.MONGO_URI || 'mongodb+srv://:@cluster0.japfcdr.mongodb.net/shop?appName=Cluster0',
+        env.mongoUrl,
         {}
     )
         .then(result => {

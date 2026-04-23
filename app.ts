@@ -13,6 +13,7 @@ import {isAuth} from "./middleware/is-auth";
 import csrf from 'csurf'; // TODO Remove deprecated package
 // import {csrfSync} from 'csrf-sync';
 import flash from "connect-flash";
+import {env} from "./env";
 
 const app = express();
 const csrfProtection = csrf()
@@ -28,11 +29,11 @@ app.use(express.urlencoded({extended: true}));
 
 // Set session
 app.use(session({
-    secret: 'my secret',
+    secret: env.sessionSecret,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-        mongoUrl: process.env.MONGO_URI || 'mongodb+srv://:@cluster0.japfcdr.mongodb.net/?appName=Cluster0',
+        mongoUrl: env.mongoUrl,
         collectionName: 'sessions',
     }),
 }));
