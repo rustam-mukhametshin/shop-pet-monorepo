@@ -1,5 +1,6 @@
 import {Request, Response} from 'express';
 import {Product} from "../models/product.model";
+import {ObjectId} from "mongodb";
 
 export const getAddProduct = (req: Request, res: Response): void => {
     res.render('admin/edit-product', {
@@ -34,7 +35,9 @@ export const postAddProduct = (req: Request, res: Response): any => {
 };
 
 export const getProducts = (req: Request, res: Response): Promise<void> => {
-    return Product.find()
+    return Product.find({
+        userId: new ObjectId(req.user.id),
+    })
         .then((products) => {
             res.render('admin/products', {
                 pageTitle: 'Admin Products',
