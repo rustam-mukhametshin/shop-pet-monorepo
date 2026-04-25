@@ -21,9 +21,9 @@
                             <img src="<%= product.imageUrl %>" class="card-img-top" alt="<%= product.title %>">
                             <div class="card-body d-flex flex-column">
                                 <h2 class="card-title h5"><%= product.title %></h2>
-                                <p class="text-success fw-semibold mb-2"><b>Price:</b> <%= product.price %>$</p>
-                                <p class="card-text text-muted flex-grow-1"><b>Description</b><%= product.description %></p>
-                                <small class="text-secondary"><b>Created by:</b> Test</small>
+                                <p class="fw-semibold mb-2"><b>Price:</b> <span class="text-success">$<%= product.price %></span></p>
+                                <p class="card-text text-muted flex-grow-1"><b>Description:</b> <%= product.description %></p>
+                                <small class="text-secondary"><b>Created by:</b> <%= product.userId.name%></small>
                                 <div class="d-flex gap-2 flex-wrap mt-3">
                                     <a href="/admin/edit-product/<%= product.id %>?edit=true" class="btn btn-outline-primary">Edit</a>
                                     <form action="/admin/delete-product/<%= product.id %>" method="get" class="m-0">

@@ -38,6 +38,7 @@ export const getProducts = (req: Request, res: Response): Promise<void> => {
     return Product.find({
         userId: new ObjectId(req.user.id),
     })
+        .populate('userId', 'name')
         .then((products) => {
             res.render('admin/products', {
                 pageTitle: 'Admin Products',
@@ -80,15 +81,19 @@ export const postEditProduct = (req: Request, res: Response): Promise<void> => {
 
     return Product.findById(id)
         .then((product) => {
+
             if (!product) throw new Error('Product not found');
+
+            if (product?.userId?.toString() !== req.user.id.toString()) {
+                return res.redirect('/');
+            }
+
             product.title = title;
             product.description = description;
             product.price = parseFloat(price);
             product.imageUrl = imageUrl;
-
-            return product.save()
+            return product.save().then(() => res.redirect('/admin/products'))
         })
-        .then(() => res.redirect('/admin/products'))
         .catch((err: unknown) => {
             console.error(err);
             res.status(500).redirect('/admin/products');
@@ -99,17 +104,16 @@ export const postEditProduct = (req: Request, res: Response): Promise<void> => {
 export const deleteProduct = (req: Request, res: Response): Promise<void> => {
     const productId = req.params['id'] as string;
 
-    return Product.findByIdAndDelete(productId)
+    return Product.deleteOne({
+        _id: productId,
+        userId: req.user.id,
+    })
         .then((product) => {
             if (!product) {
                 throw new Error('Product not found');
             }
             return product;
-
-            // return UserModel.removeProductFromAllOrders(productId);
         })
-        // .then(() => UserModel.removeProductFromAllCarts(productId))
-        // .then(() => Product.deleteProduct(productId))
         .then(() => res.redirect('/admin/products'))
         .catch((err: unknown) => console.error('Error: ', err)) as Promise<void>;
 };
