@@ -53,6 +53,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     res.locals.isLoggedIn = req.session?.isLoggedIn || false;
+    res.locals.userName = req.user?.name || req.session?.user?.name || '';
     // res.locals.csrfToken = generateToken(req);
     res.locals.csrfToken = req.csrfToken();
     res.locals.error = req.flash('error');

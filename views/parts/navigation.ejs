@@ -37,6 +37,9 @@
                 </li>
             <% } else { %>
                 <li class="main-header__item">
+                    <span class="badge text-bg-secondary"><%= userName %></span>
+                </li>
+                <li class="main-header__item">
                     <a href="/logout">Logout</a>
                 </li>
             <% } %>
@@ -66,6 +69,11 @@
             <a class="<%= url === '/admin/products' ? 'active' : '' %>" href="/admin/products">Admin Products
             </a>
         </li>
+        <% if(isLoggedIn) { %>
+            <li class="mobile-nav__item">
+                <span class="badge text-bg-secondary"><%= userName %></span>
+            </li>
+        <% } %>
     </ul>
 </nav>
 
