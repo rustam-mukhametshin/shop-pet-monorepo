@@ -1,6 +1,7 @@
 import {Request, Response} from 'express';
 import {Product} from "../models/product.model";
 import {ObjectId} from "mongodb";
+import {validationResult} from "express-validator";
 
 export const getAddProduct = (req: Request, res: Response): void => {
     res.render('admin/edit-product', {
@@ -8,10 +9,24 @@ export const getAddProduct = (req: Request, res: Response): void => {
         url: '/admin/add-product',
         edit: false,
         product: undefined,
+        errorMessage: undefined,
     });
 };
 
 export const postAddProduct = (req: Request, res: Response): any => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        // console.log(errors.array());
+        // req.flash('error', [errors.array()[0].msg]);
+        return res.status(422).render('admin/edit-product', {
+            pageTitle: 'Add product',
+            url: '/admin/add-product',
+            edit: false,
+            product: undefined,
+            errorMessage: [errors.array()[0].msg],
+        });
+    }
+
     const {title, imageUrl, description, price} = req.body as {
         title: string;
         imageUrl: string;

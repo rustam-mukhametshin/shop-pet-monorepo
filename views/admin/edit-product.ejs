@@ -3,6 +3,8 @@
 <%- include('./../parts/body') %>
 <%- include('./../parts/navigation') %>
 
+<%- include('./../parts/error-msg') %>
+
 <main>
     <form class="product-form" action="/admin/<%- edit ? 'edit' : 'add' %>-product" method="POST">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">

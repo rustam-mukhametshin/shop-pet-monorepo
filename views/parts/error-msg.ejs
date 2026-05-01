@@ -1,5 +1,15 @@
-<% if (errorMessage && errorMessage.length > 0) { %>
-    <div class="alert alert-danger" role="alert">
-        <%= errorMessage[0] %>
-    </div>
+<% if(Array.isArray(errorMessage)) { %>
+    <% if (errorMessage && errorMessage.length > 0) { %>
+        <% errorMessage.forEach(msg => { %>
+            <div class="alert alert-danger" role="alert">
+                <%= msg %>
+            </div>
+        <% }) %>
+    <% } %>
+<% } else { %>
+    <% if (errorMessage){ %>
+        <div class="alert alert-danger" role="alert">
+            <%= errorMessage %>
+        </div>
+    <% } %>
 <% } %>
