@@ -1,20 +1,44 @@
 # Mongoose Model Rules
 
 ## Schema Conventions
-- Define a TypeScript interface for document attributes (e.g., `ProductAttributes`).
-- Export both the interface and the model: `export const ProductModel = mongoose.model<...>()`.
-- Keep `userId` as a `ref` to `User` on product documents.
+- Export the Mongoose model from each file (e.g., `export const UserModel = mongoose.model<...>()`).
+- Keep `userId` as a `ref: 'User'` on `Product` and `Order` documents.
+- Define static helpers on the schema with `modelSchema.statics.*` and mirror them in a static interface type.
 
-## Instance Methods
-- Cart and order mutations belong on `userSchema.methods`, not in controllers.
-- Existing methods: `addToCart`, `deleteProductFromCart`, `clearCart`.
-- When adding a new method, also extend the `UserDocument` interface in `user.model.ts`.
+## Model Inventory
+| File | Export | Key Feature |
+|---|---|---|
+| `user.model.ts` | `UserModel` | Cart instance methods + static helpers |
+| `product.model.ts` | `Product` | `userId` ref to `User` |
+| `order.model.ts` | `OrderModel` | `products[]` with embedded product ref + quantity |
+| `token.model.ts` | `TokenModel` | `userId` ref to `User`, `token` string |
+| `node-mail.model.ts` | `NodeMailModel` | Email sending + JWT reset-password helpers |
+
+## UserModel Static Methods
+- `isValidEmail(email): boolean` — regex test for basic email format.
+- `isPasswordLengthIsOk(password): boolean` — returns `true` when `password.length <= 72`.
+- `getUserByEmail(email): Promise<User | null>` — wraps `findOne({email})`.
+- `isUserExistByEmail(email): Promise<boolean>` — returns `true` when user exists.
+
+## UserModel Instance Methods (on `userSchema.methods`)
+- `addToCart(product)` — adds product or increments quantity; marks `cart` modified before save.
+- `deleteProductFromCart(productId)` — filters out item matching `productId`, then saves.
+- `clearCart()` — resets `cart.items` to `[]` and saves.
+- When adding a new instance method, extend the Mongoose document type accordingly.
+
+## NodeMailModel Statics
+- `sendWelcomeEmail(email, name)` — sends welcome email; errors are caught and logged.
+- `sendResetPasswordEmail(email, link)` — sends reset password email; errors are caught and logged.
+- `createResetPasswordToken(email)` — signs JWT `{ email }` with `env.sessionSecret`, expires `1h`.
+- `verifyResetPasswordToken(token)` — verifies JWT, returns `{ email, iat, exp }` or `null`.
+- `getResetPasswordTokenLink(email, token?)` — builds the full reset-password URL using `env.url`.
 
 ## Population Pattern
-- Cart products use nested populate: `cart.items.productId` (see `shop.controller.ts#getCart`).
-- Orders store snapshots: `products[].product` (embedded object, not a ref) + `products[].quantity`.
+- Cart products: nested populate `cart.items.productId` (see `shop.controller.ts#getCart`).
+- Orders: `products[].product` is a ref to `Product`; `products[].quantity` is a Number.
 
 ## Do Not
-- Do not use `Model.find` with raw SQL-style syntax — use Mongoose query API.
-- Do not call `.save()` on a document fetched via `lean()` — it returns a plain object.
+- Do not use raw SQL-style syntax — use Mongoose query API.
+- Do not call `.save()` on a document fetched via `.lean()` — it returns a plain object.
+- Do not define cart/order mutation logic in controllers — keep it in `userSchema.methods`.
 

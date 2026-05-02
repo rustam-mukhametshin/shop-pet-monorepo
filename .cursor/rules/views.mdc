@@ -3,29 +3,44 @@
 ## Layout Parts
 Shared partials live in `views/parts/` — always include them in this order:
 1. `head.ejs` → `head-end.ejs`
-2. `body.ejs` (navbar via `navigation.ejs`)
-3. Page content
+2. `body.ejs` (renders `navigation.ejs` inside)
+3. Page content inside `<main>`
 4. `body-end.ejs`
+
+## Partials Catalogue
+- `navigation.ejs` — desktop + mobile nav; renders signed-in username badge via `res.locals.userName`; includes `success-notification.ejs` at the bottom.
+- `success-notification.ejs` — Bootstrap dismissible alert, shows when `locals.successMessage` is set.
+- `error-msg.ejs` — shows flash error (`res.locals.error`).
+- `add-to-cart.ejs` — reusable add-to-cart form posting hidden `id` to `POST /cart`.
 
 ## Bootstrap Usage
 - Use Bootstrap CDN (already included in `head.ejs`) — do not add a local copy.
-- Cards for product listings, `list-group` for cart/order items.
+- Cards for product listings, `list-group` for cart/order items, `badge text-bg-secondary` for user name in nav.
 - Use `btn btn-primary` / `btn btn-danger` for actions consistently.
+- Use `alert alert-success alert-dismissible fade show` for success notifications.
 
 ## Forms
-- Add-to-cart form is the shared partial `views/parts/add-to-cart.ejs` — reuse it, do not duplicate.
-- Hidden `<input name="id">` carries the product id to `POST /cart`.
+- Reuse `views/parts/add-to-cart.ejs` for add-to-cart actions — do not duplicate inline.
+- Hidden `<input name="id">` carries product id to `POST /cart`.
 - All forms use `method="POST"`; no client-side fetch unless explicitly requested.
-- Every POST form must include hidden `_csrf` with value from `csrfToken` local.
+- Every POST form **must** include `<input type="hidden" name="_csrf" value="<%= csrfToken %>">`.
 
 ## Variable Contract
-Each rendered view receives at minimum:
+Every rendered view receives at minimum via `res.locals`:
 - `pageTitle` — used in `<title>` tag inside `head.ejs`
-- `url` — used to highlight the active nav link in `navigation.ejs`
+- `url` — active nav link indicator in `navigation.ejs`
 - `isLoggedIn` — controls nav item visibility
-- `csrfToken` — required by forms to pass global CSRF middleware
+- `csrfToken` — required on all POST forms
+- `error` — flash error array (set via `req.flash('error', ...)`)
+- `success` — flash success array (set via `req.flash('success', ...)`)
+- `userName` — signed-in user display name (empty string when not logged in)
+
+## Auth Views Location
+Auth-related EJS files live in `views/auth/`:
+- `login.ejs`, `signup.ejs`, `reset.ejs`, `reset-password.ejs`
 
 ## Do Not
 - Do not add inline `<style>` blocks; use `public/css/*.css` instead.
 - Do not introduce a JS framework (React, Vue) — views are server-rendered EJS only.
+- Do not duplicate `_csrf` hidden field logic; always reference `csrfToken` local.
 
