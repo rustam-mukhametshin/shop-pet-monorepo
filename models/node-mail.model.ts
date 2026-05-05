@@ -25,6 +25,12 @@ export class NodeMailModel {
         text: 'Hello from Node.js!'
     };
 
+    /**
+     * Default method to send email
+     * Only if env.prod = true
+     *
+     * @param options
+     */
     sendMail(options: {
         to: string,
         subject?: string,
@@ -34,12 +40,21 @@ export class NodeMailModel {
         this._mailOptions.subject = options.subject;
         this._mailOptions.text = options.text;
 
-
-        return this._transporter.sendMail(
-            this._mailOptions
-        )
+        if (env.production) {
+            return this._transporter.sendMail(
+                this._mailOptions
+            )
+        }
+        return new Promise(resolve => resolve('DEV ENVIRONMENT'));
     }
 
+    /**
+     * Send welcome email to user after registration
+     * Only if env.prod = true
+     *
+     * @param email
+     * @param name
+     */
     static async sendWelcomeEmail(email: string, name: string) {
         try {
             return await new NodeMailModel().sendMail({
@@ -52,6 +67,13 @@ export class NodeMailModel {
         }
     }
 
+    /**
+     * Send reset password email
+     * Only if env.prod = true
+     *
+     * @param email
+     * @param link
+     */
     static async sendResetPasswordEmail(email: string, link: string) {
         try {
             return await new NodeMailModel().sendMail({
