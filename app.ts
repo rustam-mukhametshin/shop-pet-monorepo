@@ -3,7 +3,7 @@ import express, {NextFunction, Request, Response} from 'express';
 import path from 'path';
 import {mongoConnect} from "./database";
 import adminRoutes from "./routes/admin.routes";
-import {notFound} from "./controllers/public.controller";
+import {get500, notFound} from "./controllers/public.controller";
 import shopRoutes from "./routes/shop.routes";
 import authRoutes from "./routes/auth.routes";
 import session from "express-session";
@@ -42,13 +42,16 @@ app.use(csrfProtection);
 // app.use(csrfSynchronisedProtection);
 app.use(flash());
 
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((req: Request, _: Response, next: NextFunction) => {
     UserModel.findById(req.session?.user?._id)
         .then((user: any) => {
+            if (!user) {
+                return next();
+            }
             req.user = user;
             next();
         })
-        .catch((err: unknown) => console.log(err))
+        .catch((err: any) => next(new Error(err)));
 })
 
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -74,7 +77,11 @@ app.use('/', (_req: Request, _res: Response, next: NextFunction) => next());
 app.use('/admin', isAuth, adminRoutes);
 app.use(authRoutes);
 app.use(shopRoutes);
+app.get('/500', get500);
 app.use(notFound);
+app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
+    res.redirect('/500');
+})
 
 if (require.main === module) {
     mongoConnect(() => {

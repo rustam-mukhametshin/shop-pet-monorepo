@@ -7,3 +7,10 @@ export const notFound = (req: Request, res: Response, _next: NextFunction): void
     });
 };
 
+export const get500 = (req: Request, res: Response, _next: NextFunction): void => {
+    res.status(500).render('500', {
+        pageTitle: '500 Error',
+        url: '500',
+        error: 'Something went wrong'
+    });
+};

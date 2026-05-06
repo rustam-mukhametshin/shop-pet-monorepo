@@ -39,11 +39,9 @@ export const postLogin = (req: Request, res: Response) => {
             return Promise.resolve(() => req.session.save())
                 .then(() => res.redirect('/admin/products'))
         })
-        .catch(err => {
-            console.error(err);
-            req.flash('error', 'Unknown error. Please try again');
-            return res.status(500).redirect('/login');
-        })
+        .catch((err: any) => {
+            throw new Error(err);
+        });
 };
 
 export const getLogout = (req: Request, res: Response) => {
@@ -105,11 +103,9 @@ export const postSignup = (req: Request, res: Response) => {
                 .then(() => res.redirect('/admin/products'))
                 .then(() => NodeMailModel.sendWelcomeEmail(user.email, user.name))
         })
-        .catch(err => {
-            console.error(err);
-            req.flash('error', 'Unknown error. Please try again')
-            return res.status(500).redirect('/signup');
-        })
+        .catch((err: any) => {
+            throw new Error(err);
+        });
 };
 
 export const getReset = (req: Request, res: Response) => {
@@ -146,6 +142,9 @@ export const postReset = async (req: Request, res: Response) => {
         .sendResetPasswordEmail(email, NodeMailModel.getResetPasswordTokenLink(email, token))
         .then(() => req.flash('success', 'Success. Check your email'))
         .then(() => res.redirect('/'))
+        .catch((err: any) => {
+            throw new Error(err);
+        });
 }
 
 export const getResetPassword = (req: Request, res: Response) => {
@@ -188,7 +187,10 @@ export const postResetPassword = async (req: Request, res: Response) => {
     user.password = await bcrypt.hash(password, 12);
     user.confirmPassword = await bcrypt.hash(confirmPassword, 12);
     await user.save()
-        .then(() => TokenModel.deleteOne({token: _token}));
+        .then(() => TokenModel.deleteOne({token: _token}))
+        .catch((err: any) => {
+            throw new Error(err);
+        });
 
     req.flash('success', 'Success. Password reset successfully')
     res.redirect('/login');

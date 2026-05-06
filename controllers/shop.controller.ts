@@ -23,6 +23,9 @@ export const getProducts = (req: Request, res: Response): Promise<void> => {
                 url: '/products',
                 prods: products,
             });
+        })
+        .catch((err: any) => {
+            throw new Error(err);
         });
 };
 
@@ -34,6 +37,9 @@ export const getProduct = (req: Request, res: Response): Promise<void> => {
                 url: '/products',
                 product,
             });
+        })
+        .catch((err: any) => {
+            throw new Error(err);
         });
 };
 
@@ -60,7 +66,9 @@ export const getCart = (req: Request, res: Response): Promise<unknown> => {
                 });
             }
         })
-        .catch((err: any) => console.error(err));
+        .catch((err: any) => {
+            throw new Error(err);
+        });
 };
 
 export const postAddProductToCart = (req: Request, res: Response): Promise<void> => {
@@ -68,14 +76,18 @@ export const postAddProductToCart = (req: Request, res: Response): Promise<void>
     return Product.findById(productId)
         .then(product => req?.user?.addToCart(product))
         .then(() => res.redirect('/cart'))
-        .catch((err: any) => console.error(err));
+        .catch((err: any) => {
+            throw new Error(err);
+        });
 };
 
 export const postCartDeleteProduct = (req: Request, res: Response) => {
     return req.user
         .deleteProductFromCart(req.params['id'])
         .then(() => res.redirect('/cart'))
-        .catch((err: any) => console.error(err));
+        .catch((err: any) => {
+            throw new Error(err);
+        });
 };
 
 export const getOrders = async (req: Request, res: Response): Promise<void> => {
@@ -94,6 +106,9 @@ export const getOrders = async (req: Request, res: Response): Promise<void> => {
                 orders: orders,
             });
         })
+        .catch((err: any) => {
+            throw new Error(err);
+        });
 
 };
 
@@ -118,7 +133,9 @@ export const postCreateOrder = async (req: Request, res: Response) => {
         })
         .then(_ => req.user.clearCart())
         .then(() => res.redirect('/orders'))
-        .catch((err: any) => console.error(err));
+        .catch((err: any) => {
+            throw new Error(err);
+        });
 };
 
 export const postDeleteOrderItem = (req: Request, res: Response): Promise<void> => {
@@ -126,5 +143,7 @@ export const postDeleteOrderItem = (req: Request, res: Response): Promise<void> 
     return req.user
         .deleteProductFromOrder(productId, orderId)
         .then(() => res.redirect('/orders'))
-        .catch((err: any) => console.error(err));
+        .catch((err: any) => {
+            throw new Error(err);
+        });
 };

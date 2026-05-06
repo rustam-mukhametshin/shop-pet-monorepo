@@ -13,7 +13,7 @@ export const getAddProduct = (req: Request, res: Response): void => {
     });
 };
 
-export const postAddProduct = (req: Request, res: Response): any => {
+export const postAddProduct = (req: Request, res: Response, next: any): any => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         // console.log(errors.array());
@@ -43,9 +43,8 @@ export const postAddProduct = (req: Request, res: Response): any => {
     })
         .save()
         .then(() => res.redirect('/admin/products'))
-        .catch((err: unknown) => {
-            console.error('Error: ', err);
-            res.status(500).redirect('/admin/products');
+        .catch((err: any) => {
+            throw new Error(err);
         });
 };
 
@@ -60,9 +59,10 @@ export const getProducts = (req: Request, res: Response): Promise<void> => {
                 url: '/admin/products',
                 prods: products,
             });
-        }).catch((err: unknown) => {
-            console.error('Error: ', err);
         })
+        .catch((err: any) => {
+            throw new Error(err);
+        });
 };
 
 
@@ -82,6 +82,9 @@ export const getEditProduct = (req: Request, res: Response): Promise<void> => {
                 edit,
                 product,
             });
+        })
+        .catch((err: any) => {
+            throw new Error(err);
         });
 };
 
@@ -109,9 +112,8 @@ export const postEditProduct = (req: Request, res: Response): Promise<void> => {
             product.imageUrl = imageUrl;
             return product.save().then(() => res.redirect('/admin/products'))
         })
-        .catch((err: unknown) => {
-            console.error(err);
-            res.status(500).redirect('/admin/products');
+        .catch((err: any) => {
+            throw new Error(err);
         });
 };
 
@@ -130,7 +132,9 @@ export const deleteProduct = (req: Request, res: Response): Promise<void> => {
             return product;
         })
         .then(() => res.redirect('/admin/products'))
-        .catch((err: unknown) => console.error('Error: ', err)) as Promise<void>;
+        .catch((err: any) => {
+            throw new Error(err);
+        });
 };
 
 
