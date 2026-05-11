@@ -19,6 +19,19 @@ jest.mock('jsonwebtoken', () => ({
   },
 }));
 
+jest.mock('../../env', () => ({
+  env: {
+    production: true,
+    url: 'http://localhost:3333/',
+    nodeMail: {
+      service: 'gmail',
+      user: 'noreply@example.com',
+      password: 'test-password',
+    },
+    sessionSecret: 'test-secret',
+  },
+}));
+
 const { NodeMailModel } = require('../../models/node-mail.model.ts');
 
 describe('node-mail.model', () => {

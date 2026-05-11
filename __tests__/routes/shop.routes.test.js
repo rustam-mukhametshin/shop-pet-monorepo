@@ -7,6 +7,7 @@ jest.mock('../../controllers/shop.controller', () => ({
   getOrders: jest.fn(),
   postCreateOrder: jest.fn(),
   postDeleteOrderItem: jest.fn(),
+  getInvoice: jest.fn(),
   getIndex: jest.fn(),
 }));
 
@@ -30,6 +31,7 @@ describe('shop.routes', () => {
       { path: '/orders', methods: ['get'] },
       { path: '/create-order', methods: ['post'] },
       { path: '/order-delete-item', methods: ['post'] },
+      { path: '/invoices/:orderId', methods: ['get'] },
       { path: '/', methods: ['get'] },
     ]));
   });

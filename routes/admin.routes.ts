@@ -18,17 +18,17 @@ adminRoutes.post(
     '/add-product',
     [
         body('title', 'Only alphanumeric characters for title')
-            .isAlphanumeric()
-            .isLength({min: 3, max: 100})
-            .trim(),
-        body('imageUrl', 'Only URL allowed for image URL')
-            .isURL()
+            .isString()
+            .escape()
+            .isLength({min: 1, max: 100})
             .trim(),
         body('price', 'Only currency characters for price')
+            .escape()
             .isFloat(),
         body('description', 'Only alphanumeric characters for description')
-            .isAlphanumeric()
-            .isLength({min: 5, max: 200})
+            .isString()
+            .escape()
+            .isLength({min: 1, max: 200})
             .trim(),
     ],
     AdminController.postAddProduct
@@ -37,17 +37,17 @@ adminRoutes.post(
 adminRoutes.post('/edit-product',
     [
         body('title', 'Only alphanumeric characters for title')
-            .isAlphanumeric()
-            .isLength({min: 3, max: 100})
-            .trim(),
-        body('imageUrl', 'Only URL allowed for image URL')
-            .isURL()
+            .isString()
+            .escape()
+            .isLength({min: 1, max: 100})
             .trim(),
         body('price', 'Only currency characters for price')
+            .escape()
             .isFloat(),
         body('description', 'Only alphanumeric characters for description')
-            .isAlphanumeric()
-            .isLength({min: 5, max: 200})
+            .isString()
+            .escape()
+            .isLength({min: 1, max: 200})
             .trim(),
     ],
     AdminController.postEditProduct

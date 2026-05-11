@@ -16,6 +16,8 @@ shopRoutes.get('/orders', isAuth, ShopController.getOrders);
 shopRoutes.post('/create-order', isAuth, ShopController.postCreateOrder);
 shopRoutes.post('/order-delete-item', isAuth, ShopController.postDeleteOrderItem);
 
+shopRoutes.get('/invoices/:orderId', isAuth, ShopController.getInvoice);
+
 shopRoutes.get('/', ShopController.getIndex);
 
 export default shopRoutes;

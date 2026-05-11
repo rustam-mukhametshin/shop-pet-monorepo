@@ -14,6 +14,8 @@ import csrf from 'csurf'; // TODO Remove deprecated package
 // import {csrfSync} from 'csrf-sync';
 import flash from "connect-flash";
 import {env} from "./env";
+import multer from "multer";
+import helmet from "helmet";
 
 const app = express();
 const csrfProtection = csrf()
@@ -21,11 +23,32 @@ const csrfProtection = csrf()
 
 app.set('view engine', 'ejs');
 
+app.use(helmet())
+
 // Static assets
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Body parsing
 app.use(express.urlencoded({extended: true}));
+app.use(multer({
+    // dest: 'public/images',
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, 'public/images');
+        },
+        filename: (req, file, cb) => {
+            cb(null, new Date().toISOString() + '-' + file.originalname);
+        },
+    }),
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg') {
+            cb(null, true);
+        } else {
+            cb(null, false);
+        }
+    }
+}).single('image'))
 
 // Set session
 app.use(session({

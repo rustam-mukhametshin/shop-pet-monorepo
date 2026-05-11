@@ -9,6 +9,7 @@ const mockGetUserByEmail = jest.fn();
 
 const mockCompareSync = jest.fn();
 const mockHash = jest.fn();
+const mockValidationResult = jest.fn();
 
 const mockSendWelcomeEmail = jest.fn();
 const mockCreateResetPasswordToken = jest.fn();
@@ -33,6 +34,10 @@ jest.mock('../../models/user.model', () => {
 jest.mock('bcryptjs', () => ({
   compareSync: (...args) => mockCompareSync(...args),
   hash: (...args) => mockHash(...args),
+}));
+
+jest.mock('express-validator', () => ({
+  validationResult: (...args) => mockValidationResult(...args),
 }));
 
 jest.mock('../../models/node-mail.model', () => ({
@@ -104,6 +109,10 @@ beforeEach(() => {
   mockFindOne.mockResolvedValue(null);
   mockIsUserExistByEmail.mockResolvedValue(null);
   mockGetUserByEmail.mockResolvedValue({ _id: 'user-id', email: 'john@example.com' });
+  mockValidationResult.mockReturnValue({
+    isEmpty: () => true,
+    array: () => [],
+  });
 });
 
 describe('auth.controller', () => {
@@ -123,15 +132,23 @@ describe('auth.controller', () => {
   });
 
   describe('postLogin', () => {
-    it('redirects to login when credentials are missing', async () => {
+    it('renders login with 422 when validator returns errors', async () => {
+      mockValidationResult.mockReturnValue({
+        isEmpty: () => false,
+        array: () => [{ msg: 'Invalid email or password' }],
+      });
       const req = mockReq({ body: { email: '', password: '' } });
       const res = mockRes();
 
       await postLogin(req, res);
 
-      expect(req.flash).toHaveBeenCalledWith('error', 'Invalid email or password');
+      expect(req.flash).toHaveBeenCalledWith('error', ['Invalid email or password']);
       expect(res.status).toHaveBeenCalledWith(422);
-      expect(res.redirect).toHaveBeenCalledWith('/login');
+      expect(res.render).toHaveBeenCalledWith('auth/login', {
+        pageTitle: 'Login',
+        url: '/login',
+        errorMessage: ['Invalid email or password'],
+      });
     });
 
     it('redirects to admin products for valid credentials', async () => {
@@ -177,18 +194,30 @@ describe('auth.controller', () => {
   });
 
   describe('postSignup', () => {
-    it('redirects to signup when required fields are missing', async () => {
+    it('renders signup with 422 when required fields are missing', async () => {
+      mockValidationResult.mockReturnValue({
+        isEmpty: () => false,
+        array: () => [{ msg: 'All fields are required.' }],
+      });
       const req = mockReq({ body: { email: '', password: '', confirmPassword: '' } });
       const res = mockRes();
 
       await postSignup(req, res);
 
-      expect(req.flash).toHaveBeenCalledWith('error', 'All fields are required.');
+      expect(req.flash).toHaveBeenCalledWith('error', ['All fields are required.']);
       expect(res.status).toHaveBeenCalledWith(422);
-      expect(res.redirect).toHaveBeenCalledWith('/signup');
+      expect(res.render).toHaveBeenCalledWith('auth/signup', {
+        pageTitle: 'Sign Up',
+        url: '/signup',
+        errorMessage: ['All fields are required.'],
+      });
     });
 
-    it('rejects signup when password and confirm password do not match', async () => {
+    it('renders signup with 422 when password mismatch is reported by validator', async () => {
+      mockValidationResult.mockReturnValue({
+        isEmpty: () => false,
+        array: () => [{ msg: 'Passwords have to match!' }],
+      });
       const req = mockReq({
         body: { email: 'john@example.com', password: '123456', confirmPassword: '654321' },
       });
@@ -196,9 +225,13 @@ describe('auth.controller', () => {
 
       await postSignup(req, res);
 
-      expect(req.flash).toHaveBeenCalledWith('error', 'Passwords do not match');
+      expect(req.flash).toHaveBeenCalledWith('error', ['Passwords have to match!']);
       expect(res.status).toHaveBeenCalledWith(422);
-      expect(res.redirect).toHaveBeenCalledWith('/signup');
+      expect(res.render).toHaveBeenCalledWith('auth/signup', {
+        pageTitle: 'Sign Up',
+        url: '/signup',
+        errorMessage: ['Passwords have to match!'],
+      });
     });
 
     it('creates a user, logs in and sends welcome email when signup is valid', async () => {

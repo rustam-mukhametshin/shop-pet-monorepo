@@ -6,7 +6,12 @@
 <%- include('./../parts/error-msg') %>
 
 <main>
-    <form class="product-form" action="/admin/<%- edit ? 'edit' : 'add' %>-product" method="POST">
+    <form
+            class="product-form"
+            action="/admin/<%- edit ? 'edit' : 'add' %>-product"
+            method="POST"
+            enctype="multipart/form-data"
+    >
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <% if(edit) { %>
             <input type="hidden" name="id" value="<%= product.id %>">
@@ -17,11 +22,19 @@
             <input type="text" name="title" id="title" required value="<%= product ? product.title : '' %>">
         </div>
 
+        <!--        <div class="form-control">-->
+        <!--            <label for="imageUrl">Image URL</label>-->
+        <!--            <input type="url" name="imageUrl" id="imageUrl" required value="<%= product ? product.imageUrl : '' %>">-->
+        <!--            <% if(edit) { %>-->
+        <!--                <img src="<%= product.imageUrl %>" alt="<%= product.title %>" width="100px" height="100px">-->
+        <!--            <% } %>-->
+        <!--        </div>-->
+
         <div class="form-control">
-            <label for="imageUrl">Image URL</label>
-            <input type="url" name="imageUrl" id="imageUrl" required value="<%= product ? product.imageUrl : '' %>">
+            <label for="image">Image</label>
+            <input type="file" name="image" id="image" required value="<%= product ? product.image : '' %>">
             <% if(edit) { %>
-                <img src="<%= product.imageUrl %>" alt="<%= product.title %>" width="100px" height="100px">
+                <img src="<%= product.image %>" alt="<%= product.title %>" width="100px" height="100px">
             <% } %>
         </div>
 

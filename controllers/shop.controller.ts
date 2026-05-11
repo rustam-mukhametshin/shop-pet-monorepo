@@ -1,7 +1,10 @@
-import {Request, Response} from 'express';
+import {NextFunction, Request, Response} from 'express';
 import {Product} from '../models/product.model';
 import {UserModel} from "../models/user.model";
 import {OrderModel} from "../models/order.model";
+import * as fs from "node:fs";
+import path from "path";
+import PDFDocument from "pdfkit";
 
 export const getIndex = (req: Request, res: Response): Promise<void> => {
     return Product.find().then((products) => {
@@ -146,4 +149,63 @@ export const postDeleteOrderItem = (req: Request, res: Response): Promise<void> 
         .catch((err: any) => {
             throw new Error(err);
         });
+};
+
+export let getInvoice = async (req: Request, res: Response, next: NextFunction) => {
+    const orderId = req.params.orderId;
+
+    OrderModel.findById(orderId)
+        .populate({
+            path: 'products.product',
+            model: 'Product',
+        })
+        .then(order => {
+            if (!order) {
+                return next(new Error('Not Found'));
+            }
+
+            if (order.userId.toString() !== req.user._id.toString()) {
+                return next(new Error('Unauthorized'));
+            }
+
+            const pdfDoc = new PDFDocument();
+            const invoice = `invoice-${orderId}.pdf`;
+            const invoicePath = path.join('private', 'invoices', invoice);
+
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'inline; filename="' + invoice + '"');
+            pdfDoc.pipe(fs.createWriteStream(invoicePath));
+            pdfDoc.pipe(res)
+
+            pdfDoc.fontSize(26).text('Invoice', {
+                underline: true,
+            });
+            pdfDoc.text('-----------------------');
+            let totalPrice = 0;
+            order.products.forEach((prod: any) => {
+                totalPrice += prod.quantity * prod.product.price;
+                pdfDoc.text(prod.product.title + ' - ' + prod.quantity + ' x $' + prod.product.price);
+            })
+            pdfDoc.text('---');
+            pdfDoc.fontSize(20).text('Total Price: $' + totalPrice);
+            pdfDoc.end();
+
+            // fs.readFile(invoicePath, (err, data) => {
+            //     if (err) {
+            //         console.error(err);
+            //         return next(err);
+            //     }
+            //
+
+            //     return res.send(data);
+            // })
+            // const file = fs.createReadStream(invoicePath);
+            // res.setHeader('Content-Type', 'application/pdf');
+            // res.setHeader('Content-Disposition', 'inline; filename="' + invoice + '"');
+            // todo: check bigger files
+            // file.pipe(res);
+
+        })
+        .catch(err => next(err))
+
 };

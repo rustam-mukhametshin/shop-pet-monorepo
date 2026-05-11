@@ -1,4 +1,14 @@
 const { Product } = require('../../models/product.model.ts');
+const deleteFileMock = jest.fn();
+const mockValidationResult = jest.fn();
+
+jest.mock('../../util/file', () => ({
+  deleteFile: (...args) => deleteFileMock(...args),
+}));
+
+jest.mock('express-validator', () => ({
+  validationResult: (...args) => mockValidationResult(...args),
+}));
 
 // Valid 24-char hex MongoDB ObjectId
 const VALID_ID = '64b1f1e2a4c3d2e1f0a9b8c7';
@@ -8,7 +18,7 @@ const mockReq = (overrides = {}) => ({
   body: {},
   params: {},
   query: {},
-  user: { _id: VALID_ID },
+  user: { _id: VALID_ID, id: VALID_ID },
   ...overrides,
 });
 
@@ -19,6 +29,14 @@ const mockRes = () => {
   res.status = jest.fn(() => res);
   return res;
 };
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockValidationResult.mockReturnValue({
+    isEmpty: () => true,
+    array: () => [],
+  });
+});
 
 afterEach(() => jest.restoreAllMocks());
 
@@ -49,7 +67,8 @@ describe('admin.controller', () => {
     it('saves a new product and redirects to /admin/products', async () => {
       jest.spyOn(Product.prototype, 'save').mockResolvedValue({});
       const req = mockReq({
-        body: { title: 'T', imageUrl: 'img.jpg', description: 'D', price: '9.99' },
+        body: { title: 'T', description: 'D', price: '9.99' },
+        file: { path: 'public/images/p.png' },
       });
       const res = mockRes();
       await postAddProduct(req, res);
@@ -61,7 +80,9 @@ describe('admin.controller', () => {
   describe('getProducts', () => {
     it('renders admin/products with fetched products', async () => {
       const fakeProducts = [{ title: 'A' }, { title: 'B' }];
-      jest.spyOn(Product, 'find').mockResolvedValue(fakeProducts);
+      jest.spyOn(Product, 'find').mockReturnValue({
+        populate: jest.fn().mockResolvedValue(fakeProducts),
+      });
       const req = mockReq();
       const res = mockRes();
       await getProducts(req, res);
@@ -99,15 +120,24 @@ describe('admin.controller', () => {
   describe('postEditProduct', () => {
     it('updates product fields and redirects to /admin/products', async () => {
       const saveMock = jest.fn().mockResolvedValue({});
-      const fakeProduct = { title: '', description: '', price: 0, imageUrl: '', save: saveMock };
+      const fakeProduct = {
+        title: '',
+        description: '',
+        price: 0,
+        imageUrl: 'old.png',
+        userId: { toString: () => VALID_ID },
+        save: saveMock,
+      };
       jest.spyOn(Product, 'findById').mockResolvedValue(fakeProduct);
       const req = mockReq({
         params: { id: VALID_ID },
-        body: { title: 'New', description: 'Desc', price: '5.00', imageUrl: 'img.jpg' },
+        body: { title: 'New', description: 'Desc', price: '5.00' },
+        file: { path: 'new.png' },
       });
       const res = mockRes();
       await postEditProduct(req, res);
       expect(fakeProduct.title).toBe('New');
+      expect(deleteFileMock).toHaveBeenCalledWith('old.png');
       expect(saveMock).toHaveBeenCalled();
       expect(res.redirect).toHaveBeenCalledWith('/admin/products');
     });
@@ -115,21 +145,26 @@ describe('admin.controller', () => {
 
   describe('deleteProduct', () => {
     it('deletes product and redirects to /admin/products', async () => {
-      jest.spyOn(Product, 'findByIdAndDelete').mockResolvedValue({ _id: VALID_ID });
+      jest.spyOn(Product, 'findById').mockResolvedValue({ _id: VALID_ID, imageUrl: 'old.png' });
+      jest.spyOn(Product, 'deleteOne').mockResolvedValue({ deletedCount: 1 });
       const req = mockReq({ params: { id: VALID_ID } });
       const res = mockRes();
-      await deleteProduct(req, res);
-      expect(Product.findByIdAndDelete).toHaveBeenCalledWith(VALID_ID);
+      const next = jest.fn();
+      await deleteProduct(req, res, next);
+      expect(Product.findById).toHaveBeenCalledWith(VALID_ID);
+      expect(Product.deleteOne).toHaveBeenCalledWith({ _id: VALID_ID, userId: VALID_ID });
+      expect(deleteFileMock).toHaveBeenCalledWith('old.png');
       expect(res.redirect).toHaveBeenCalledWith('/admin/products');
     });
 
-    it('logs error when product is not found', async () => {
-      jest.spyOn(Product, 'findByIdAndDelete').mockResolvedValue(null);
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    it('calls next with error when product is not found', async () => {
+      jest.spyOn(Product, 'findById').mockResolvedValue(null);
+      jest.spyOn(Product, 'deleteOne').mockResolvedValue({ deletedCount: 0 });
       const req = mockReq({ params: { id: VALID_ID } });
       const res = mockRes();
-      await deleteProduct(req, res);
-      expect(consoleSpy).toHaveBeenCalled();
+      const next = jest.fn();
+      await deleteProduct(req, res, next);
+      expect(next).toHaveBeenCalledWith(expect.any(Error));
     });
   });
 });

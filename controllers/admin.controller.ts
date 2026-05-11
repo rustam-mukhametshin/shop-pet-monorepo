@@ -1,7 +1,9 @@
-import {Request, Response} from 'express';
+import {NextFunction, Request, Response} from 'express';
 import {Product} from "../models/product.model";
 import {ObjectId} from "mongodb";
 import {validationResult} from "express-validator";
+import {env} from "../env";
+import {deleteFile} from "../util/file";
 
 export const getAddProduct = (req: Request, res: Response): void => {
     res.render('admin/edit-product', {
@@ -27,12 +29,24 @@ export const postAddProduct = (req: Request, res: Response, next: any): any => {
         });
     }
 
-    const {title, imageUrl, description, price} = req.body as {
+    const image = req.file;
+    const {title, description, price} = req.body as {
         title: string;
-        imageUrl: string;
         description: string;
         price: string;
     };
+
+    if (!image) {
+        return res.status(422).render('admin/edit-product', {
+            pageTitle: 'Add product',
+            url: '/admin/add-product',
+            edit: false,
+            product: undefined,
+            errorMessage: 'Attached file is not an image',
+        });
+    }
+
+    const imageUrl = image.path;
 
     return new Product({
         title,
@@ -76,6 +90,8 @@ export const getEditProduct = (req: Request, res: Response): Promise<void> => {
                 res.status(404).redirect('/admin/products');
                 return;
             }
+            product.imageUrl = env.url + product.imageUrl;
+
             res.render('admin/edit-product', {
                 pageTitle: 'Edit product',
                 url: '/admin/edit-product',
@@ -90,11 +106,11 @@ export const getEditProduct = (req: Request, res: Response): Promise<void> => {
 
 export const postEditProduct = (req: Request, res: Response): Promise<void> => {
     const id = ((req.params['id'] as string) || (req.body.id as string));
-    const {title, description, price, imageUrl} = req.body as {
+    const image = req.file;
+    const {title, description, price} = req.body as {
         title: string;
         description: string;
         price: string;
-        imageUrl: string;
     };
 
     return Product.findById(id)
@@ -106,10 +122,14 @@ export const postEditProduct = (req: Request, res: Response): Promise<void> => {
                 return res.redirect('/');
             }
 
+            if (image) {
+                deleteFile(product.imageUrl);
+                product.imageUrl = image.path;
+            }
+
             product.title = title;
             product.description = description;
             product.price = parseFloat(price);
-            product.imageUrl = imageUrl;
             return product.save().then(() => res.redirect('/admin/products'))
         })
         .catch((err: any) => {
@@ -118,23 +138,22 @@ export const postEditProduct = (req: Request, res: Response): Promise<void> => {
 };
 
 
-export const deleteProduct = (req: Request, res: Response): Promise<void> => {
+export const deleteProduct = (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const productId = req.params['id'] as string;
-
-    return Product.deleteOne({
-        _id: productId,
-        userId: req.user.id,
-    })
+    return Product.findById(productId)
         .then((product) => {
             if (!product) {
-                throw new Error('Product not found');
+                next(new Error('Product not found'));
             }
-            return product;
+            deleteFile(product?.imageUrl);
+
+            return Product.deleteOne({
+                _id: productId,
+                userId: req.user.id,
+            })
         })
         .then(() => res.redirect('/admin/products'))
-        .catch((err: any) => {
-            throw new Error(err);
-        });
+        .catch((err: any) => next(new Error(err)));
 };
 
 
