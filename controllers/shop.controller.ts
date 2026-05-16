@@ -6,25 +6,44 @@ import * as fs from "node:fs";
 import path from "path";
 import PDFDocument from "pdfkit";
 
-export const getIndex = (req: Request, res: Response): Promise<void> => {
-    return Product.find().then((products) => {
-        res.render('shop/index', {
-            pageTitle: 'Shop',
-            url: '/',
-            prods: products,
+const ITEMS_PER_PAGE = 2;
+
+export const getIndex = async (req: Request, res: Response): Promise<void> => {
+    const currentPage: number = parseInt(req.query?.page as string) || 1;
+    const totalNumberOfPages = await Product.countDocuments();
+    const lastPage = Math.ceil(totalNumberOfPages / 2);
+
+    return Product.find()
+        .skip((currentPage - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE)
+        .then((products) => {
+            res.render('shop/index', {
+                pageTitle: 'Shop',
+                url: '/',
+                prods: products,
+                currentPage,
+                lastPage,
+            });
         });
-    });
 };
 
-export const getProducts = (req: Request, res: Response): Promise<void> => {
+export const getProducts = async (req: Request, res: Response): Promise<void> => {
+    const currentPage: number = parseInt(req.query?.page as string) || 1;
+    const totalNumberOfPages = await Product.countDocuments();
+    const lastPage = Math.ceil(totalNumberOfPages / 2);
+
     return Product
         .find()
+        .skip((currentPage - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE)
         .populate('userId')
         .then((products) => {
             res.render('shop/product-list', {
                 pageTitle: 'Products',
                 url: '/products',
                 prods: products,
+                currentPage,
+                lastPage,
             });
         })
         .catch((err: any) => {
