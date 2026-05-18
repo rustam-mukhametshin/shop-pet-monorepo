@@ -5,6 +5,10 @@ import {OrderModel} from "../models/order.model";
 import * as fs from "node:fs";
 import path from "path";
 import PDFDocument from "pdfkit";
+import {env} from "../env";
+import Stripe from 'stripe';
+
+const stripe = new Stripe(env.STRIPE_SECRET);
 
 const ITEMS_PER_PAGE = 2;
 
@@ -134,32 +138,6 @@ export const getOrders = async (req: Request, res: Response): Promise<void> => {
 
 };
 
-export const postCreateOrder = async (req: Request, res: Response) => {
-    return UserModel.findById(req?.user.id).populate({
-        path: 'cart.items.productId',
-        model: 'Product',
-    })
-        .select('cart')
-        .then(_ => {
-            const order = new OrderModel({
-                products: req.user.cart.items.map((item: any) => {
-                    return {
-                        quantity: item.quantity,
-                        product: item.productId,
-                    }
-                }),
-                userId: req.user.id
-            });
-
-            return order.save();
-        })
-        .then(_ => req.user.clearCart())
-        .then(() => res.redirect('/orders'))
-        .catch((err: any) => {
-            throw new Error(err);
-        });
-};
-
 export const postDeleteOrderItem = (req: Request, res: Response): Promise<void> => {
     const {productId, orderId} = req.body as { productId: string; orderId: string };
     return req.user
@@ -227,4 +205,87 @@ export let getInvoice = async (req: Request, res: Response, next: NextFunction) 
         })
         .catch(err => next(err))
 
+};
+
+export let getCheckout = async (req: Request, res: Response) => {
+    return UserModel.findById(req?.user).populate({
+        path: 'cart.items.productId',
+        model: 'Product',
+    })
+        .select('cart')
+        .then(async (user: any) => {
+            if (!user || !user.cart || user.cart.items.length === 0) {
+                return res.redirect('/cart');
+            }
+
+            const products = user.cart.items;
+
+            const session = await stripe.checkout.sessions.create({
+                payment_method_types: ['card'],
+                line_items: products.map((p: any) => ({
+                    price_data: {
+                        currency: 'usd',
+                        unit_amount: Math.round(p.productId.price * 100),
+                        product_data: {
+                            name: p.productId.title,
+                            description: p.productId.description,
+                        },
+                    },
+                    quantity: p.quantity,
+                })),
+                mode: 'payment',
+                success_url: req.protocol + '://' + req.get('host') + '/checkout/success',
+                cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel',
+            });
+
+            return res.redirect(303, session.url || '/cart');
+        })
+        .catch((err: any) => {
+            throw new Error(err);
+        });
+};
+
+export let getCheckoutSuccess = async (req: Request, res: Response) => {
+    return UserModel.findById(req?.user).populate({
+        path: 'cart.items.productId',
+        model: 'Product',
+    })
+        .select('cart')
+        .then(async (user: any) => {
+            const orders = await OrderModel.find().cursor().toArray();
+            if (!user || !user.cart) {
+                return res.render('shop/orders', {
+                    pageTitle: 'Orders',
+                    url: '/orders',
+                    orders: orders,
+                });
+            }
+
+            const order = new OrderModel({
+                products: user.cart.items.map((item: any) => ({
+                    quantity: item.quantity,
+                    product: item.productId,
+                })),
+                userId: req.user.id,
+            });
+
+            await order.save();
+            await req.user.clearCart();
+
+            return res.render('shop/orders', {
+                pageTitle: 'Orders',
+                url: '/orders',
+                orders: orders,
+            });
+        })
+        .catch((err: any) => {
+            throw new Error(err);
+        });
+};
+
+export const getCheckoutCancel = (req: Request, res: Response) => {
+    res.render('shop/checkout-cancel', {
+        pageTitle: 'Checkout Cancelled',
+        url: '/checkout-cancel',
+    });
 };

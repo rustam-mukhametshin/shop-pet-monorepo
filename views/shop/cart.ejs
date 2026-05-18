@@ -29,10 +29,7 @@
                         </ul>
 
                         <div class="card-body border-top d-flex justify-content-end">
-                            <form action="/create-order" method="post" class="m-0">
-                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                <button type="submit" class="btn btn-success">Order</button>
-                            </form>
+                            <a href="/checkout" id="checkout" class="btn btn-info">Checkout</a>
                         </div>
                     </div>
                 </div>
