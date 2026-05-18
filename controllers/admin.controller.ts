@@ -138,22 +138,28 @@ export const postEditProduct = (req: Request, res: Response): Promise<void> => {
 };
 
 
-export const deleteProduct = (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const deleteProduct = (req: Request, res: Response, next: NextFunction) => {
     const productId = req.params['id'] as string;
     return Product.findById(productId)
         .then((product) => {
             if (!product) {
                 next(new Error('Product not found'));
             }
-            deleteFile(product?.imageUrl);
+            // deleteFile(product?.imageUrl);
 
-            return Product.deleteOne({
-                _id: productId,
-                userId: req.user.id,
-            })
+            // return Product.deleteOne({
+            //     _id: productId,
+            //     userId: req.user.id,
+            // })
+            return 'OK';
         })
-        .then(() => res.redirect('/admin/products'))
-        .catch((err: any) => next(new Error(err)));
+        .then(() => {
+            // res.redirect('/admin/products')
+            return res
+                .status(204)
+                .json({ message: 'Success' });
+        })
+        .catch((err: any) => res.status(500).json(err));
 };
 
 

@@ -8,7 +8,7 @@ const adminRoutes = Router();
  */
 adminRoutes.get('/add-product', AdminController.getAddProduct);
 adminRoutes.get('/edit-product/:id', AdminController.getEditProduct);
-adminRoutes.get('/delete-product/:id', AdminController.deleteProduct);
+adminRoutes.delete('/delete-product/:id', AdminController.deleteProduct);
 adminRoutes.get('/products', AdminController.getProducts);
 
 /**

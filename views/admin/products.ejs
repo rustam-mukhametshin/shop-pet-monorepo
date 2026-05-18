@@ -21,15 +21,21 @@
                             <img src="/<%= product.imageUrl %>" class="card-img-top" alt="<%= product.title %>">
                             <div class="card-body d-flex flex-column">
                                 <h2 class="card-title h5"><%= product.title %></h2>
-                                <p class="fw-semibold mb-2"><b>Price:</b> <span class="text-success">$<%= product.price %></span></p>
-                                <p class="card-text text-muted flex-grow-1"><b>Description:</b> <%= product.description %></p>
-                                <small class="text-secondary"><b>Created by:</b> <%= product.userId.name%></small>
+                                <p class="fw-semibold mb-2"><b>Price:</b> <span
+                                            class="text-success">$<%= product.price %></span></p>
+                                <p class="card-text text-muted flex-grow-1">
+                                    <b>Description:</b> <%= product.description %></p>
+                                <small class="text-secondary"><b>Created by:</b> <%= product.userId.name %></small>
                                 <div class="d-flex gap-2 flex-wrap mt-3">
-                                    <a href="/admin/edit-product/<%= product.id %>?edit=true" class="btn btn-outline-primary">Edit</a>
-                                    <form action="/admin/delete-product/<%= product.id %>" method="get" class="m-0">
-                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                        <button class="btn btn-outline-danger" type="submit">Delete</button>
-                                    </form>
+                                    <a href="/admin/edit-product/<%= product.id %>?edit=true"
+                                       class="btn btn-outline-primary">Edit</a>
+                                    <button
+                                            class="btn btn-outline-danger"
+                                            id="deleteProduct"
+                                            data-id="<%= product.id %>"
+                                            data-csrfToken="<%= csrfToken %>"
+                                    >Delete
+                                    </button>
                                 </div>
                             </div>
                         </article>
@@ -44,3 +50,4 @@
     <% } %>
 </main>
 <%- include('./../parts/body-end') %>
+<script src="/js/admin.js"></script>
