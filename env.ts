@@ -8,4 +8,6 @@ export const env = {
     }
     mongoUrl: ''
     sessionSecret: '',
+    STRIPE_PUBLIC: '',
+    STRIPE_SECRET: '',
 }
