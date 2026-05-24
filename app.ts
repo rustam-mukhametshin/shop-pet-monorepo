@@ -59,6 +59,12 @@ app.use(session({
         mongoUrl: env.mongoUrl,
         collectionName: 'sessions',
     }),
+    cookie: {
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 600000,
+        httpOnly: true,
+    }
 }));
 
 app.use(csrfProtection);
