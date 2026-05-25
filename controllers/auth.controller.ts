@@ -77,14 +77,11 @@ export const postSignup = (req: Request, res: Response) => {
                 return undefined;
             } else {
                 const hashedPassword: string = await bcrypt.hash(password, 12)
-                const hashedConfirmPassword: string = await bcrypt.hash(confirmPassword, 12)
 
-                // Todo: no need to store confirmPassword
                 const user = new UserModel({
                     name: email.split('@')[0],
                     email,
                     password: hashedPassword,
-                    confirmPassword: hashedConfirmPassword,
                     cart: {items: [],}
                 })
                 return user.save()
