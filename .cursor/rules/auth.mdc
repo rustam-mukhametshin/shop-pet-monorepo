@@ -1,36 +1,40 @@
-# Auth & Session Rules
+# Auth and Session Rules
 
-## Session Shape
-- Session is extended in `global.d.ts` — add new session fields there, not inline.
-- Available session fields: `isLoggedIn: boolean`, `user: UserDocument`.
-- Always call `req.session.save()` before redirecting after mutating session state.
+## Scope
+- Auth logic lives in `apps/api/controllers/auth.controller.ts` and `apps/api/routes/auth.routes.ts`.
+- Session typing is declared in `apps/api/global.d.ts`.
 
-## Auth Flow
-- All auth logic lives in `controllers/auth.controller.ts` + `routes/auth.routes.ts`.
-- Routes: `GET/POST /login`, `GET /logout`, `GET/POST /signup`, `GET/POST /reset`, `GET/POST /reset-password`.
-- `postLogin`: validates email + password (via `UserModel.isValidEmail` / `isPasswordLengthIsOk`), compares bcrypt hash, sets session, redirects to `/admin/products`.
-- `postSignup`: validates fields, checks `UserModel.isUserExistByEmail`, hashes passwords with `bcrypt`, saves user, sends welcome email via `NodeMailModel.sendWelcomeEmail`.
-- `postReset`: validates email, fetches user via `UserModel.getUserByEmail`, creates JWT token (`NodeMailModel.createResetPasswordToken`), saves `TokenModel`, sends reset email.
-- `getResetPassword`: verifies token via `NodeMailModel.verifyResetPasswordToken`, renders form with `_email` and `_token` locals.
-- `postResetPassword`: finds user by `_email`, hashes new passwords, saves, deletes `TokenModel` record, redirects to `/login`.
-- `getLogout`: destroys session, redirects to `/`.
+## Session Contract
+- Session fields currently used: `isLoggedIn?: boolean`, `user?: User`.
+- Add any new session fields to `apps/api/global.d.ts`, not ad hoc in controllers.
+- After changing session state (login/signup), call `req.session.save()` before redirect.
 
-## Password Security
-- Always hash with `bcrypt.hash(password, 12)` — never store plain text.
-- Compare with `bcrypt.compareSync(plain, hashed)` in `postLogin`.
+## Auth Route Surface
+- `GET /login`, `POST /login`
+- `GET /logout`
+- `GET /signup`, `POST /signup`
+- `GET /reset`, `POST /reset`
+- `GET /reset-password`, `POST /reset-password`
 
-## Flash Messages
-- Use `req.flash('error', '...')` for errors and `req.flash('success', '...')` for success.
-- `res.locals.error` and `res.locals.success` are set globally in the locals middleware; views read from those.
+## Controller Flow Expectations
+- `postLogin`: validate request, compare password hash with `bcrypt.compareSync`, set session, redirect to `/admin/products`.
+- `postSignup`: validate fields, prevent duplicate email, hash password, create user, set session, redirect, send welcome email.
+- `postReset`: validate email, create reset JWT via `NodeMailModel`, persist token via `TokenModel`, send reset link email.
+- `getResetPassword`: verify token and render reset-password page with `_email` and `_token`.
+- `postResetPassword`: update hashed password and delete used token record.
+- `getLogout`: destroy session and redirect to `/`.
 
-## Middleware
-- `req.user` is populated for every request in `app.ts` via `UserModel.findById(req.session?.user?._id)`.
-- Do not duplicate user-loading logic in controllers — use `req.user` directly.
-- `res.locals.userName` is also set in the locals middleware for displaying the signed-in user badge in navigation.
+## Flash Message Contract
+- Errors: `req.flash('error', ...)`
+- Success: `req.flash('success', ...)`
+- Views consume values from `res.locals.error` and `res.locals.success`.
+
+## Middleware Assumptions
+- `req.user` is hydrated globally in `apps/api/app.ts` from `req.session.user`.
+- Do not duplicate user hydration in auth controllers.
+- `res.locals.userName` is set globally and used in navigation.
 
 ## Do Not
-- Do not store raw passwords — always use `bcrypt`.
-- Do not bypass `req.session.save()` before a redirect when session state changes.
-- Do not expose `/admin` handlers outside `isAuth` protected route mounting.
-- Do not call `UserModel.isValidEmail` / `UserModel.isPasswordLengthIsOk` only in controllers — they are static methods on the model.
-
+- Do not store raw passwords.
+- Do not bypass `req.session.save()` before redirects after session mutation.
+- Do not expose admin handlers outside `/admin` + `isAuth` guarded route mount.

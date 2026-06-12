@@ -1,64 +1,45 @@
 # TDD Rule
 
-## Workflow — strictly follow this order for every new method in a `.ts` file
+## Workflow (red -> green -> refactor)
 
-1. **Write the test first** in `__tests__/<module>.test.js` (or `.test.ts`).
-   - Test must call the method and assert the expected output / side-effect.
-   - Run `npm test` — the test **must fail** (red) before moving on.
+1. Write the test first in `apps/api/__tests__/...`.
+   - Test should fail first.
+2. Implement the minimum code in `apps/api/*.ts` to pass.
+3. Refactor while keeping tests green.
 
-2. **Implement the method** in the `.ts` source file with the minimum code needed to pass.
-   - Run `npm test` — the test **must pass** (green) before moving on.
+## Test Location Rules
+- Mirror source folders under `apps/api/__tests__/`.
+- Existing project uses `.test.js` files for tests, even when source is TypeScript.
+- Keep path parity to make imports and mocks predictable.
 
-3. **Refactor** — clean up the implementation without breaking the test.
-   - Run `npm test` one final time to confirm still green.
+Examples:
+- `apps/api/controllers/admin.controller.ts` -> `apps/api/__tests__/controllers/admin.controller.test.js`
+- `apps/api/models/user.model.ts` -> `apps/api/__tests__/models/user.model.test.js`
+- `apps/api/routes/auth.routes.ts` -> `apps/api/__tests__/routes/auth.routes.test.js`
 
-## Test File Conventions
-- Mirror the **full source path** inside `__tests__/`:
-  - `controllers/admin.controller.ts` → `__tests__/controllers/admin.controller.test.ts`
-  - `models/user.model.ts` → `__tests__/models/user.model.test.ts`
-  - `routes/auth.routes.ts` → `__tests__/routes/auth.routes.test.ts`
-- Use `jest` globals (`describe`, `it`, `expect`); config is in `jest.config.js`.
-- Mock Mongoose models with `jest.mock('../../models/product.model')` — adjust relative path depth to match the mirrored folder — do not hit real DB in unit tests.
+## Test Commands
+- Root: `npm test` (delegates to `turbo run test`).
+- API only: run tests from `apps/api` with `npm test`.
+- For focused loops in API workspace: `npm run test:watch`.
 
-## Test Structure — mandatory nesting
-
-Every test file **must** follow this three-level structure:
-
-```
-describe('<fileName>')          ← outer: mirrors the source file name, e.g. 'user.model'
-  describe('<methodName>')      ← middle: exact method / function being tested
-    it('<expected behaviour>')  ← inner: one behaviour per it-block
-```
-
-### Example Skeleton
+## Test Structure
+Recommended nesting:
 
 ```ts
-// __tests__/controllers/example.controller.test.ts  ← write this FIRST
-const { myMethod } = require('../../controllers/example.controller');
-
-describe('example.controller', () => {
-  describe('myMethod', () => {
-    it('returns expected value for valid input', async () => {
-      const result = await myMethod(/* args */);
-      expect(result).toBe(/* expected */);
-    });
-
-    it('throws when required argument is missing', async () => {
-      await expect(myMethod()).rejects.toThrow();
+describe('<fileName>', () => {
+  describe('<methodName>', () => {
+    it('<expected behavior>', async () => {
+      // assertions
     });
   });
 });
 ```
 
-```ts
-// controllers/example.controller.ts  ← implement AFTER test is red
-export const myMethod = async (/* args */): Promise<...> => {
-  // implementation
-};
-```
+## Mocking Rules
+- Mock Mongoose model modules in unit tests; avoid real DB calls unless integration behavior is explicitly required.
+- Keep mocks at the top level of the test file and reset mocks between tests when needed.
 
 ## Do Not
-- Do not write implementation before the test exists.
-- Do not skip the failing-test (red) step — it proves the test actually covers the code.
-- Do not write multiple methods at once; apply the cycle once per method.
-
+- Do not implement before there is at least one failing test.
+- Do not skip the initial failing assertion step.
+- Do not bundle unrelated behavior changes into one test cycle.

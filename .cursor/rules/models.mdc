@@ -1,44 +1,47 @@
 # Mongoose Model Rules
 
+## Scope
+- All backend models live in `apps/api/models/*.model.ts`.
+- Keep model exports and names stable because controllers and tests import them directly.
+
 ## Schema Conventions
-- Export the Mongoose model from each file (e.g., `export const UserModel = mongoose.model<...>()`).
-- Keep `userId` as a `ref: 'User'` on `Product` and `Order` documents.
-- Define static helpers on the schema with `modelSchema.statics.*` and mirror them in a static interface type.
+- Export one Mongoose model per file.
+- Keep `userId` as `ref: 'User'` on Product and Order documents.
+- Keep statics on `schema.statics.*` and mirror them in static TypeScript types.
 
 ## Model Inventory
 | File | Export | Key Feature |
 |---|---|---|
-| `user.model.ts` | `UserModel` | Cart instance methods + static helpers |
-| `product.model.ts` | `Product` | `userId` ref to `User` |
-| `order.model.ts` | `OrderModel` | `products[]` with embedded product ref + quantity |
-| `token.model.ts` | `TokenModel` | `userId` ref to `User`, `token` string |
-| `node-mail.model.ts` | `NodeMailModel` | Email sending + JWT reset-password helpers |
+| `apps/api/models/user.model.ts` | `UserModel` | Cart instance methods + static email/password helpers |
+| `apps/api/models/product.model.ts` | `Product` | Product owned by user (`userId` ref) |
+| `apps/api/models/order.model.ts` | `OrderModel` | `products[]` with `{ product, quantity }` and `userId` |
+| `apps/api/models/token.model.ts` | `TokenModel` | Password reset token storage |
+| `apps/api/models/node-mail.model.ts` | `NodeMailModel` | Welcome/reset email and JWT token helpers |
 
 ## UserModel Static Methods
-- `isValidEmail(email): boolean` — regex test for basic email format.
-- `isPasswordLengthIsOk(password): boolean` — returns `true` when `password.length <= 72`.
-- `getUserByEmail(email): Promise<User | null>` — wraps `findOne({email})`.
-- `isUserExistByEmail(email): Promise<boolean>` — returns `true` when user exists.
+- `isValidEmail(email): boolean`
+- `isPasswordLengthIsOk(password): boolean`
+- `getUserByEmail(email): Promise<User | null>`
+- `isUserExistByEmail(email): Promise<boolean>`
 
-## UserModel Instance Methods (on `userSchema.methods`)
-- `addToCart(product)` — adds product or increments quantity; marks `cart` modified before save.
-- `deleteProductFromCart(productId)` — filters out item matching `productId`, then saves.
-- `clearCart()` — resets `cart.items` to `[]` and saves.
-- When adding a new instance method, extend the Mongoose document type accordingly.
+## UserModel Instance Methods
+- `addToCart(product)`
+- `deleteProductFromCart(productId)`
+- `clearCart()`
+- If adding new instance methods, update the document type usage accordingly.
 
-## NodeMailModel Statics
-- `sendWelcomeEmail(email, name)` — sends welcome email; errors are caught and logged.
-- `sendResetPasswordEmail(email, link)` — sends reset password email; errors are caught and logged.
-- `createResetPasswordToken(email)` — signs JWT `{ email }` with `env.sessionSecret`, expires `1h`.
-- `verifyResetPasswordToken(token)` — verifies JWT, returns `{ email, iat, exp }` or `null`.
-- `getResetPasswordTokenLink(email, token?)` — builds the full reset-password URL using `env.url`.
+## NodeMailModel Expectations
+- `sendWelcomeEmail(email, name)`
+- `sendResetPasswordEmail(email, link)`
+- `createResetPasswordToken(email)`
+- `verifyResetPasswordToken(token)`
+- `getResetPasswordTokenLink(email, token?)`
 
 ## Population Pattern
-- Cart products: nested populate `cart.items.productId` (see `shop.controller.ts#getCart`).
-- Orders: `products[].product` is a ref to `Product`; `products[].quantity` is a Number.
+- Cart reads should populate `cart.items.productId`.
+- Orders should populate `products.product` when rendering order views.
 
 ## Do Not
-- Do not use raw SQL-style syntax — use Mongoose query API.
-- Do not call `.save()` on a document fetched via `.lean()` — it returns a plain object.
-- Do not define cart/order mutation logic in controllers — keep it in `userSchema.methods`.
-
+- Do not move cart mutation logic into controllers.
+- Do not call `.save()` on `.lean()` results.
+- Do not replace Mongoose query APIs with raw database calls in normal controller flows.

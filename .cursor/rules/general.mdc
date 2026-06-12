@@ -1,39 +1,50 @@
 # General Project Rules
 
-## Stack
-Node.js + Express 5 + EJS + TypeScript + Mongoose. Entry: `app.ts`, DB bootstrap: `database.ts`.
-Security/session: `express-session` + `connect-mongo` + `csurf` (cookie-based, replaces deprecated `csrf-sync`).
-Flash messages: `connect-flash` (replaces manual `req.flash` stubs).
+## Monorepo Scope
+- Root uses `npm workspaces` and `turbo`.
+- Application code is under `apps/*`, mainly `apps/api`.
+- When changing backend behavior, edit files in `apps/api/*`.
 
-## Middleware Order in `app.ts` — do not reorder
-1. `express.static`
-2. `express.urlencoded`
-3. `express-session` (Mongo-backed, `collectionName: 'sessions'`)
-4. `csurf()` → exposes `req.csrfToken()`
-5. `connect-flash()`
-6. User-hydration middleware — `UserModel.findById(req.session?.user?._id)` → `req.user`
-7. Locals middleware → sets `res.locals.isLoggedIn`, `res.locals.csrfToken`, `res.locals.error`, `res.locals.success`, `res.locals.userName`
-8. CSRF error handler (`EBADCSRFTOKEN` → 403) — **must come before routes**
-9. Route mounts: `/admin` (+ `isAuth`) → `authRoutes` → `shopRoutes`
-10. `notFound` fallback
+## Stack (`apps/api`)
+- Node.js + Express 5 + EJS + TypeScript + Mongoose.
+- App entry: `apps/api/app.ts`.
+- DB bootstrap: `apps/api/database.ts`.
+- Security/session: `express-session` + `connect-mongo` + `csurf` + `connect-flash`.
+
+## Middleware Order in `apps/api/app.ts` - do not reorder without reason
+1. `helmet()`
+2. CORS headers middleware
+3. Static middleware (`express.static`, `/public` alias)
+4. Body parsers (`express.urlencoded`, `express.json`) + `multer.single('image')`
+5. `express-session` with Mongo store (`collectionName: 'sessions'`)
+6. `csurf()`
+7. `connect-flash()`
+8. User hydration (`UserModel.findById(req.session?.user?._id)` -> `req.user`)
+9. Locals middleware (`isLoggedIn`, `userName`, `csrfToken`, `error`, `success`)
+10. CSRF error handler (`EBADCSRFTOKEN` -> 403)
+11. Route mounts (`/admin` + `isAuth` -> `authRoutes` -> `shopRoutes`)
+12. `notFound` fallback and final error redirect handler (`/500`)
 
 ## Code Style
-- Use TypeScript for all new files; keep strict mode compatible with `tsconfig.json`.
-- Follow existing controller pattern: named exports, `(req, res) => void` or returning `Promise`.
-- Use Mongoose model instance methods for cart/order mutations (see `user.model.ts`).
-- Read config from `env.ts` (`env.sessionSecret`, `env.mongoUrl`, `env.url`, `env.nodeMail`).
+- Use TypeScript for all new backend files.
+- Keep controller exports as named functions.
+- Keep cart/order mutation logic inside `userSchema.methods`, not controllers.
+- Keep request typing aligned with `apps/api/global.d.ts`.
 
 ## File Conventions
-- Controllers → `controllers/*.controller.ts`
-- Models → `models/*.model.ts`
-- Routes → `routes/*.routes.ts`
-- Views → `views/**/*.ejs` (Bootstrap-compatible markup)
-- Shared view partials → `views/parts/*.ejs`
+- Controllers: `apps/api/controllers/*.controller.ts`
+- Models: `apps/api/models/*.model.ts`
+- Routes: `apps/api/routes/*.routes.ts`
+- Views: `apps/api/views/**/*.ejs`
+- Shared view partials: `apps/api/views/parts/*.ejs`
+- Tests: `apps/api/__tests__/**/*`
+
+## Commands
+- Root orchestration: `npm run build`, `npm run dev`, `npm run lint`, `npm test`.
+- API-focused commands should be run in `apps/api` (or with npm workspace flag).
 
 ## Do Not
-- Do not reorder the middleware chain in `app.ts`.
-- Do not remove or rename `req.user` — it is augmented globally in `global.d.ts`.
-- Do not remove `res.locals.csrfToken`; all POST forms depend on it.
-- Do not remove `res.locals.error` / `res.locals.success`; views render flash messages from these.
-- Do not hardcode Mongo URI or session secret in source — read exclusively from `env.ts`.
-
+- Do not bypass `/admin` route protection with `isAuth`.
+- Do not remove or rename `req.user` augmentation.
+- Do not remove `res.locals.csrfToken`; POST forms depend on it.
+- Do not remove flash locals (`res.locals.error`, `res.locals.success`) without updating views.

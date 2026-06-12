@@ -1,148 +1,175 @@
-# Node Course Shop (TypeScript + MongoDB)
+# Shop Pet — Monorepo
 
-[![Build](https://github.com/rustam-mukhametshin/Node_learn/actions/workflows/build.yml/badge.svg)](https://github.com/rustam-mukhametshin/Node_learn/actions/workflows/build.yml)
-[![Tests](https://github.com/rustam-mukhametshin/Node_learn/actions/workflows/test.yml/badge.svg)](https://github.com/rustam-mukhametshin/Node_learn/actions/workflows/test.yml)
-[![Coverage](https://codecov.io/gh/rustam-mukhametshin/Node_learn/branch/master/graph/badge.svg)](https://codecov.io/gh/rustam-mukhametshin/Node_learn)
+[![Build](https://github.com/rustam-mukhametshin/shop-pet-monorepo/actions/workflows/build.yml/badge.svg)](https://github.com/rustam-mukhametshin/shop-pet-monorepo/actions/workflows/build.yml)
+[![Tests](https://github.com/rustam-mukhametshin/shop-pet-monorepo/actions/workflows/test.yml/badge.svg)](https://github.com/rustam-mukhametshin/shop-pet-monorepo/actions/workflows/test.yml)
+[![Coverage](https://codecov.io/gh/rustam-mukhametshin/shop-pet-monorepo/branch/master/graph/badge.svg)](https://codecov.io/gh/rustam-mukhametshin/shop-pet-monorepo)
 
-Developer guide for running and working on this project.
+A full-stack pet-shop project managed as a **Turborepo** monorepo.
+
+---
+
+## Monorepo Structure
+
+```
+shop-pet-monorepo/
+├── apps/
+│   ├── api/          # Node.js + Express 5 + EJS backend (TypeScript)
+│   └── frontend-ng/  # Angular frontend (in progress)
+├── turbo.json        # Turborepo pipeline config
+└── package.json      # Root workspace (npm workspaces)
+```
+
+> Commands run from the **root** use Turborepo to orchestrate tasks across all apps in parallel.
+
+---
 
 ## Stack
+
+### `apps/api`
 - Node.js + Express 5
-- EJS templates
+- EJS templates (server-rendered UI)
 - TypeScript
 - MongoDB (Mongoose)
 - Sessions: `express-session` + `connect-mongo`
 - CSRF protection: `csrf-sync`
-- Bootstrap 5 (CDN in `views/parts/head.ejs`)
+- Bootstrap 5 (CDN)
+- PDF generation: `pdfkit`
+- File uploads: `multer`
+- Email: `nodemailer`
+- Payments: `stripe`
 
-## Project Entry Points
-- App entry: `app.ts`
-- DB connection: `database.ts`
-- Main startup path for development: `npm run start:ts`
+### Tooling
+- **Turborepo** — build orchestration and task caching
+- **npm workspaces** — package management across apps
+- **Husky** — git hooks (in `apps/api`)
+- **Jest + Supertest** — testing
+- **ts-node / nodemon** — TypeScript dev runtime
 
-> Note: some legacy scripts still point to `app.js`; the active TypeScript runtime path is `app.ts`.
+---
 
 ## Prerequisites
-- Node.js and npm installed
+- Node.js ≥ 20 and npm ≥ 11
 - Network access to MongoDB Atlas (or your own Mongo URI)
 
-## Environment Variables
-Create a `.env` file or export variables in your shell:
+---
 
-- `MONGO_URI` (optional)
-  - If not set, `database.ts` uses the default Atlas URI in code.
+## Environment Variables
+
+Create a `.env` file inside `apps/api/` (or export variables in your shell):
+
+| Variable    | Description                                      |
+|-------------|--------------------------------------------------|
+| `MONGO_URI` | MongoDB connection string (Atlas or local)       |
 
 Notes:
-- Session store in `app.ts` also uses `MONGO_URI` via `connect-mongo`.
-- Session `secret` is currently hardcoded in `app.ts` (`my secret`) and should be moved to env for production.
+- The session store (`connect-mongo`) also uses `MONGO_URI`.
+- The session `secret` is currently hardcoded in `app.ts` and should be moved to env for production.
 
 Example (zsh):
 ```zsh
 export MONGO_URI="mongodb+srv://<user>:<pass>@<cluster>.mongodb.net/?appName=Cluster0"
 ```
 
+---
+
 ## Install Dependencies
+
+From the **repo root** (installs all workspaces):
 ```zsh
 npm install
 ```
 
-## Run the Project
-Recommended (TypeScript runtime):
-```zsh
-npm run start:ts
-```
+---
 
-Watch mode:
-```zsh
-npm run start:ts-dev
-```
+## Common Scripts
 
-Type-check only:
-```zsh
-npm run typecheck
-```
+All of the following commands are run from the **repo root** and delegate to Turborepo:
 
-Build TypeScript:
-```zsh
-npm run build:ts
-```
+| Command              | Description                                    |
+|----------------------|------------------------------------------------|
+| `npm run build`      | Build all apps (`turbo run build`)             |
+| `npm run dev`        | Start all apps in dev mode (`turbo run dev`)   |
+| `npm run lint`       | Lint all apps (`turbo run lint`)               |
+| `npm test`           | Run all test suites (`turbo run test`)         |
 
-## Testing
-Run all tests:
-```zsh
-npm test
-```
+### `apps/api`-specific scripts (run from `apps/api/`)
+
+| Command                  | Description                        |
+|--------------------------|------------------------------------|
+| `npm run start`          | Run API with `ts-node`             |
+| `npm run start-dev`      | Watch mode with `nodemon + ts-node`|
+| `npm run typecheck`      | TypeScript type-check only         |
+| `npm run build`          | Compile TypeScript → `dist/`       |
+| `npm test`               | Run Jest test suite                |
+| `npm run test:watch`     | Jest watch mode                    |
+| `npm run test:coverage`  | Jest with coverage report          |
+
+---
 
 ## CI
-- GitHub Actions workflow: `.github/workflows/build.yml`
-- It runs `npm ci` and `npm run build:ts` on pushes and pull requests to `main`/`master`.
-- GitHub Actions workflow: `.github/workflows/test.yml`
-- It runs `npm ci` and `npm run test:coverage`, then uploads `coverage/lcov.info` to Codecov.
-- Coverage badge reflects the latest Codecov upload and appears after the first successful test workflow run.
 
-Watch mode:
-```zsh
-npm run test:watch
-```
+| Workflow        | File                              | Trigger                      | Steps                                                |
+|-----------------|-----------------------------------|------------------------------|------------------------------------------------------|
+| **Build**       | `.github/workflows/build.yml`     | Push / PR → `main`, `master` | `npm ci` → `npm run build`                           |
+| **Tests**       | `.github/workflows/test.yml`      | Push / PR → `main`, `master` | `npm ci` → `npm run test:coverage` → upload Codecov  |
 
-Coverage:
-```zsh
-npm run test:coverage
-```
+---
 
-Notes:
-- Jest uses a custom TS transformer: `jest.ts-transformer.js`
-- Test bootstrap file: `jest.setup.js`
-- `__tests__/app.test.js` checks unknown route returns `404`
-
-## Request Flow (High Level)
+## Request Flow — `apps/api` (High Level)
 1. Static files from `public/`
 2. `express.urlencoded`
 3. Session middleware (`express-session`) with Mongo-backed store (`connect-mongo`)
 4. CSRF middleware (`csrfSynchronisedProtection`)
 5. User middleware loads by `req.session.user._id` and attaches `req.user`
 6. Locals middleware sets `res.locals.isLoggedIn` and `res.locals.csrfToken`
-7. Routes mounted in order: `/admin` (guarded by `isAuth`) -> auth routes -> shop routes
+7. Routes mounted in order: `/admin` (guarded by `isAuth`) → auth routes → shop routes
 8. Fallback `notFound` handler renders `views/404.ejs`
 9. Error middleware returns `403` for `EBADCSRFTOKEN`
 
+---
+
 ## Important Routes
+
 ### Admin
-- `GET /admin/products`
-- `GET /admin/add-product`
+- `GET  /admin/products`
+- `GET  /admin/add-product`
 - `POST /admin/add-product`
-- `GET /admin/edit-product/:id`
+- `GET  /admin/edit-product/:id`
 - `POST /admin/edit-product`
-- `GET /admin/delete-product/:id`
+- `GET  /admin/delete-product/:id`
 
 ### Shop
-- `GET /`
-- `GET /products`
-- `GET /products/:id`
-- `GET /cart`
+- `GET  /`
+- `GET  /products`
+- `GET  /products/:id`
+- `GET  /cart`
 - `POST /cart`
-- `GET /cart-delete-item/:id`
-- `GET /orders`
+- `GET  /cart-delete-item/:id`
+- `GET  /orders`
 - `POST /create-order`
 - `POST /order-delete-item`
 
 ### Auth
-- `GET /login`
+- `GET  /login`
 - `POST /login`
 - `POST /logout`
-- `GET /signup`
+- `GET  /signup`
 - `POST /signup`
 
+---
+
 ## Common Pitfalls
-- `ObjectId` throws on invalid IDs; validate/sanitize before `new ObjectId(...)`.
-- Database calls fail if `mongoConnect` has not completed.
+- `ObjectId` throws on invalid IDs — validate/sanitize before `new ObjectId(...)`.
+- Database calls fail if `mongoConnect` has not completed before the app starts handling requests.
 - Navigation active-link checks depend on exact `url` strings in `views/parts/navigation.ejs`.
-- `global.d.ts` request typing should stay aligned with `UserModel` export usage.
-- Any `POST` form without hidden `_csrf` token will fail with `403 Invalid CSRF token`.
-- Missing `req.session.save()` before redirect after login/logout can lose session updates.
+- `global.d.ts` request typing must stay aligned with `UserModel` usage in `app.ts`.
+- Any `POST` form without the hidden `_csrf` token will return `403 Invalid CSRF token`.
+- Missing `req.session.save()` before a redirect after login/logout can silently drop session updates.
+
+---
 
 ## UI Notes
-- Bootstrap is globally included.
-- Product list pages (`views/shop/index.ejs`, `views/shop/product-list.ejs`, `views/admin/products.ejs`) use Bootstrap card grids.
+- Bootstrap 5 is globally included via CDN.
+- Product list pages use Bootstrap card grids.
 - Cart and orders pages use Bootstrap card/list-group layouts.
-
+- Shared add-to-cart form lives in `views/parts/add-to-cart.ejs`.
