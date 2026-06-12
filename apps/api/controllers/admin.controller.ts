@@ -2,7 +2,7 @@ import {NextFunction, Request, Response} from 'express';
 import {Product} from "../models/product.model";
 import {ObjectId} from "mongodb";
 import {validationResult} from "express-validator";
-import {deleteFile} from "../util/file";
+import fs from "node:fs";
 
 export const getAddProduct = (req: Request, res: Response): void => {
     res.render('admin/edit-product', {
@@ -122,7 +122,9 @@ export const postEditProduct = (req: Request, res: Response): Promise<void> => {
             }
 
             if (image) {
-                deleteFile(product.imageUrl);
+                fs.unlink(product.imageUrl, err => {
+                    if (err) throw err;
+                })
                 product.imageUrl = image.path;
             }
 
