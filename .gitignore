@@ -3,7 +3,7 @@ node_modules
 dist
 coverage
 .npm-cache
-public/images
-private/invoices
+apps/api/public/images
+apps/api/private/invoices
 .env
 api/images
