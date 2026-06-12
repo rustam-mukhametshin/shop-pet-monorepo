@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
-import {env} from "./env";
 
-export const mongoConnect = (cb: any, api = false) => {
+export const mongoConnect = (cb: any) => {
     return mongoose.connect(
-        api ? env.mongoUrlAPI: env.mongoUrl,
+        process.env.MONGO_URI!,
         {}
     )
         .then(result => {

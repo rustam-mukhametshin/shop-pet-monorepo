@@ -13,7 +13,6 @@ import {isAuth} from "./middleware/is-auth";
 import csrf from 'csurf'; // TODO Remove deprecated package
 // import {csrfSync} from 'csrf-sync';
 import flash from "connect-flash";
-import {env} from "./env";
 import multer from "multer";
 import helmet from "helmet";
 
@@ -64,11 +63,11 @@ app.use(multer({
 
 // Set session
 app.use(session({
-    secret: env.sessionSecret,
+    secret: process.env.DB_SESSION_SECRET!,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-        mongoUrl: env.mongoUrl,
+        mongoUrl: process.env.MONGO_URI!,
         collectionName: 'sessions',
     }),
     cookie: {

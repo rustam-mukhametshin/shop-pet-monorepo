@@ -2,7 +2,6 @@ import {NextFunction, Request, Response} from 'express';
 import {Product} from "../models/product.model";
 import {ObjectId} from "mongodb";
 import {validationResult} from "express-validator";
-import {env} from "../env";
 import {deleteFile} from "../util/file";
 
 export const getAddProduct = (req: Request, res: Response): void => {
@@ -90,7 +89,7 @@ export const getEditProduct = (req: Request, res: Response): Promise<void> => {
                 res.status(404).redirect('/admin/products');
                 return;
             }
-            product.imageUrl = env.url + product.imageUrl;
+            product.imageUrl = process.env.MAIN_URL! + product.imageUrl;
 
             res.render('admin/edit-product', {
                 pageTitle: 'Edit product',
@@ -157,7 +156,7 @@ export const deleteProduct = (req: Request, res: Response, next: NextFunction) =
             // res.redirect('/admin/products')
             return res
                 .status(204)
-                .json({ message: 'Success' });
+                .json({message: 'Success'});
         })
         .catch((err: any) => res.status(500).json(err));
 };

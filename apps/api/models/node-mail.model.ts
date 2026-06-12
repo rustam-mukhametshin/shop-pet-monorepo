@@ -1,13 +1,12 @@
 import nodemailer, {Transporter} from "nodemailer";
-import {env} from "../env";
 import jwt from 'jsonwebtoken';
 
 export class NodeMailModel {
     private _transporterOptions = {
-        service: env.nodeMail.service, // or use your SMTP server
+        service: process.env.NODE_MAIL_SERVICE!, // or use your SMTP server
         auth: {
-            user: env.nodeMail.user,
-            pass: env.nodeMail.password
+            user: process.env.NODE_MAIL_USER!,
+            pass: process.env.NODE_MAIL_PASSWORD!
         }
     }
 
@@ -24,29 +23,6 @@ export class NodeMailModel {
         subject: 'Test Email',
         text: 'Hello from Node.js!'
     };
-
-    /**
-     * Default method to send email
-     * Only if env.prod = true
-     *
-     * @param options
-     */
-    sendMail(options: {
-        to: string,
-        subject?: string,
-        text?: string
-    }) {
-        this._mailOptions.to = options.to;
-        this._mailOptions.subject = options.subject;
-        this._mailOptions.text = options.text;
-
-        if (env.production) {
-            return this._transporter.sendMail(
-                this._mailOptions
-            )
-        }
-        return new Promise(resolve => resolve('DEV ENVIRONMENT'));
-    }
 
     /**
      * Send welcome email to user after registration
@@ -91,7 +67,7 @@ export class NodeMailModel {
 
     static getResetPasswordTokenLink(email: string, token: string) {
         return [
-            env.url,
+            process.env.MAIN_URL!,
             'reset-password',
             `?token=${token ?? NodeMailModel.createResetPasswordToken(email)}`,
         ].join('');
@@ -100,12 +76,35 @@ export class NodeMailModel {
     static createResetPasswordToken(email: string) {
         return jwt.sign(
             {email: email,},
-            env.sessionSecret,
+            process.env.DB_SESSION_SECRET!,
             {expiresIn: '1h',}
         )
     }
 
     static verifyResetPasswordToken(token: string): { email: string, iat: number, exp: number } | null {
-        return jwt.verify(token, env.sessionSecret) as { email: string, iat: number, exp: number } | null;
+        return jwt.verify(token, process.env.DB_SESSION_SECRET!) as { email: string, iat: number, exp: number } | null;
+    }
+
+    /**
+     * Default method to send email
+     * Only if env.prod = true
+     *
+     * @param options
+     */
+    sendMail(options: {
+        to: string,
+        subject?: string,
+        text?: string
+    }) {
+        this._mailOptions.to = options.to;
+        this._mailOptions.subject = options.subject;
+        this._mailOptions.text = options.text;
+
+        if (process.env.ENV === 'prod') {
+            return this._transporter.sendMail(
+                this._mailOptions
+            )
+        }
+        return new Promise(resolve => resolve('DEV ENVIRONMENT'));
     }
 }

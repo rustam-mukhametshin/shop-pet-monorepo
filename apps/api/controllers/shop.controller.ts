@@ -5,10 +5,9 @@ import {OrderModel} from "../models/order.model";
 import * as fs from "node:fs";
 import path from "path";
 import PDFDocument from "pdfkit";
-import {env} from "../env";
 import Stripe from 'stripe';
 
-const stripe = new Stripe(env.STRIPE_SECRET);
+const stripe = new Stripe(process.env.STRIPE_SECRET!);
 
 const ITEMS_PER_PAGE = 2;
 
