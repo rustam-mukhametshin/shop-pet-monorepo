@@ -7,3 +7,5 @@ apps/api/public/images
 apps/api/private/invoices
 .env
 api/images
+.turbo
+.DS_Store
