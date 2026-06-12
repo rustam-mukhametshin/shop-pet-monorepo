@@ -24,6 +24,17 @@ const csrfProtection = csrf()
 app.set('view engine', 'ejs');
 
 app.use(helmet())
+app.use((req, res, next) => {
+    // res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Origin", "http://localhost:4200");
+    // res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Methods', '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    // res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Headers', '*');
+    next();
+})
+
 
 // Static assets
 app.use(express.static(path.join(__dirname, 'public')));
@@ -31,6 +42,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Body parsing
 app.use(express.urlencoded({extended: true}));
+app.use(express.json());
 app.use(multer({
     // dest: 'public/images',
     storage: multer.diskStorage({
