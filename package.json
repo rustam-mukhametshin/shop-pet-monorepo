@@ -7,22 +7,29 @@
     "angular",
     "turborepo"
   ],
-  "homepage": "https://github.com/rustam-mukhametshin/Node_learn#readme",
+  "homepage": "https://github.com/rustam-mukhametshin/shop-pet-monorepo#readme",
   "bugs": {
-    "url": "https://github.com/rustam-mukhametshin/Node_learn/issues"
+    "url": "https://github.com/rustam-mukhametshin/shop-pet-monorepo/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rustam-mukhametshin/Node_learn.git"
+    "url": "git+https://github.com/rustam-mukhametshin/shop-pet-monorepo.git"
   },
   "license": "MIT",
   "author": "Rustam Mukhametshin",
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "turbo test"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
   },
   "devDependencies": {
     "turbo": "^2.9.18"
-  }
+  },
+  "packageManager": "npm@11.14.0",
+  "workspaces": [
+    "apps/*"
+  ]
 }
