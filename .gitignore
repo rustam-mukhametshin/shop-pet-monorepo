@@ -5,3 +5,5 @@ coverage
 .npm-cache
 public/images
 private/invoices
+.env
+api/images
