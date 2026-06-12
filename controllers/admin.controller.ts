@@ -64,7 +64,7 @@ export const postAddProduct = (req: Request, res: Response, next: any): any => {
 
 export const getProducts = (req: Request, res: Response): Promise<void> => {
     return Product.find({
-        userId: new ObjectId(req.user.id),
+        userId: new ObjectId(req?.user?.id),
     })
         .populate('userId', 'name')
         .then((products) => {
