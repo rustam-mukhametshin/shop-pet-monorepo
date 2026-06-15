@@ -1,5 +1,6 @@
 import type User from './models/user.model';
 
+// Todo: remove
 declare module 'express-session' {
     interface SessionData {
         isLoggedIn?: boolean;

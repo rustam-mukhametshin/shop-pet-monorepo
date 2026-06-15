@@ -21,7 +21,10 @@ export function isAuth(req: Request, res: Response, next: NextFunction) {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET) as any;
         if (decoded?.userId) {
-            req.userId = decoded.userId;
+            req.user = {
+                userId: decoded.userId,
+                status: decoded.status,
+            };
             return next();
         }
         throw new Error('Unauthorized');

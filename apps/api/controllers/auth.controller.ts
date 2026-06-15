@@ -33,7 +33,8 @@ export const postLogin = (req: Request, res: Response) => {
 
             // Create token
             const token = jwt.sign({
-                id: user.id,
+                userId: user.id,
+                status: user.status,
             }, process.env.JWT_SECRET, {expiresIn: '1h'});
 
             return res.status(200).json({
@@ -73,7 +74,8 @@ export const postSignup = (req: Request, res: Response, next: any) => {
                     name: email.split('@')[0],
                     email,
                     password: hashedPassword,
-                    cart: {items: [],}
+                    cart: {items: [],},
+                    status: 'active',
                 })
                 return user.save()
             }
@@ -91,6 +93,13 @@ export const postSignup = (req: Request, res: Response, next: any) => {
         })
         .catch((err: any) => next(err));
 };
+
+export const getStatus = (req: Request, res: Response) => {
+    const status = req.user.status;
+    return res.status(200).json({
+        status: status,
+    })
+}
 
 export const getReset = (req: Request, res: Response) => {
     res.render('auth/reset', {

@@ -2,6 +2,7 @@ import {Router} from 'express';
 import * as AuthController from '../controllers/auth.controller';
 import {body} from "express-validator";
 import {UserModel} from "../models/user.model";
+import {isAuth} from "../middleware/is-auth";
 
 const authRoutes = Router();
 
@@ -58,6 +59,8 @@ authRoutes.post(
     ],
     AuthController.postSignup
 );
+
+authRoutes.get('/status', isAuth, AuthController.getStatus);
 
 authRoutes.post('/reset', AuthController.postReset);
 
