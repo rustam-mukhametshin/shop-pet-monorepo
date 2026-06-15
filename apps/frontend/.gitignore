@@ -1,0 +1,12 @@
+# dependencies
+/node_modules
+
+# build output
+/dist
+
+# test output
+/coverage
+
+# Angular cache
+.angular
+
