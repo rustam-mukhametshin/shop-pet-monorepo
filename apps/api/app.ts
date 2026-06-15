@@ -1,5 +1,6 @@
 /// <reference path="./global.d.ts" />
 import express, {NextFunction, Request, Response} from 'express';
+import dotenv from 'dotenv';
 import path from 'path';
 import {mongoConnect} from "./database";
 import adminRoutes from "./routes/admin.routes";
@@ -15,6 +16,8 @@ import csrf from 'csurf'; // TODO Remove deprecated package
 import flash from "connect-flash";
 import multer from "multer";
 import helmet from "helmet";
+
+dotenv.config();
 
 const app = express();
 const csrfProtection = csrf()
