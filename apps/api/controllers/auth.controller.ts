@@ -4,40 +4,43 @@ import bcrypt from "bcryptjs";
 import {NodeMailModel} from "../models/node-mail.model";
 import {TokenModel} from "../models/token.model";
 import {validationResult} from "express-validator";
-
-export const getLogin = (req: Request, res: Response): void => {
-    res.render('auth/login', {
-        pageTitle: 'Login',
-        url: '/login',
-        errorMessage: req.flash('error'),
-    });
-};
+import jwt from "jsonwebtoken";
 
 export const postLogin = (req: Request, res: Response) => {
     const {email, password} = req.body;
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        console.log(errors.array());
-        req.flash('error', [errors.array()[0].msg]);
-        return res.status(422).render('auth/login', {
-            pageTitle: 'Login',
-            url: '/login',
-            errorMessage: [errors.array()[0].msg],
+        return res.status(422).json({
+            error: [errors.array()[0].msg],
         });
     }
 
     return UserModel.findOne({email: email})
         .then(user => {
             if (!bcrypt.compareSync(password, user.password)) {
-                req.flash('error', 'Incorrect user or password');
-                return res.status(422).redirect('/login');
+                return res.status(422).json({
+                    error: 'Incorrect user or password',
+                })
             }
 
-            req.session.user = user;
-            req.session.isLoggedIn = true;
-            return Promise.resolve(() => req.session.save())
-                .then(() => res.redirect('/admin/products'))
+            // Todo: refactor
+            if (!process.env.JWT_SECRET) {
+                return res.status(422).json({
+                    error: 'Unknown error',
+                })
+            }
+
+            // Create token
+            const token = jwt.sign({
+                id: user.id,
+            }, process.env.JWT_SECRET, {expiresIn: '1h'});
+
+            return res.status(200).json({
+                userId: user._id,
+                message: 'Login successfully',
+                token: token,
+            })
         })
         .catch((err: any) => {
             throw new Error(err);
@@ -48,25 +51,13 @@ export const getLogout = (req: Request, res: Response) => {
     return req.session.destroy(() => res.redirect('/'))
 }
 
-export const getSignup = (req: Request, res: Response): void => {
-    res.render('auth/signup', {
-        pageTitle: 'Sign Up',
-        url: '/signup',
-        errorMessage: false,
-    });
-};
-
-export const postSignup = (req: Request, res: Response) => {
-    const {email, password, confirmPassword} = req.body;
+export const postSignup = (req: Request, res: Response, next: any) => {
+    const {email, password} = req.body;
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        console.log(errors.array());
-        req.flash('error', [errors.array()[0].msg]);
-        return res.status(422).render('auth/signup', {
-            pageTitle: 'Sign Up',
-            url: '/signup',
-            errorMessage: [errors.array()[0].msg],
+        return res.status(422).json({
+            error: [errors.array()[0].msg],
         });
     }
 
@@ -89,20 +80,16 @@ export const postSignup = (req: Request, res: Response) => {
         })
         .then(user => {
             if (!user) {
-                req.flash('error', 'User or password are incorrect');
-                return res.status(422).redirect('/signup')
+                return res.status(422).json({
+                    error: 'User or password are incorrect'
+                })
             }
 
-            req.session.user = user;
-            req.session.isLoggedIn = true;
-
             return Promise.resolve(() => req.session.save())
-                .then(() => res.redirect('/admin/products'))
                 .then(() => NodeMailModel.sendWelcomeEmail(user.email, user.name))
+                .then(_ => res.status(201).json({message: 'User created successfully',}))
         })
-        .catch((err: any) => {
-            throw new Error(err);
-        });
+        .catch((err: any) => next(err));
 };
 
 export const getReset = (req: Request, res: Response) => {

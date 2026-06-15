@@ -8,9 +8,7 @@ const authRoutes = Router();
 /**
  *  GET
  */
-authRoutes.get('/login', AuthController.getLogin);
 authRoutes.get('/logout', AuthController.getLogout);
-authRoutes.get('/signup', AuthController.getSignup);
 authRoutes.get('/reset', AuthController.getReset);
 authRoutes.get('/reset-password', AuthController.getResetPassword);
 
