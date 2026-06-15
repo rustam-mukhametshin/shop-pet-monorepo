@@ -48,10 +48,6 @@ export const postLogin = (req: Request, res: Response) => {
         });
 };
 
-export const getLogout = (req: Request, res: Response) => {
-    return req.session.destroy(() => res.redirect('/'))
-}
-
 export const postSignup = (req: Request, res: Response, next: any) => {
     const {email, password} = req.body;
 
