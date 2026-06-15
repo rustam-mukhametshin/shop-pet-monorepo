@@ -7,6 +7,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "dev": "npm run start-dev",
     "start": "ts-node app.ts",
     "start-dev": "nodemon --exec ts-node app.ts",
     "start-api": "nodemon api/api.ts",
@@ -56,6 +57,7 @@
     "multer": "^2.1.1",
     "nodemailer": "^8.0.5",
     "pdfkit": "^0.18.0",
+    "socket.io": "^4.8.3",
     "stripe": "^22.1.1",
     "uuid": "^14.0.0"
   }
