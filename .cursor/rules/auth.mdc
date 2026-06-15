@@ -3,6 +3,7 @@
 ## Scope
 - Auth logic lives in `apps/api/controllers/auth.controller.ts` and `apps/api/routes/auth.routes.ts`.
 - Session typing is declared in `apps/api/global.d.ts`.
+- Auth is migrating to API-first behavior; prefer JSON responses over renders/redirects.
 
 ## Session Contract
 - Session fields currently used: `isLoggedIn?: boolean`, `user?: User`.
@@ -10,24 +11,25 @@
 - After changing session state (login/signup), call `req.session.save()` before redirect.
 
 ## Auth Route Surface
-- `GET /login`, `POST /login`
+- `POST /login`
 - `GET /logout`
-- `GET /signup`, `POST /signup`
+- `POST /signup`
+- `GET /status` (guarded by `isAuth`)
 - `GET /reset`, `POST /reset`
 - `GET /reset-password`, `POST /reset-password`
 
 ## Controller Flow Expectations
-- `postLogin`: validate request, compare password hash with `bcrypt.compareSync`, set session, redirect to `/admin/products`.
-- `postSignup`: validate fields, prevent duplicate email, hash password, create user, set session, redirect, send welcome email.
+- `postLogin`: validate request, compare password hash with `bcrypt.compareSync`, return JSON payload with JWT token.
+- `postSignup`: validate fields, prevent duplicate email, hash password, create user, send welcome email, return JSON payload.
+- `getStatus`: return JSON status response for authenticated requests.
 - `postReset`: validate email, create reset JWT via `NodeMailModel`, persist token via `TokenModel`, send reset link email.
 - `getResetPassword`: verify token and render reset-password page with `_email` and `_token`.
 - `postResetPassword`: update hashed password and delete used token record.
 - `getLogout`: destroy session and redirect to `/`.
 
 ## Flash Message Contract
-- Errors: `req.flash('error', ...)`
-- Success: `req.flash('success', ...)`
-- Views consume values from `res.locals.error` and `res.locals.success`.
+- Legacy EJS auth flows still use flash messages.
+- For migrated API endpoints, return error/success in JSON and avoid flash message dependency.
 
 ## Middleware Assumptions
 - `req.user` is hydrated globally in `apps/api/app.ts` from `req.session.user`.
@@ -36,5 +38,6 @@
 
 ## Do Not
 - Do not store raw passwords.
-- Do not bypass `req.session.save()` before redirects after session mutation.
+- Do not call `next()` and then continue to send another response in middleware (avoids "Cannot set headers after they are sent").
+- Do not bypass `req.session.save()` before redirects in legacy session-based flows.
 - Do not expose admin handlers outside `/admin` + `isAuth` guarded route mount.

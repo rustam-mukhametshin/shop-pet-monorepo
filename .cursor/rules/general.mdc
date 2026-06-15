@@ -6,7 +6,8 @@
 - When changing backend behavior, edit files in `apps/api/*`.
 
 ## Stack (`apps/api`)
-- Node.js + Express 5 + EJS + TypeScript + Mongoose.
+- Node.js + Express 5 + TypeScript + Mongoose.
+- Project is migrating from server-rendered EJS to JSON-only API responses.
 - App entry: `apps/api/app.ts`.
 - DB bootstrap: `apps/api/database.ts`.
 - Security/session: `express-session` + `connect-mongo` + `csurf` + `connect-flash`.
@@ -28,6 +29,7 @@
 ## Code Style
 - Use TypeScript for all new backend files.
 - Keep controller exports as named functions.
+- For migrated endpoints, return JSON responses only (`res.status(...).json(...)`).
 - Keep cart/order mutation logic inside `userSchema.methods`, not controllers.
 - Keep request typing aligned with `apps/api/global.d.ts`.
 
@@ -35,8 +37,8 @@
 - Controllers: `apps/api/controllers/*.controller.ts`
 - Models: `apps/api/models/*.model.ts`
 - Routes: `apps/api/routes/*.routes.ts`
-- Views: `apps/api/views/**/*.ejs`
-- Shared view partials: `apps/api/views/parts/*.ejs`
+- Views: `apps/api/views/**/*.ejs` (legacy while migration is in progress)
+- Shared view partials: `apps/api/views/parts/*.ejs` (legacy while migration is in progress)
 - Tests: `apps/api/__tests__/**/*`
 
 ## Commands
@@ -46,5 +48,5 @@
 ## Do Not
 - Do not bypass `/admin` route protection with `isAuth`.
 - Do not remove or rename `req.user` augmentation.
-- Do not remove `res.locals.csrfToken`; POST forms depend on it.
-- Do not remove flash locals (`res.locals.error`, `res.locals.success`) without updating views.
+- Do not add new view-rendering auth endpoints; use JSON contracts for new API behavior.
+- Do not remove `res.locals.csrfToken` or flash locals until legacy EJS flows are fully migrated.

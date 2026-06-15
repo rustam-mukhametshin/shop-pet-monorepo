@@ -35,6 +35,11 @@ describe('<fileName>', () => {
 });
 ```
 
+## API Migration Assertions
+- For migrated endpoints, assert `res.status(...).json(...)` instead of `res.render(...)` or redirect-only behavior.
+- Keep response contract assertions strict (field names/messages/token keys).
+- Route tests should reflect current API surface (for auth: include `/status`, no legacy `GET /login` and `GET /signup`).
+
 ## Mocking Rules
 - Mock Mongoose model modules in unit tests; avoid real DB calls unless integration behavior is explicitly required.
 - Keep mocks at the top level of the test file and reset mocks between tests when needed.

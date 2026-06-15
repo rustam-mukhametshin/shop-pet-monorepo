@@ -3,19 +3,20 @@
 ## Project Snapshot
 - Monorepo uses `npm workspaces` + `Turborepo`.
 - Root workspace is `shop-pet-monorepo`; app code lives in `apps/*`.
-- Backend app is `apps/api` (`Node.js + Express 5 + EJS + TypeScript + Mongoose`).
+- Backend app is `apps/api` (`Node.js + Express 5 + TypeScript + Mongoose`).
 - Runtime entry is `apps/api/app.ts`; database bootstrap is `apps/api/database.ts` (`mongoConnect`).
 - Sessions use `express-session` + `connect-mongo` (Mongo-backed session store).
 - CSRF protection currently uses `csurf` (`req.csrfToken()`), with a TODO to remove deprecated package.
 - Flash messages use `connect-flash` and are exposed via `res.locals.error` and `res.locals.success`.
-- UI is server-rendered EJS with Bootstrap CDN + custom styles in `apps/api/public/css/*.css`.
+- UI lives in `apps/frontend` and is built with Angular.
+- `apps/api` is the backend/data API layer; UI work should not be added there.
 - CI workflows are in `.github/workflows/build.yml` and `.github/workflows/test.yml`.
 
 ## Monorepo Layout
 - Root config: `package.json`, `turbo.json`, `tsconfig*.json`, `jest*.js`.
 - Workspaces:
   - `apps/api` - Express app and test suite.
-  - `apps/frontend-ng` - Angular workspace placeholder/in progress.
+  - `apps/frontend` - Angular frontend application.
 
 ## Request Flow (`apps/api/app.ts`)
 1. Security middleware: `helmet()` + manual CORS headers.
@@ -28,7 +29,7 @@
 8. Locals middleware sets `res.locals.isLoggedIn`, `res.locals.userName`, `res.locals.csrfToken`, `res.locals.error`, `res.locals.success`.
 9. CSRF error handler maps `EBADCSRFTOKEN` to HTTP 403.
 10. Route mount order: `/admin` (with `isAuth`) -> `authRoutes` -> `shopRoutes`.
-11. Fallback `notFound` handler renders `views/404.ejs`, then `/500` redirect error handler.
+11. Fallback `notFound` handler and `/500` redirect error handler.
 12. App listens only when `require.main === module` (safe to import in tests).
 
 ## Route Surface
@@ -44,9 +45,10 @@
   - `GET /checkout`, `GET /checkout/success`, `GET /checkout/cancel`
   - `GET /orders`, `POST /order-delete-item`, `GET /invoices/:orderId`
 - Auth (`apps/api/routes/auth.routes.ts`):
-  - `GET /login`, `POST /login`
+  - `POST /login`
   - `GET /logout`
-  - `GET /signup`, `POST /signup`
+  - `POST /signup`
+  - `GET /status`
   - `GET /reset`, `POST /reset`
   - `GET /reset-password`, `POST /reset-password`
 
@@ -83,5 +85,6 @@
 - Do not bypass `isAuth` for `/admin` route mount.
 - Every POST form must include hidden `_csrf` from `res.locals.csrfToken`.
 - Keep session writes followed by `req.session.save()` before redirects in auth flows.
-- Use Bootstrap-compatible markup in EJS views; shared add-to-cart form is `apps/api/views/parts/add-to-cart.ejs` posting hidden `id` to `/cart`.
-- Keep changes workspace-aware: root automation should use Turbo, app-specific behavior should be updated in `apps/api`.
+- Prefer `res.status(...).json(...)` responses over `res.render(...)` in `apps/api`.
+- Build UI in `apps/frontend`; treat `apps/api` as backend-only.
+- Keep changes workspace-aware: root automation should use Turbo, app-specific behavior should be updated in the matching workspace.

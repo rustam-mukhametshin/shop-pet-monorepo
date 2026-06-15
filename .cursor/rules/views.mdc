@@ -3,6 +3,7 @@
 ## Scope
 - Server-rendered views live in `apps/api/views/**/*.ejs`.
 - Shared partials are in `apps/api/views/parts/*.ejs`.
+- These rules are legacy-only while backend endpoints migrate to JSON API responses.
 
 ## Layout Parts
 Include shared parts in this order:
@@ -21,7 +22,7 @@ Include shared parts in this order:
 - Every POST form must include:
   - `<input type="hidden" name="_csrf" value="<%= csrfToken %>">`
 - Reuse `apps/api/views/parts/add-to-cart.ejs` for add-to-cart UI.
-- Default to standard form posts; avoid introducing fetch/AJAX unless requested.
+- Do not add new form-based auth pages; auth endpoints should move to JSON contracts.
 
 ## Locals Expected by Views
 Set globally in `apps/api/app.ts`:
@@ -45,3 +46,4 @@ Set per-render in controllers:
 - Do not remove `_csrf` hidden field from POST forms.
 - Do not duplicate shared partial logic inline across many pages.
 - Do not introduce frontend frameworks inside EJS templates.
+- Do not add new `res.render(...)` handlers for migrated API endpoints.
