@@ -1,16 +1,13 @@
-import { Request, Response, NextFunction } from 'express';
+import {NextFunction, Request, Response} from 'express';
 
-export const notFound = (req: Request, res: Response, _next: NextFunction): void => {
-    res.status(404).render('404', {
-        pageTitle: 'Not Found',
-        url: '404',
+export const notFound = (req: Request, res: Response, _next: NextFunction) => {
+    return res.status(404).json({
+        error: 'Not Found',
     });
 };
 
-export const get500 = (req: Request, res: Response, _next: NextFunction): void => {
-    res.status(500).render('500', {
-        pageTitle: '500 Error',
-        url: '500',
+export const get500 = (req: Request, res: Response, _next: NextFunction) => {
+    return res.status(500).json({
         error: 'Something went wrong'
     });
 };
