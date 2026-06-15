@@ -3,7 +3,6 @@ const mockTokenSave = jest.fn();
 
 const mockFindOne = jest.fn();
 const mockIsValidEmail = jest.fn();
-const mockIsPasswordLengthIsOk = jest.fn();
 const mockIsUserExistByEmail = jest.fn();
 const mockGetUserByEmail = jest.fn();
 
@@ -18,6 +17,7 @@ const mockGetResetPasswordTokenLink = jest.fn();
 const mockVerifyResetPasswordToken = jest.fn();
 
 const mockDeleteOne = jest.fn();
+const mockJwtSign = jest.fn();
 
 jest.mock('../../models/user.model', () => {
   const UserModel = jest.fn().mockImplementation(() => ({
@@ -25,7 +25,6 @@ jest.mock('../../models/user.model', () => {
   }));
   UserModel.findOne = mockFindOne;
   UserModel.isValidEmail = mockIsValidEmail;
-  UserModel.isPasswordLengthIsOk = mockIsPasswordLengthIsOk;
   UserModel.isUserExistByEmail = mockIsUserExistByEmail;
   UserModel.getUserByEmail = mockGetUserByEmail;
   return { UserModel };
@@ -38,6 +37,10 @@ jest.mock('bcryptjs', () => ({
 
 jest.mock('express-validator', () => ({
   validationResult: (...args) => mockValidationResult(...args),
+}));
+
+jest.mock('jsonwebtoken', () => ({
+  sign: (...args) => mockJwtSign(...args),
 }));
 
 jest.mock('../../models/node-mail.model', () => ({
@@ -61,11 +64,10 @@ jest.mock('../../models/token.model', () => {
 const { UserModel } = require('../../models/user.model');
 const { TokenModel } = require('../../models/token.model');
 const {
-  getLogin,
   postLogin,
   getLogout,
-  getSignup,
   postSignup,
+  getStatus,
   getReset,
   postReset,
   getResetPassword,
@@ -88,25 +90,31 @@ const mockRes = () => {
   const res = {};
   res.render = jest.fn();
   res.redirect = jest.fn();
+  res.json = jest.fn();
   res.status = jest.fn(() => res);
   return res;
 };
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockIsValidEmail.mockReturnValue(true);
-  mockIsPasswordLengthIsOk.mockReturnValue(true);
+  process.env.JWT_SECRET = 'test-secret';
+
   mockCompareSync.mockReturnValue(true);
   mockHash.mockResolvedValue('hashed-value');
+  mockJwtSign.mockReturnValue('jwt-token');
+
   mockSendWelcomeEmail.mockResolvedValue(undefined);
   mockCreateResetPasswordToken.mockReturnValue('token-1');
   mockSendResetPasswordEmail.mockResolvedValue(undefined);
   mockGetResetPasswordTokenLink.mockReturnValue('https://example.com/reset?token=token-1');
   mockVerifyResetPasswordToken.mockReturnValue({ email: 'john@example.com' });
+
   mockUserSave.mockResolvedValue({ _id: 'new-user-id', email: 'john@example.com', name: 'john' });
   mockTokenSave.mockResolvedValue({ _id: 'token-id' });
   mockDeleteOne.mockResolvedValue({ deletedCount: 1 });
+
   mockFindOne.mockResolvedValue(null);
+  mockIsValidEmail.mockReturnValue(true);
   mockIsUserExistByEmail.mockResolvedValue(null);
   mockGetUserByEmail.mockResolvedValue({ _id: 'user-id', email: 'john@example.com' });
   mockValidationResult.mockReturnValue({
@@ -116,23 +124,8 @@ beforeEach(() => {
 });
 
 describe('auth.controller', () => {
-  describe('getLogin', () => {
-    it('renders login view with flash errors', () => {
-      const req = mockReq({ flash: jest.fn(() => ['Login failed']) });
-      const res = mockRes();
-
-      getLogin(req, res);
-
-      expect(res.render).toHaveBeenCalledWith('auth/login', {
-        pageTitle: 'Login',
-        url: '/login',
-        errorMessage: ['Login failed'],
-      });
-    });
-  });
-
   describe('postLogin', () => {
-    it('renders login with 422 when validator returns errors', async () => {
+    it('returns 422 json when validator returns errors', async () => {
       mockValidationResult.mockReturnValue({
         isEmpty: () => false,
         array: () => [{ msg: 'Invalid email or password' }],
@@ -142,27 +135,112 @@ describe('auth.controller', () => {
 
       await postLogin(req, res);
 
-      expect(req.flash).toHaveBeenCalledWith('error', ['Invalid email or password']);
       expect(res.status).toHaveBeenCalledWith(422);
-      expect(res.render).toHaveBeenCalledWith('auth/login', {
-        pageTitle: 'Login',
-        url: '/login',
-        errorMessage: ['Invalid email or password'],
+      expect(res.json).toHaveBeenCalledWith({
+        error: ['Invalid email or password'],
       });
     });
 
-    it('redirects to admin products for valid credentials', async () => {
-      const user = { _id: 'u1', email: 'john@example.com', password: 'hashed' };
+    it('returns 422 json when password does not match', async () => {
+      mockCompareSync.mockReturnValue(false);
+      const user = { _id: 'u1', id: 'u1', email: 'john@example.com', password: 'hashed' };
+      mockFindOne.mockResolvedValue(user);
+      const req = mockReq({ body: { email: 'john@example.com', password: 'wrong-password' } });
+      const res = mockRes();
+
+      await postLogin(req, res);
+
+      expect(UserModel.findOne).toHaveBeenCalledWith({ email: 'john@example.com' });
+      expect(res.status).toHaveBeenCalledWith(422);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Incorrect user or password',
+      });
+    });
+
+    it('returns token payload json for valid credentials', async () => {
+      const user = { _id: 'u1', id: 'u1', email: 'john@example.com', password: 'hashed' };
       mockFindOne.mockResolvedValue(user);
       const req = mockReq({ body: { email: 'john@example.com', password: '123456' } });
       const res = mockRes();
 
       await postLogin(req, res);
 
-      expect(UserModel.findOne).toHaveBeenCalledWith({ email: 'john@example.com' });
-      expect(req.session.user).toBe(user);
-      expect(req.session.isLoggedIn).toBe(true);
-      expect(res.redirect).toHaveBeenCalledWith('/admin/products');
+      expect(mockJwtSign).toHaveBeenCalledWith({ id: 'u1' }, 'test-secret', { expiresIn: '1h' });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        userId: 'u1',
+        message: 'Login successfully',
+        token: 'jwt-token',
+      });
+    });
+  });
+
+  describe('postSignup', () => {
+    it('returns 422 json when validator returns errors', async () => {
+      mockValidationResult.mockReturnValue({
+        isEmpty: () => false,
+        array: () => [{ msg: 'All fields are required.' }],
+      });
+      const req = mockReq({ body: { email: '', password: '', confirmPassword: '' } });
+      const res = mockRes();
+
+      await postSignup(req, res, jest.fn());
+
+      expect(res.status).toHaveBeenCalledWith(422);
+      expect(res.json).toHaveBeenCalledWith({
+        error: ['All fields are required.'],
+      });
+    });
+
+    it('returns 422 json when user already exists', async () => {
+      mockIsUserExistByEmail.mockResolvedValue({ _id: 'existing-user-id' });
+      const req = mockReq({
+        body: { email: 'john@example.com', password: '123456', confirmPassword: '123456' },
+      });
+      const res = mockRes();
+
+      await postSignup(req, res, jest.fn());
+
+      expect(UserModel.isUserExistByEmail).toHaveBeenCalledWith('john@example.com');
+      expect(res.status).toHaveBeenCalledWith(422);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'User or password are incorrect',
+      });
+    });
+
+    it('creates a user and returns 201 json for valid payload', async () => {
+      const savedUser = { _id: 'u1', email: 'john@example.com', name: 'john' };
+      mockUserSave.mockResolvedValue(savedUser);
+      const req = mockReq({
+        body: { email: 'john@example.com', password: '123456', confirmPassword: '123456' },
+      });
+      const res = mockRes();
+
+      await postSignup(req, res, jest.fn());
+
+      expect(UserModel).toHaveBeenCalledWith(expect.objectContaining({
+        name: 'john',
+        email: 'john@example.com',
+      }));
+      expect(mockSendWelcomeEmail).toHaveBeenCalledWith('john@example.com', 'john');
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'User created successfully',
+      });
+    });
+  });
+
+  describe('getStatus', () => {
+    it('returns success json', () => {
+      const req = mockReq();
+      const res = mockRes();
+
+      getStatus(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        status: 'success',
+      });
     });
   });
 
@@ -175,85 +253,6 @@ describe('auth.controller', () => {
 
       expect(req.session.destroy).toHaveBeenCalledTimes(1);
       expect(res.redirect).toHaveBeenCalledWith('/');
-    });
-  });
-
-  describe('getSignup', () => {
-    it('renders signup view with expected locals', () => {
-      const req = mockReq();
-      const res = mockRes();
-
-      getSignup(req, res);
-
-      expect(res.render).toHaveBeenCalledWith('auth/signup', {
-        pageTitle: 'Sign Up',
-        url: '/signup',
-        errorMessage: false,
-      });
-    });
-  });
-
-  describe('postSignup', () => {
-    it('renders signup with 422 when required fields are missing', async () => {
-      mockValidationResult.mockReturnValue({
-        isEmpty: () => false,
-        array: () => [{ msg: 'All fields are required.' }],
-      });
-      const req = mockReq({ body: { email: '', password: '', confirmPassword: '' } });
-      const res = mockRes();
-
-      await postSignup(req, res);
-
-      expect(req.flash).toHaveBeenCalledWith('error', ['All fields are required.']);
-      expect(res.status).toHaveBeenCalledWith(422);
-      expect(res.render).toHaveBeenCalledWith('auth/signup', {
-        pageTitle: 'Sign Up',
-        url: '/signup',
-        errorMessage: ['All fields are required.'],
-      });
-    });
-
-    it('renders signup with 422 when password mismatch is reported by validator', async () => {
-      mockValidationResult.mockReturnValue({
-        isEmpty: () => false,
-        array: () => [{ msg: 'Passwords have to match!' }],
-      });
-      const req = mockReq({
-        body: { email: 'john@example.com', password: '123456', confirmPassword: '654321' },
-      });
-      const res = mockRes();
-
-      await postSignup(req, res);
-
-      expect(req.flash).toHaveBeenCalledWith('error', ['Passwords have to match!']);
-      expect(res.status).toHaveBeenCalledWith(422);
-      expect(res.render).toHaveBeenCalledWith('auth/signup', {
-        pageTitle: 'Sign Up',
-        url: '/signup',
-        errorMessage: ['Passwords have to match!'],
-      });
-    });
-
-    it('creates a user, logs in and sends welcome email when signup is valid', async () => {
-      const savedUser = { _id: 'u1', email: 'john@example.com', name: 'john' };
-      mockIsUserExistByEmail.mockResolvedValue(null);
-      mockUserSave.mockResolvedValue(savedUser);
-      const req = mockReq({
-        body: { email: 'john@example.com', password: '123456', confirmPassword: '123456' },
-      });
-      const res = mockRes();
-
-      await postSignup(req, res);
-
-      expect(UserModel.isUserExistByEmail).toHaveBeenCalledWith('john@example.com');
-      expect(UserModel).toHaveBeenCalledWith(expect.objectContaining({
-        name: 'john',
-        email: 'john@example.com',
-      }));
-      expect(req.session.user).toBe(savedUser);
-      expect(req.session.isLoggedIn).toBe(true);
-      expect(res.redirect).toHaveBeenCalledWith('/admin/products');
-      expect(mockSendWelcomeEmail).toHaveBeenCalledWith('john@example.com', 'john');
     });
   });
 

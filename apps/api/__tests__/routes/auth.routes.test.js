@@ -1,9 +1,8 @@
 jest.mock('../../controllers/auth.controller', () => ({
-  getLogin: jest.fn(),
   postLogin: jest.fn(),
   getLogout: jest.fn(),
-  getSignup: jest.fn(),
   postSignup: jest.fn(),
+  getStatus: jest.fn(),
   getReset: jest.fn(),
   postReset: jest.fn(),
   getResetPassword: jest.fn(),
@@ -22,11 +21,10 @@ describe('auth.routes', () => {
     const routes = getRouteMeta(authRoutes);
 
     expect(routes).toEqual(expect.arrayContaining([
-      { path: '/login', methods: ['get'] },
       { path: '/login', methods: ['post'] },
       { path: '/logout', methods: ['get'] },
-      { path: '/signup', methods: ['get'] },
       { path: '/signup', methods: ['post'] },
+      { path: '/status', methods: ['get'] },
       { path: '/reset', methods: ['get'] },
       { path: '/reset', methods: ['post'] },
       { path: '/reset-password', methods: ['get'] },
