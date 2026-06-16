@@ -4,24 +4,10 @@ import {ObjectId} from "mongodb";
 import {validationResult} from "express-validator";
 import fs from "node:fs";
 
-export const getAddProduct = (req: Request, res: Response): void => {
-    res.render('admin/edit-product', {
-        pageTitle: 'Add product',
-        url: '/admin/add-product',
-        edit: false,
-        product: undefined,
-        errorMessage: undefined,
-    });
-};
-
-export const postAddProduct = (req: Request, res: Response, next: any): any => {
+export const postAddProduct = (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        // console.log(errors.array());
-        // req.flash('error', [errors.array()[0].msg]);
-        return res.status(422).render('admin/edit-product', {
-            pageTitle: 'Add product',
-            url: '/admin/add-product',
+        return res.status(422).json( {
             edit: false,
             product: undefined,
             errorMessage: [errors.array()[0].msg],
@@ -36,9 +22,7 @@ export const postAddProduct = (req: Request, res: Response, next: any): any => {
     };
 
     if (!image) {
-        return res.status(422).render('admin/edit-product', {
-            pageTitle: 'Add product',
-            url: '/admin/add-product',
+        return res.status(422).json( {
             edit: false,
             product: undefined,
             errorMessage: 'Attached file is not an image',
@@ -55,55 +39,23 @@ export const postAddProduct = (req: Request, res: Response, next: any): any => {
         userId: req.user,
     })
         .save()
-        .then(() => res.redirect('/admin/products'))
-        .catch((err: any) => {
-            throw new Error(err);
-        });
+        .catch((err: any) => next(new Error(err)));
 };
 
-export const getProducts = (req: Request, res: Response): Promise<void> => {
+export const getProducts = (req: Request, res: Response, next: NextFunction) => {
     return Product.find({
         userId: new ObjectId(req?.user?.id),
     })
         .populate('userId', 'name')
         .then((products) => {
-            res.render('admin/products', {
-                pageTitle: 'Admin Products',
-                url: '/admin/products',
+            return res.json( {
                 prods: products,
             });
         })
-        .catch((err: any) => {
-            throw new Error(err);
-        });
+        .catch((err: any) => next(new Error(err)));
 };
 
-
-export const getEditProduct = (req: Request, res: Response): Promise<void> => {
-    const edit = req.query['edit'] === 'true';
-    const prodId = req.params['id'] as string;
-
-    return Product.findById(prodId)
-        .then((product) => {
-            if (!product) {
-                res.status(404).redirect('/admin/products');
-                return;
-            }
-            product.imageUrl = process.env.MAIN_URL! + product.imageUrl;
-
-            res.render('admin/edit-product', {
-                pageTitle: 'Edit product',
-                url: '/admin/edit-product',
-                edit,
-                product,
-            });
-        })
-        .catch((err: any) => {
-            throw new Error(err);
-        });
-};
-
-export const postEditProduct = (req: Request, res: Response): Promise<void> => {
+export const postEditProduct = (req: Request, res: Response, next: NextFunction) => {
     const id = ((req.params['id'] as string) || (req.body.id as string));
     const image = req.file;
     const {title, description, price} = req.body as {
@@ -131,11 +83,9 @@ export const postEditProduct = (req: Request, res: Response): Promise<void> => {
             product.title = title;
             product.description = description;
             product.price = parseFloat(price);
-            return product.save().then(() => res.redirect('/admin/products'))
+            return product.save()
         })
-        .catch((err: any) => {
-            throw new Error(err);
-        });
+        .catch((err: any) => next(new Error(err)));
 };
 
 
@@ -160,7 +110,7 @@ export const deleteProduct = (req: Request, res: Response, next: NextFunction) =
                 .status(204)
                 .json({message: 'Success'});
         })
-        .catch((err: any) => res.status(500).json(err));
+        .catch((err: any) => next(new Error(err)));
 };
 
 

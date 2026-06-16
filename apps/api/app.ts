@@ -119,7 +119,7 @@ app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
 app.use('/', (_req: Request, _res: Response, next: NextFunction) => next());
 app.use('/admin', isAuth, adminRoutes);
 app.use('/auth', authRoutes);
-app.use(shopRoutes);
+app.use('/v1', shopRoutes);
 app.get('/500', get500);
 app.use(notFound);
 app.use((err: any, _req: Request, res: Response, next: NextFunction) => {

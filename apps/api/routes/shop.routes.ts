@@ -12,7 +12,6 @@ shopRoutes.get('/cart', isAuth, ShopController.getCart);
 shopRoutes.get('/cart-delete-item/:id', isAuth, ShopController.postCartDeleteProduct);
 shopRoutes.get('/checkout', isAuth, ShopController.getCheckout);
 shopRoutes.get('/checkout/success', isAuth, ShopController.getCheckoutSuccess);
-shopRoutes.get('/checkout/cancel', isAuth, ShopController.getCheckoutCancel);
 shopRoutes.get('/orders', isAuth, ShopController.getOrders);
 shopRoutes.get('/invoices/:orderId', isAuth, ShopController.getInvoice);
 /**

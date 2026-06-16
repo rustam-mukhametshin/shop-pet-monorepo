@@ -5,9 +5,7 @@ import {body} from "express-validator";
 const adminRoutes = Router();
 /**
  * GET
- */
-adminRoutes.get('/add-product', AdminController.getAddProduct);
-adminRoutes.get('/edit-product/:id', AdminController.getEditProduct);
+ */;
 adminRoutes.delete('/delete-product/:id', AdminController.deleteProduct);
 adminRoutes.get('/products', AdminController.getProducts);
 

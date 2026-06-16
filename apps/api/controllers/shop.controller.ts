@@ -5,13 +5,12 @@ import {OrderModel} from "../models/order.model";
 import * as fs from "node:fs";
 import path from "path";
 import PDFDocument from "pdfkit";
-import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET!);
+// const stripe = new Stripe(process.env.STRIPE_SECRET!);
 
 const ITEMS_PER_PAGE = 2;
 
-export const getIndex = async (req: Request, res: Response): Promise<void> => {
+export const getIndex = async (req: Request, res: Response, next: NextFunction) => {
     const currentPage: number = parseInt(req.query?.page as string) || 1;
     const totalNumberOfPages = await Product.countDocuments();
     const lastPage = Math.ceil(totalNumberOfPages / 2);
@@ -20,17 +19,16 @@ export const getIndex = async (req: Request, res: Response): Promise<void> => {
         .skip((currentPage - 1) * ITEMS_PER_PAGE)
         .limit(ITEMS_PER_PAGE)
         .then((products) => {
-            res.render('shop/index', {
-                pageTitle: 'Shop',
-                url: '/',
+            return res.json({
                 prods: products,
                 currentPage,
                 lastPage,
             });
-        });
+        })
+        .catch((err: any) => next(new Error(err)));
 };
 
-export const getProducts = async (req: Request, res: Response): Promise<void> => {
+export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
     const currentPage: number = parseInt(req.query?.page as string) || 1;
     const totalNumberOfPages = await Product.countDocuments();
     const lastPage = Math.ceil(totalNumberOfPages / 2);
@@ -41,34 +39,32 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
         .limit(ITEMS_PER_PAGE)
         .populate('userId')
         .then((products) => {
-            res.render('shop/product-list', {
-                pageTitle: 'Products',
-                url: '/products',
+            return res.json({
                 prods: products,
                 currentPage,
                 lastPage,
             });
         })
-        .catch((err: any) => {
-            throw new Error(err);
-        });
+        .catch((err: any) => next(new Error(err)));
 };
 
-export const getProduct = (req: Request, res: Response): Promise<void> => {
+export const getProduct = (req: Request, res: Response, next: NextFunction) => {
     return Product.findById(req.params['id'] as string)
         .then((product) => {
-            res.render('shop/product-detail', {
-                pageTitle: product?.title ?? 'Product',
-                url: '/products',
+            if (!product) {
+                return res.status(404).json({
+                    message: 'Product not found',
+                });
+            }
+
+            return res.json({
                 product,
             });
         })
-        .catch((err: any) => {
-            throw new Error(err);
-        });
+        .catch((err: any) => next(new Error(err)));
 };
 
-export const getCart = (req: Request, res: Response): Promise<unknown> => {
+export const getCart = (req: Request, res: Response, next: NextFunction): Promise<unknown> => {
     return UserModel.findById(req?.user).populate({
         path: 'cart.items.productId',
         model: 'Product',
@@ -76,46 +72,40 @@ export const getCart = (req: Request, res: Response): Promise<unknown> => {
         .select('cart')
         .then((user: any) => {
             if (user && user.cart) {
-                return res.render('shop/cart', {
-                    pageTitle: 'Cart',
-                    url: '/cart',
+                return res.json({
                     cart: user.cart,
                     products: user.cart.items,
                 });
             } else {
-                return res.render('shop/cart', {
-                    pageTitle: 'Cart',
-                    url: '/cart',
+                return res.status(404).json({
                     cart: {},
                     products: [],
                 });
             }
         })
-        .catch((err: any) => {
-            throw new Error(err);
-        });
+        .catch((err: any) => next(new Error(err)));
 };
 
-export const postAddProductToCart = (req: Request, res: Response): Promise<void> => {
+export const postAddProductToCart = (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const productId = req.body.id as string;
     return Product.findById(productId)
         .then(product => req?.user?.addToCart(product))
-        .then(() => res.redirect('/cart'))
-        .catch((err: any) => {
-            throw new Error(err);
-        });
+        .then((value) => res.json({
+            product,
+        }))
+        .catch((err: any) => next(new Error(err)));
 };
 
-export const postCartDeleteProduct = (req: Request, res: Response) => {
+export const postCartDeleteProduct = (req: Request, res: Response, next: NextFunction) => {
     return req.user
         .deleteProductFromCart(req.params['id'])
-        .then(() => res.redirect('/cart'))
-        .catch((err: any) => {
-            throw new Error(err);
-        });
+        .then(result => res.json({
+            product: result,
+        }))
+        .catch((err: any) => next(new Error(err)));
 };
 
-export const getOrders = async (req: Request, res: Response): Promise<void> => {
+export const getOrders = async (req: Request, res: Response, next: NextFunction) => {
     return OrderModel
         .find({
             'userId': req?.user
@@ -125,26 +115,21 @@ export const getOrders = async (req: Request, res: Response): Promise<void> => {
             model: 'Product',
         })
         .then((orders: any[]) => {
-            return res.render('shop/orders', {
-                pageTitle: 'Orders',
-                url: '/orders',
+            return res.json({
                 orders: orders,
             });
         })
-        .catch((err: any) => {
-            throw new Error(err);
-        });
-
+        .catch((err: any) => next(new Error(err)));
 };
 
-export const postDeleteOrderItem = (req: Request, res: Response): Promise<void> => {
+export const postDeleteOrderItem = (req: Request, res: Response, next: NextFunction) => {
     const {productId, orderId} = req.body as { productId: string; orderId: string };
     return req.user
         .deleteProductFromOrder(productId, orderId)
-        .then(() => res.redirect('/orders'))
-        .catch((err: any) => {
-            throw new Error(err);
-        });
+        .then((result) => res.json({
+            product: result,
+        }))
+        .catch((err: any) => next(new Error(err)));
 };
 
 export let getInvoice = async (req: Request, res: Response, next: NextFunction) => {
@@ -202,11 +187,11 @@ export let getInvoice = async (req: Request, res: Response, next: NextFunction) 
             // file.pipe(res);
 
         })
-        .catch(err => next(err))
+        .catch((err: any) => next(new Error(err)));
 
 };
 
-export let getCheckout = async (req: Request, res: Response) => {
+export let getCheckout = async (req: Request, res: Response, next: NextFunction) => {
     return UserModel.findById(req?.user).populate({
         path: 'cart.items.productId',
         model: 'Product',
@@ -214,37 +199,39 @@ export let getCheckout = async (req: Request, res: Response) => {
         .select('cart')
         .then(async (user: any) => {
             if (!user || !user.cart || user.cart.items.length === 0) {
-                return res.redirect('/cart');
+                return res.json({
+                    cart: {},
+                    error: 'Empty cart item',
+                });
             }
 
             const products = user.cart.items;
 
-            const session = await stripe.checkout.sessions.create({
-                payment_method_types: ['card'],
-                line_items: products.map((p: any) => ({
-                    price_data: {
-                        currency: 'usd',
-                        unit_amount: Math.round(p.productId.price * 100),
-                        product_data: {
-                            name: p.productId.title,
-                            description: p.productId.description,
-                        },
-                    },
-                    quantity: p.quantity,
-                })),
-                mode: 'payment',
-                success_url: req.protocol + '://' + req.get('host') + '/checkout/success',
-                cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel',
-            });
+            // const session = await stripe.checkout.sessions.create({
+            //     payment_method_types: ['card'],
+            //     line_items: products.map((p: any) => ({
+            //         price_data: {
+            //             currency: 'usd',
+            //             unit_amount: Math.round(p.productId.price * 100),
+            //             product_data: {
+            //                 name: p.productId.title,
+            //                 description: p.productId.description,
+            //             },
+            //         },
+            //         quantity: p.quantity,
+            //     })),
+            //     mode: 'payment',
+            //     success_url: req.protocol + '://' + req.get('host') + '/checkout/success',
+            //     cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel',
+            // });
 
-            return res.redirect(303, session.url || '/cart');
+            // return res.redirect(303, session.url || '/cart');
+            return res.redirect(303, '/cart');
         })
-        .catch((err: any) => {
-            throw new Error(err);
-        });
+        .catch((err: any) => next(new Error(err)));
 };
 
-export let getCheckoutSuccess = async (req: Request, res: Response) => {
+export let getCheckoutSuccess = async (req: Request, res: Response, next: NextFunction) => {
     return UserModel.findById(req?.user).populate({
         path: 'cart.items.productId',
         model: 'Product',
@@ -253,9 +240,7 @@ export let getCheckoutSuccess = async (req: Request, res: Response) => {
         .then(async (user: any) => {
             const orders = await OrderModel.find().cursor().toArray();
             if (!user || !user.cart) {
-                return res.render('shop/orders', {
-                    pageTitle: 'Orders',
-                    url: '/orders',
+                return res.json({
                     orders: orders,
                 });
             }
@@ -271,20 +256,9 @@ export let getCheckoutSuccess = async (req: Request, res: Response) => {
             await order.save();
             await req.user.clearCart();
 
-            return res.render('shop/orders', {
-                pageTitle: 'Orders',
-                url: '/orders',
+            return res.json({
                 orders: orders,
             });
         })
-        .catch((err: any) => {
-            throw new Error(err);
-        });
-};
-
-export const getCheckoutCancel = (req: Request, res: Response) => {
-    res.render('shop/checkout-cancel', {
-        pageTitle: 'Checkout Cancelled',
-        url: '/checkout-cancel',
-    });
+        .catch((err: any) => next(new Error(err)));
 };
