@@ -11,21 +11,7 @@ import PDFDocument from "pdfkit";
 const ITEMS_PER_PAGE = 2;
 
 export const getIndex = async (req: Request, res: Response, next: NextFunction) => {
-    const currentPage: number = parseInt(req.query?.page as string) || 1;
-    const totalNumberOfPages = await Product.countDocuments();
-    const lastPage = Math.ceil(totalNumberOfPages / 2);
-
-    return Product.find()
-        .skip((currentPage - 1) * ITEMS_PER_PAGE)
-        .limit(ITEMS_PER_PAGE)
-        .then((products) => {
-            return res.json({
-                prods: products,
-                currentPage,
-                lastPage,
-            });
-        })
-        .catch((err: any) => next(new Error(err)));
+    return getProducts(req, res, next);
 };
 
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
