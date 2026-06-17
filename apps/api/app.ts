@@ -11,8 +11,6 @@ import session from "express-session";
 import MongoStore from 'connect-mongo';
 import {UserModel} from "./models/user.model";
 import {isAuth} from "./middleware/is-auth";
-import csrf from 'csurf'; // TODO Remove deprecated package
-// import {csrfSync} from 'csrf-sync';
 import flash from "connect-flash";
 import multer from "multer";
 import helmet from "helmet";
@@ -20,8 +18,7 @@ import helmet from "helmet";
 dotenv.config();
 
 const app = express();
-const csrfProtection = csrf()
-// export const {generateToken, csrfSynchronisedProtection} = csrfSync();
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:4200'];
 
 app.set('view engine', 'ejs');
 
@@ -81,8 +78,6 @@ app.use(session({
     }
 }));
 
-app.use(csrfProtection);
-// app.use(csrfSynchronisedProtection);
 app.use(flash());
 
 app.use((req: Request, _: Response, next: NextFunction) => {
@@ -100,19 +95,9 @@ app.use((req: Request, _: Response, next: NextFunction) => {
 app.use((req: Request, res: Response, next: NextFunction) => {
     res.locals.isLoggedIn = req.session?.isLoggedIn || false;
     res.locals.userName = req.user?.name || req.session?.user?.name || '';
-    // res.locals.csrfToken = generateToken(req);
-    res.locals.csrfToken = req.csrfToken();
     res.locals.error = req.flash('error');
     res.locals.success = req.flash('success');
     next();
-});
-
-app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
-    if (err && err.code === 'EBADCSRFTOKEN') {
-        res.status(403).send('Invalid CSRF token.');
-    } else {
-        next(err);
-    }
 });
 
 // Routes
