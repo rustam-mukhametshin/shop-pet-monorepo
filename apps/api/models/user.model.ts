@@ -35,6 +35,8 @@ const userSchema = new Schema({
             }
         }],
     }
+}, {
+    timestamps: true
 })
 
 userSchema.methods.addToCart = function (product: any) {
