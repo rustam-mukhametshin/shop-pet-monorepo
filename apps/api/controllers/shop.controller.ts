@@ -75,17 +75,24 @@ export const getCart = (req: Request, res: Response, next: NextFunction): Promis
 export const postAddProductToCart = (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const productId = req.body.id as string;
     return Product.findById(productId)
-        .then(product => req?.user?.addToCart(product))
-        .then((value) => res.json({
-            product,
-        }))
+        .then(product => {
+            if (!product) {
+                return res.status(404).json({
+                    message: 'Product not found',
+                });
+            }
+
+            return req?.user?.addToCart(product).then(() => res.json({
+                product,
+            }));
+        })
         .catch((err: any) => next(new Error(err)));
 };
 
 export const postCartDeleteProduct = (req: Request, res: Response, next: NextFunction) => {
     return req.user
         .deleteProductFromCart(req.params['id'])
-        .then(result => res.json({
+        .then((result: unknown) => res.json({
             product: result,
         }))
         .catch((err: any) => next(new Error(err)));
@@ -112,7 +119,7 @@ export const postDeleteOrderItem = (req: Request, res: Response, next: NextFunct
     const {productId, orderId} = req.body as { productId: string; orderId: string };
     return req.user
         .deleteProductFromOrder(productId, orderId)
-        .then((result) => res.json({
+        .then((result: unknown) => res.json({
             product: result,
         }))
         .catch((err: any) => next(new Error(err)));
