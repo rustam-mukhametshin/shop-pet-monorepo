@@ -21,8 +21,6 @@ dotenv.config();
 const app = express();
 const allowedOrigins = ['http://localhost:3000', 'http://localhost:4200'];
 
-app.set('view engine', 'ejs');
-
 app.use(helmet())
 app.use((req, res, next) => {
     const origin = req.headers.origin;

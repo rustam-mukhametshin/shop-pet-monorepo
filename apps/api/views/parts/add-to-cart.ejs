@@ -1,7 +1,0 @@
-<% if(isLoggedIn) { %>
-    <form action="/cart" method="post" class="m-0">
-        <button type="submit" class="btn btn-success">Add to cart</button>
-        <input type="hidden" name="id" value="<%= product.id %>">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    </form>
-<% } %>

@@ -97,14 +97,6 @@ export const getStatus = (req: Request, res: Response) => {
     })
 }
 
-export const getReset = (req: Request, res: Response) => {
-    res.render('auth/reset', {
-        pageTitle: 'Reset Password',
-        url: '/reset',
-        errorMessage: req.flash('error'),
-    });
-}
-
 export const postReset = async (req: Request, res: Response) => {
     const {email} = req.body;
     if (!email || !UserModel.isValidEmail(email)) {
@@ -152,9 +144,7 @@ export const getResetPassword = (req: Request, res: Response) => {
         return res.status(422).redirect('/reset');
     }
 
-    return res.render('auth/reset-password', {
-        pageTitle: 'Reset Password',
-        url: '/reset-password',
+    return res.json({
         errorMessage: req.flash('error'),
         _email: payload.email,
         _token: token,
