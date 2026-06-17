@@ -24,13 +24,19 @@ app.set('view engine', 'ejs');
 
 app.use(helmet())
 app.use((req, res, next) => {
-    // res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Origin", "http://localhost:4200");
-    // res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Methods', '*');
+    const origin = req.headers.origin;
+    if (origin && allowedOrigins.includes(origin)) {
+        res.header('Access-Control-Allow-Origin', origin);
+    }
+    res.header('Vary', 'Origin');
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
     res.header('Access-Control-Allow-Credentials', 'true');
-    // res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.header('Access-Control-Allow-Headers', '*');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(204);
+    }
+
     next();
 })
 
