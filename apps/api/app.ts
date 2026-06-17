@@ -7,9 +7,7 @@ import adminRoutes from "./routes/admin.routes";
 import {get500, notFound} from "./controllers/public.controller";
 import shopRoutes from "./routes/shop.routes";
 import authRoutes from "./routes/auth.routes";
-import {UserModel} from "./models/user.model";
 import {isAuth} from "./middleware/is-auth";
-import flash from "connect-flash";
 import multer from "multer";
 import helmet from "helmet";
 import {initSocket, type Socket} from "./socket";
@@ -63,14 +61,6 @@ app.use(multer({
         }
     }
 }).single('image'))
-
-app.use(flash());
-
-app.use((req: Request, res: Response, next: NextFunction) => {
-    res.locals.error = req.flash('error');
-    res.locals.success = req.flash('success');
-    next();
-});
 
 // Routes
 app.use('/', (_req: Request, _res: Response, next: NextFunction) => next());
