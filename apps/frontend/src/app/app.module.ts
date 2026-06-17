@@ -2,12 +2,37 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
+import { RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
+import { ProductsComponent } from './products/products/products.component';
+import { CreateProductComponent } from './products/create-product/create-product.component';
+import { UpdateProductComponent } from './products/update-product/update-product.component';
+import { FormProductComponent } from './products/form-product/form-product.component';
+import { ProductComponent } from './products/product/product.component';
+
+const routes: Routes = [
+  { path: '', redirectTo: 'products', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { path: 'products', component: ProductsComponent },
+  { path: 'products/create', component: CreateProductComponent },
+  { path: 'products/form', component: FormProductComponent },
+  { path: 'products/:id', component: ProductComponent },
+  { path: 'products/:id/update', component: UpdateProductComponent },
+  { path: '**', redirectTo: 'products' },
+];
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent],
-  imports: [BrowserModule, HttpClientModule, ReactiveFormsModule],
+  declarations: [
+    AppComponent,
+    LoginComponent,
+    ProductsComponent,
+    CreateProductComponent,
+    UpdateProductComponent,
+    FormProductComponent,
+    ProductComponent,
+  ],
+  imports: [BrowserModule, HttpClientModule, ReactiveFormsModule, RouterModule.forRoot(routes)],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

@@ -1,0 +1,45 @@
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Product, ProductsService } from '../products.service';
+
+@Component({
+  selector: 'app-product',
+  templateUrl: './product.component.html',
+  styleUrls: ['./product.component.css'],
+})
+export class ProductComponent implements OnInit {
+  @Input() product?: Product;
+  @Input() showActions = true;
+  @Output() remove = new EventEmitter<string>();
+
+  detailView = false;
+
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly productsService: ProductsService,
+  ) {}
+
+  ngOnInit(): void {
+    if (this.product) {
+      return;
+    }
+
+    const id = this.route.snapshot.paramMap.get('id');
+
+    if (!id) {
+      return;
+    }
+
+    this.product = this.productsService.getProductById(id);
+    this.detailView = true;
+    this.showActions = false;
+  }
+
+  deleteProduct(): void {
+    if (!this.product) {
+      return;
+    }
+
+    this.remove.emit(this.product.id);
+  }
+}

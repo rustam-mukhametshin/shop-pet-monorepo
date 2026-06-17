@@ -1,0 +1,48 @@
+<form [formGroup]="productForm" (ngSubmit)="submit()" novalidate>
+  <div class="mb-3">
+    <label class="form-label" for="title">Title</label>
+    <input
+      id="title"
+      type="text"
+      class="form-control"
+      formControlName="title"
+      [class.is-invalid]="titleControl.touched && titleControl.invalid"
+    />
+    <div class="invalid-feedback" *ngIf="titleControl.touched && titleControl.errors?.['required']">
+      Title is required.
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label" for="description">Description</label>
+    <textarea
+      id="description"
+      class="form-control"
+      rows="4"
+      formControlName="description"
+      [class.is-invalid]="descriptionControl.touched && descriptionControl.invalid"
+    ></textarea>
+    <div class="invalid-feedback" *ngIf="descriptionControl.touched && descriptionControl.errors?.['required']">
+      Description is required.
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <label class="form-label" for="price">Price</label>
+    <input
+      id="price"
+      type="number"
+      class="form-control"
+      formControlName="price"
+      [class.is-invalid]="priceControl.touched && priceControl.invalid"
+    />
+    <div class="invalid-feedback" *ngIf="priceControl.touched && priceControl.errors?.['required']">
+      Price is required.
+    </div>
+    <div class="invalid-feedback" *ngIf="priceControl.touched && priceControl.errors?.['min']">
+      Price must be a positive number.
+    </div>
+  </div>
+
+  <button class="btn btn-primary" type="submit">{{ submitLabel }}</button>
+</form>
