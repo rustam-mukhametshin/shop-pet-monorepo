@@ -14,6 +14,7 @@ import {isAuth} from "./middleware/is-auth";
 import flash from "connect-flash";
 import multer from "multer";
 import helmet from "helmet";
+import {initSocket, type Socket} from "./socket";
 
 dotenv.config();
 
@@ -119,7 +120,20 @@ app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
 
 if (require.main === module) {
     mongoConnect(() => {
-        app.listen(3333);
+        const server = app.listen(3333);
+
+
+        const io = initSocket(server, {
+            cors: {
+                origin: allowedOrigins,
+                methods: ['GET', 'POST'],
+                credentials: true,
+            },
+        });
+
+        io.on('connection', (socketConnection: Socket) => {
+            console.log('Client connected!');
+        })
     })
 }
 
