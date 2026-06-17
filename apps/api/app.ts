@@ -7,8 +7,6 @@ import adminRoutes from "./routes/admin.routes";
 import {get500, notFound} from "./controllers/public.controller";
 import shopRoutes from "./routes/shop.routes";
 import authRoutes from "./routes/auth.routes";
-import session from "express-session";
-import MongoStore from 'connect-mongo';
 import {UserModel} from "./models/user.model";
 import {isAuth} from "./middleware/is-auth";
 import flash from "connect-flash";
@@ -66,40 +64,9 @@ app.use(multer({
     }
 }).single('image'))
 
-// Set session
-app.use(session({
-    secret: process.env.DB_SESSION_SECRET!,
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-        mongoUrl: process.env.MONGO_URI!,
-        collectionName: 'sessions',
-    }),
-    cookie: {
-        secure: true,
-        sameSite: 'strict',
-        maxAge: 600000,
-        httpOnly: true,
-    }
-}));
-
 app.use(flash());
 
-app.use((req: Request, _: Response, next: NextFunction) => {
-    UserModel.findById(req.session?.user?._id)
-        .then((user: any) => {
-            if (!user) {
-                return next();
-            }
-            req.user = user;
-            next();
-        })
-        .catch((err: any) => next(new Error(err)));
-})
-
 app.use((req: Request, res: Response, next: NextFunction) => {
-    res.locals.isLoggedIn = req.session?.isLoggedIn || false;
-    res.locals.userName = req.user?.name || req.session?.user?.name || '';
     res.locals.error = req.flash('error');
     res.locals.success = req.flash('success');
     next();

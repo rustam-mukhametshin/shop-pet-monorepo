@@ -83,7 +83,7 @@ export const postSignup = (req: Request, res: Response, next: any) => {
                 })
             }
 
-            return Promise.resolve(() => req.session.save())
+            return Promise.resolve()
                 .then(() => NodeMailModel.sendWelcomeEmail(user.email, user.name))
                 .then(_ => res.status(201).json({message: 'User created successfully',}))
         })
