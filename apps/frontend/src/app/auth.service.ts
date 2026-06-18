@@ -8,10 +8,20 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface SignupCredentials {
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
 export interface LoginResponse {
   userId: string;
   message: string;
   token: string;
+}
+
+export interface SignupResponse {
+  message: string;
 }
 
 @Injectable({
@@ -30,6 +40,14 @@ export class AuthService {
         }
       })
       .pipe(tap(response => this.setToken(response.token)));
+  }
+
+  signup(credentials: SignupCredentials): Observable<SignupResponse> {
+    return this.http.post<SignupResponse>(`${environment.apiUrl}auth/signup`, credentials, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
   }
 
   getToken(): string | null {

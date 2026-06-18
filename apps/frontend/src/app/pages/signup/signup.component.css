@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.signup-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding-inline: 1rem;
+}
+
+.signup-card {
+  width: 100%;
+  max-width: 28rem;
+  border-radius: 1rem;
+}

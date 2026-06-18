@@ -1,10 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { AuthService } from '../auth.service';
+import { Router } from '@angular/router';
+import { first } from 'rxjs';
+import { AuthService } from '../../auth.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-login-page',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
 })
@@ -21,7 +23,16 @@ export class LoginComponent {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
+    private readonly router: Router,
   ) {}
+
+  get emailControl() {
+    return this.loginForm.controls.email;
+  }
+
+  get passwordControl() {
+    return this.loginForm.controls.password;
+  }
 
   submit(): void {
     if (this.loginForm.invalid) {
@@ -33,24 +44,20 @@ export class LoginComponent {
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.authService.login(this.loginForm.getRawValue()).subscribe({
-      next: response => {
-        this.successMessage = response.message;
-        this.isSubmitting = false;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage = this.getErrorMessage(error);
-        this.isSubmitting = false;
-      },
-    });
-  }
-
-  get emailControl() {
-    return this.loginForm.controls.email;
-  }
-
-  get passwordControl() {
-    return this.loginForm.controls.password;
+    this.authService
+      .login(this.loginForm.getRawValue())
+      .pipe(first())
+      .subscribe({
+        next: response => {
+          this.successMessage = response.message;
+          this.isSubmitting = false;
+          this.router.navigate(['/products']);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage = this.getErrorMessage(error);
+          this.isSubmitting = false;
+        },
+      });
   }
 
   private getErrorMessage(error: HttpErrorResponse): string {
