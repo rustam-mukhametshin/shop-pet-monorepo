@@ -3,6 +3,7 @@ import * as AuthController from '../controllers/auth.controller';
 import {body} from "express-validator";
 import {UserModel} from "../models/user.model";
 import {isAuth} from "../middleware/is-auth";
+import {get2FA} from "../controllers/auth.controller";
 
 const authRoutes = Router();
 
@@ -59,6 +60,10 @@ authRoutes.post(
 );
 
 authRoutes.get('/status', isAuth, AuthController.getStatus);
+
+authRoutes.get('/profile', isAuth, AuthController.getProfile);
+
+authRoutes.post('/2fa', get2FA)
 
 authRoutes.post('/reset', AuthController.postReset);
 
