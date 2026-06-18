@@ -65,6 +65,7 @@ export const postEditProduct = (req: Request, res: Response, next: NextFunction)
     };
 
     return Product.findById(id)
+        // @ts-ignore
         .then((product) => {
 
             if (!product) throw new Error('Product not found');
