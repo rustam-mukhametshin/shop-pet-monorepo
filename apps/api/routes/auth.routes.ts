@@ -34,6 +34,19 @@ authRoutes.post('/login', [
     .isLength({min: 6, max: 72}),
 ], AuthController.postLogin);
 
+authRoutes.post('/login-twofa', [
+  body('twoFACode')
+    .trim()
+    .escape()
+    .isNumeric()
+    .isLength({min: 6, max: 6}),
+  body('stateToken')
+    .trim()
+    .escape()
+    .isString()
+    .isLength({min: 25, max: 255}),
+], AuthController.postLoginWithTwoFa);
+
 authRoutes.post(
   '/signup',
   [

@@ -5,14 +5,33 @@ import {NodeMailModel} from "../models/node-mail.model";
 import {TokenModel} from "../models/token.model";
 import {validationResult} from "express-validator";
 import jwt from "jsonwebtoken";
-import {generateSecret, generateURI} from "otplib";
+import {generateSecret, generateURI, verify} from "otplib";
 import QRCode from "qrcode";
 import {ProfileModel} from "../models/profile.model";
 import {env} from "../env";
 import {TwoFAModel} from "../models/two-fa.model";
 
 
-export const postLogin = (req: Request, res: Response) => {
+function createToken(user: any) {
+  return jwt.sign({
+    userId: user.id,
+    status: user.status,
+    // Todo: refactor
+  }, process.env.JWT_SECRET!, {expiresIn: '1h'});
+}
+
+function createStateToken(user: any) {
+  return jwt.sign({
+    userId: user.id,
+    status: user.status,
+  }, process.env.JWT_STATE_SECRET!, {expiresIn: '10m'});
+}
+
+function validateStateToken(token: string) {
+  return jwt.verify(token, process.env.JWT_STATE_SECRET!)
+}
+
+export const postLogin = async (req: Request, res: Response, next: NextFunction) => {
   const {email, password} = req.body;
 
   const errors = validationResult(req);
@@ -22,36 +41,96 @@ export const postLogin = (req: Request, res: Response) => {
     });
   }
 
-  return UserModel.findOne({email: email})
-    .then(user => {
-      if (!bcrypt.compareSync(password, user.password)) {
-        return res.status(422).json({
-          error: 'Incorrect user or password',
-        })
-      }
+  try {
+    const user = await UserModel.findOne({email: email});
 
-      // Todo: refactor
-      if (!process.env.JWT_SECRET) {
-        return res.status(422).json({
-          error: 'Unknown error',
-        })
-      }
+    if (!bcrypt.compareSync(password, user.password)) {
+      return res.status(422).json({
+        status: 'error',
+        error: 'Incorrect user or password',
+      })
+    }
 
+    const profile = await ProfileModel.findOne({userId: user._id});
+
+    if (profile?.twoFA) {
+      return res.status(200).json({
+        status: "MFA_REQUIRED",
+        message: 'MFA is required',
+        "state_token": createStateToken(user),
+        // Expires in 10 minutes
+        "expires_at": Date.now() + 10 * 60 * 1000
+      })
+    } else {
       // Create token
-      const token = jwt.sign({
-        userId: user.id,
-        status: user.status,
-      }, process.env.JWT_SECRET, {expiresIn: '1h'});
+      return res.status(200).json({
+        status: 'success',
+        message: 'Login successfully',
+        userId: user._id,
+        token: createToken(user),
+      })
+    }
+
+  } catch (error: any) {
+    next(new Error(error))
+  }
+};
+
+
+export const postLoginWithTwoFa = async (req: Request, res: Response, next: NextFunction) => {
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
+      error: [errors.array()[0].msg],
+    });
+  }
+
+  const {twoFACode, stateToken} = req.body;
+
+  // Validate code from authentificator
+  const payload = validateStateToken(stateToken);
+
+  // Todo: check how it works
+  if (!payload || typeof payload === 'string') {
+    return res.status(422).json({
+      status: 'error',
+      message: 'Login failed',
+    })
+  }
+
+  const userId = payload.userId;
+
+  const twoFASecret = await TwoFAModel.findOne({userId: userId})
+
+  if (twoFASecret && twoFASecret.secret) {
+    const result = await verify({
+      secret: twoFASecret.secret,
+      token: twoFACode
+    })
+
+    if (result.valid) {
+      const user = await UserModel.findById(userId);
+
+      if (!user) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'Login failed',
+        })
+      }
 
       return res.status(200).json({
+        status: 'success',
         userId: user._id,
         message: 'Login successfully',
-        token: token,
+        token: createToken(user),
       })
+    }
+    return res.status(402).json({
+      status: 'error',
+      message: 'Login failed',
     })
-    .catch((err: any) => {
-      throw new Error(err);
-    });
+  }
 };
 
 export const postSignup = (req: Request, res: Response, next: any) => {
@@ -205,6 +284,12 @@ export const getResetPassword = (req: Request, res: Response) => {
   });
 }
 
+/**
+ * POST
+ * reset password
+ * @param req
+ * @param res
+ */
 export const postResetPassword = async (req: Request, res: Response) => {
   const {password, confirmPassword, _email, _token} = req.body;
 
