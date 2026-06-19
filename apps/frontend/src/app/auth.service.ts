@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { environment } from '../environments/environment';
+import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject, Observable, tap} from 'rxjs';
+import {environment} from '../environments/environment';
 
 export interface LoginCredentials {
   email: string;
@@ -18,6 +18,9 @@ export interface LoginResponse {
   userId: string;
   message: string;
   token: string;
+  status: string;
+  state_token: string;
+  expires_at: number;
 }
 
 export interface SignupResponse {
@@ -41,8 +44,32 @@ export class AuthService {
         }
       })
       .pipe(tap(response => {
-        this.setToken(response.token);
-        this.isLoggedInSubj$.next(true);
+        if (response.status !== 'MFA_REQUIRED' && response.status === 'success') {
+          this.setToken(response.token);
+          this.isLoggedInSubj$.next(true);
+        }
+      }))
+  }
+
+  loginWithTwoFA(twoFACode: string, stateToken: string) {
+    return this.http
+      .post<LoginResponse>(
+        `${environment.apiUrl}auth/login-twofa`, {
+          twoFACode: twoFACode,
+          stateToken: stateToken,
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      )
+      .pipe(tap((response) => {
+        if (response.message && response.status === 'success') {
+          if (response.token) {
+            this.setToken(response.token);
+          }
+          this.isLoggedInSubj$.next(true);
+        }
       }))
   }
 

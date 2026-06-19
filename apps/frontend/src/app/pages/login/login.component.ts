@@ -1,9 +1,9 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { first } from 'rxjs';
-import { AuthService } from '../../auth.service';
+import {HttpErrorResponse} from '@angular/common/http';
+import {Component, OnInit} from '@angular/core';
+import {FormBuilder, Validators} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {first} from 'rxjs';
+import {AuthService} from '../../auth.service';
 
 @Component({
   selector: 'app-login-page',
@@ -14,22 +14,22 @@ export class LoginComponent implements OnInit {
   readonly loginForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
+    twoFA: ['', [Validators.minLength(6), Validators.maxLength(6)]],
   });
 
   isSubmitting = false;
   errorMessage = '';
   successMessage = '';
+  isTwoFASubmit = false;
   private returnUrl = '';
+  private stateToken = '';
 
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
-  ) {}
-
-  ngOnInit(): void {
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/products';
+  ) {
   }
 
   get emailControl() {
@@ -38,6 +38,14 @@ export class LoginComponent implements OnInit {
 
   get passwordControl() {
     return this.loginForm.controls.password;
+  }
+
+  get twoFAControl() {
+    return this.loginForm.controls.twoFA;
+  }
+
+  ngOnInit(): void {
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/products';
   }
 
   submit(): void {
@@ -55,9 +63,44 @@ export class LoginComponent implements OnInit {
       .pipe(first())
       .subscribe({
         next: response => {
-          this.successMessage = response.message;
+          if (response.status === 'success') {
+            // loginWithTwoFA
+            this.successMessage = response.message;
+            this.router.navigateByUrl(this.returnUrl);
+          } else if (response.status === 'MFA_REQUIRED') {
+            this.isTwoFASubmit = true;
+            console.log('true')
+            this.stateToken = response.state_token as any;
+          }
+
           this.isSubmitting = false;
-          this.router.navigateByUrl(this.returnUrl);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage = this.getErrorMessage(error);
+          this.isSubmitting = false;
+        },
+      });
+  }
+
+  submitTwoFA(): void {
+    this.isSubmitting = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.authService
+      .loginWithTwoFA(
+        this.loginForm.get('twoFA')?.value as string,
+        this.stateToken,
+      )
+      .pipe(first())
+      .subscribe({
+        next: response => {
+          if (response.status === 'success') {
+            this.successMessage = response.message;
+            this.router.navigateByUrl(this.returnUrl);
+          }
+
+          this.isSubmitting = false;
         },
         error: (error: HttpErrorResponse) => {
           this.errorMessage = this.getErrorMessage(error);

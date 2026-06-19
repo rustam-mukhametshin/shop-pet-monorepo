@@ -15,16 +15,16 @@
         {{ successMessage }}
       </div>
 
-      <form [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
-        <div class="mb-3">
+      <form [formGroup]="loginForm">
+        <div class="mb-3" *ngIf="!isTwoFASubmit">
           <label for="email" class="form-label">Email address</label>
           <input
-            id="email"
-            type="email"
-            class="form-control form-control-lg"
-            formControlName="email"
-            placeholder="name@example.com"
-            [class.is-invalid]="emailControl.touched && emailControl.invalid"
+                  id="email"
+                  type="email"
+                  class="form-control form-control-lg"
+                  formControlName="email"
+                  placeholder="name@example.com"
+                  [class.is-invalid]="emailControl.touched && emailControl.invalid"
           />
           <div class="invalid-feedback" *ngIf="emailControl.touched && emailControl.errors?.['required']">
             Email is required.
@@ -34,15 +34,15 @@
           </div>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-3" *ngIf="!isTwoFASubmit">
           <label for="password" class="form-label">Password</label>
           <input
-            id="password"
-            type="password"
-            class="form-control form-control-lg"
-            formControlName="password"
-            placeholder="Your password"
-            [class.is-invalid]="passwordControl.touched && passwordControl.invalid"
+                  id="password"
+                  type="password"
+                  class="form-control form-control-lg"
+                  formControlName="password"
+                  placeholder="Your password"
+                  [class.is-invalid]="passwordControl.touched && passwordControl.invalid"
           />
           <div class="invalid-feedback" *ngIf="passwordControl.touched && passwordControl.errors?.['required']">
             Password is required.
@@ -52,18 +52,49 @@
           </div>
         </div>
 
+        <div class="mb-3" *ngIf="isTwoFASubmit">
+          <label for="twoFA" class="form-label">2FA</label>
+          <input
+                  id="twoFA"
+                  type="text"
+                  minlength="6"
+                  maxlength="6"
+                  class="form-control form-control-lg"
+                  formControlName="twoFA"
+                  placeholder="Your 2fa"
+                  [class.is-invalid]="twoFAControl.touched && twoFAControl.invalid"
+          />
+          <div class="invalid-feedback" *ngIf="twoFAControl.touched && twoFAControl.errors?.['minlength']">
+            twoFA must be at least 6 characters.
+          </div>
+        </div>
+
         <div class="d-flex align-items-center justify-content-between mb-4">
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="remember" />
+            <input class="form-check-input" type="checkbox" id="remember"/>
             <label class="form-check-label" for="remember">Remember me</label>
           </div>
           <a href="#" class="text-decoration-none small">Forgot password?</a>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-lg w-100" [disabled]="isSubmitting">
-          <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-          {{ isSubmitting ? 'Signing in...' : 'Sign in' }}
-        </button>
+        <ng-container *ngIf="!isTwoFASubmit">
+          <button type="button" class="btn btn-primary btn-lg w-100" [disabled]="isSubmitting"
+                  (click)="submit()"
+          >
+            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+            {{ isSubmitting ? 'Signing in...' : 'Sign in' }}
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="isTwoFASubmit">
+          <button type="submit" class="btn btn-primary btn-lg w-100" [disabled]="isSubmitting"
+                  (click)="submitTwoFA()"
+          >
+            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+            {{ isSubmitting ? 'Signing in...' : 'Sign in with 2FA' }}
+          </button>
+        </ng-container>
+
       </form>
 
       <p class="text-center mt-4 mb-0">
