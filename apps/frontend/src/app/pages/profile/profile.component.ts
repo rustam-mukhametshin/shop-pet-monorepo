@@ -3,6 +3,8 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {debounceTime, distinctUntilChanged, forkJoin, shareReplay, Subscription, take} from 'rxjs';
 import {ProfileService} from './profile.service';
+import {AuthService} from "../../auth.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-profile',
@@ -29,6 +31,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly profileService: ProfileService,
+    private readonly authService: AuthService,
+    private readonly router: Router,
   ) {
   }
 
@@ -135,6 +139,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: (error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          this.authService.logout();
+          this.router.navigate(['login']);
+        }
+
         this.errorMessage = this.getErrorMessage(error, 'Unable to load profile data.');
         this.isLoading = false;
       },
