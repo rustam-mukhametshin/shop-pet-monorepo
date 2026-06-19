@@ -132,8 +132,8 @@ export const get2FA = async (req: Request, res: Response) => {
   const otpAuthURI = generateURI(
     {
       secret: userSecret,
-      issuer: user.email,
-      label: env.projectLabel
+      issuer: env.projectLabel,
+      label: user.email
     }
   )
 
