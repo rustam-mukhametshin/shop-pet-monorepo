@@ -1,49 +1,24 @@
-# EJS Views and Bootstrap Rules
+# Frontend (Angular) Rules
 
 ## Scope
-- Server-rendered views live in `apps/api/views/**/*.ejs`.
-- Shared partials are in `apps/api/views/parts/*.ejs`.
-- These rules are legacy-only while backend endpoints migrate to JSON API responses.
+- UI lives in `apps/frontend`.
+- `apps/api` is backend/API only.
 
-## Layout Parts
-Include shared parts in this order:
-1. `head.ejs` -> `head-end.ejs`
-2. `body.ejs` (includes navigation)
-3. Page content inside `<main>`
-4. `body-end.ejs`
+## Angular Structure
+- Keep feature logic in Angular components/services/modules under `apps/frontend/src`.
+- Keep HTTP calls in frontend services, not inside presentational components when avoidable.
+- Keep route-driven pages in Angular router; backend should expose JSON endpoints only.
 
-## Partials Contract
-- `navigation.ejs`: main + mobile nav, reads `url`, `isLoggedIn`, `userName`; includes `success-notification.ejs`.
-- `success-notification.ejs`: renders first success flash message from `success[0]`.
-- `error-msg.ejs`: handles string or array `errorMessage` values.
-- `add-to-cart.ejs`: reusable POST form to `/cart` with hidden `id` and `_csrf`.
-
-## Form Rules
-- Every POST form must include:
-  - `<input type="hidden" name="_csrf" value="<%= csrfToken %>">`
-- Reuse `apps/api/views/parts/add-to-cart.ejs` for add-to-cart UI.
-- Do not add new form-based auth pages; auth endpoints should move to JSON contracts.
-
-## Locals Expected by Views
-Set globally in `apps/api/app.ts`:
-- `isLoggedIn`
-- `userName`
-- `csrfToken`
-- `error`
-- `success`
-
-Set per-render in controllers:
-- `pageTitle`
-- `url`
-- `errorMessage` when a view-specific error state is needed
+## API Integration
+- Consume backend routes with their prefixes (`/auth/*`, `/v1/*`, `/admin/*`).
+- Send JWT as `Authorization: Bearer <token>` for protected routes.
+- Handle auth and API errors in frontend state/UI, not in backend-rendered templates.
 
 ## Styling Rules
-- Keep Bootstrap-compatible markup.
-- Keep project custom styles in `apps/api/public/css/*.css`.
-- Avoid inline `<style>` blocks.
+- Prefer existing Angular styling patterns in the frontend workspace.
+- Keep backend static asset changes (`apps/api/public`) only for backend assets like uploaded files or generated artifacts.
 
 ## Do Not
-- Do not remove `_csrf` hidden field from POST forms.
-- Do not duplicate shared partial logic inline across many pages.
-- Do not introduce frontend frameworks inside EJS templates.
-- Do not add new `res.render(...)` handlers for migrated API endpoints.
+- Do not add new EJS templates or server-rendered pages in `apps/api`.
+- Do not move Angular UI code into backend controllers/routes.
+- Do not couple frontend component structure to backend internals.

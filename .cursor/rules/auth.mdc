@@ -3,41 +3,36 @@
 ## Scope
 - Auth logic lives in `apps/api/controllers/auth.controller.ts` and `apps/api/routes/auth.routes.ts`.
 - Session typing is declared in `apps/api/global.d.ts`.
-- Auth is migrating to API-first behavior; prefer JSON responses over renders/redirects.
+- Backend auth is API-first and token-based.
 
-## Session Contract
-- Session fields currently used: `isLoggedIn?: boolean`, `user?: User`.
-- Add any new session fields to `apps/api/global.d.ts`, not ad hoc in controllers.
-- After changing session state (login/signup), call `req.session.save()` before redirect.
+## Token Contract
+- Protected endpoints use `Authorization: Bearer <token>`.
+- `isAuth` validates `process.env.JWT_SECRET` and sets `req.user = { userId, status }`.
+- Keep `req.user` typing aligned in `apps/api/global.d.ts`.
 
 ## Auth Route Surface
-- `POST /login`
-- `GET /logout`
-- `POST /signup`
-- `GET /status` (guarded by `isAuth`)
-- `GET /reset`, `POST /reset`
-- `GET /reset-password`, `POST /reset-password`
+- `POST /auth/login`
+- `POST /auth/login-twofa`
+- `POST /auth/signup`
+- `GET /auth/status` (guarded by `isAuth`)
+- `GET /auth/profile`, `PUT /auth/profile` (guarded by `isAuth`)
+- `GET /auth/2fa` (guarded by `isAuth`)
+- `POST /auth/reset`
+- `GET /auth/reset-password`, `POST /auth/reset-password`
 
 ## Controller Flow Expectations
-- `postLogin`: validate request, compare password hash with `bcrypt.compareSync`, return JSON payload with JWT token.
-- `postSignup`: validate fields, prevent duplicate email, hash password, create user, send welcome email, return JSON payload.
-- `getStatus`: return JSON status response for authenticated requests.
-- `postReset`: validate email, create reset JWT via `NodeMailModel`, persist token via `TokenModel`, send reset link email.
-- `getResetPassword`: verify token and render reset-password page with `_email` and `_token`.
-- `postResetPassword`: update hashed password and delete used token record.
-- `getLogout`: destroy session and redirect to `/`.
-
-## Flash Message Contract
-- Legacy EJS auth flows still use flash messages.
-- For migrated API endpoints, return error/success in JSON and avoid flash message dependency.
-
-## Middleware Assumptions
-- `req.user` is hydrated globally in `apps/api/app.ts` from `req.session.user`.
-- Do not duplicate user hydration in auth controllers.
-- `res.locals.userName` is set globally and used in navigation.
+- `postLogin`: validate input, verify password, return success token or MFA-required payload.
+- `postLoginWithTwoFa`: verify state token and OTP code, then return access token.
+- `postSignup`: validate input, create user + profile, send welcome email, return JSON success.
+- `getStatus`: return current `req.user.status`.
+- `getProfile` / `putProfile`: fetch and update `ProfileModel`.
+- `get2FA`: generate TOTP secret, persist to `TwoFAModel`, return QR data URL.
+- `postReset`: validate email and send reset email link.
+- `getResetPassword`: validate token and return `_email` + `_token`.
+- `postResetPassword`: hash and save new password, then consume reset token.
 
 ## Do Not
 - Do not store raw passwords.
-- Do not call `next()` and then continue to send another response in middleware (avoids "Cannot set headers after they are sent").
-- Do not bypass `req.session.save()` before redirects in legacy session-based flows.
-- Do not expose admin handlers outside `/admin` + `isAuth` guarded route mount.
+- Do not return unguarded private profile/2FA data.
+- Do not bypass `isAuth` for protected auth/admin routes.
+- Do not move frontend login UI concerns into `apps/api`.

@@ -2,34 +2,32 @@
 
 ## Monorepo Scope
 - Root uses `npm workspaces` and `turbo`.
-- Application code is under `apps/*`, mainly `apps/api`.
-- When changing backend behavior, edit files in `apps/api/*`.
+- Application code is under `apps/*`:
+  - `apps/api` (backend API)
+  - `apps/frontend` (Angular UI)
+- Keep backend changes in `apps/api/*` and frontend/UI changes in `apps/frontend/*`.
 
 ## Stack (`apps/api`)
 - Node.js + Express 5 + TypeScript + Mongoose.
-- Project is migrating from server-rendered EJS to JSON-only API responses.
+- API-first backend with JSON responses.
 - App entry: `apps/api/app.ts`.
 - DB bootstrap: `apps/api/database.ts`.
-- Security/session: `express-session` + `connect-mongo` + `csurf` + `connect-flash`.
+- Security: `helmet` + explicit CORS allowlist.
+- Auth guard: JWT `Authorization: Bearer <token>` via `isAuth`.
+- Uploads: `multer.single('image')`.
 
 ## Middleware Order in `apps/api/app.ts` - do not reorder without reason
 1. `helmet()`
 2. CORS headers middleware
 3. Static middleware (`express.static`, `/public` alias)
 4. Body parsers (`express.urlencoded`, `express.json`) + `multer.single('image')`
-5. `express-session` with Mongo store (`collectionName: 'sessions'`)
-6. `csurf()`
-7. `connect-flash()`
-8. User hydration (`UserModel.findById(req.session?.user?._id)` -> `req.user`)
-9. Locals middleware (`isLoggedIn`, `userName`, `csrfToken`, `error`, `success`)
-10. CSRF error handler (`EBADCSRFTOKEN` -> 403)
-11. Route mounts (`/admin` + `isAuth` -> `authRoutes` -> `shopRoutes`)
-12. `notFound` fallback and final error redirect handler (`/500`)
+5. Route mounts (`/admin` + `isAuth` -> `/auth` -> `/v1`)
+6. `GET /500`, `notFound`, final error redirect handler
 
 ## Code Style
 - Use TypeScript for all new backend files.
 - Keep controller exports as named functions.
-- For migrated endpoints, return JSON responses only (`res.status(...).json(...)`).
+- Return JSON responses for API handlers (`res.status(...).json(...)`).
 - Keep cart/order mutation logic inside `userSchema.methods`, not controllers.
 - Keep request typing aligned with `apps/api/global.d.ts`.
 
@@ -37,8 +35,6 @@
 - Controllers: `apps/api/controllers/*.controller.ts`
 - Models: `apps/api/models/*.model.ts`
 - Routes: `apps/api/routes/*.routes.ts`
-- Views: `apps/api/views/**/*.ejs` (legacy while migration is in progress)
-- Shared view partials: `apps/api/views/parts/*.ejs` (legacy while migration is in progress)
 - Tests: `apps/api/__tests__/**/*`
 
 ## Commands
@@ -48,5 +44,5 @@
 ## Do Not
 - Do not bypass `/admin` route protection with `isAuth`.
 - Do not remove or rename `req.user` augmentation.
-- Do not add new view-rendering auth endpoints; use JSON contracts for new API behavior.
-- Do not remove `res.locals.csrfToken` or flash locals until legacy EJS flows are fully migrated.
+- Do not add server-rendered frontend behavior inside `apps/api`.
+- Do not move Angular UI concerns out of `apps/frontend`.

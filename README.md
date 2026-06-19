@@ -4,199 +4,131 @@
 [![Tests](https://github.com/rustam-mukhametshin/shop-pet-monorepo/actions/workflows/test.yml/badge.svg)](https://github.com/rustam-mukhametshin/shop-pet-monorepo/actions/workflows/test.yml)
 [![Coverage](https://codecov.io/gh/rustam-mukhametshin/shop-pet-monorepo/branch/master/graph/badge.svg)](https://codecov.io/gh/rustam-mukhametshin/shop-pet-monorepo)
 
-A full-stack pet-shop project managed as a **Turborepo** monorepo.
-
-> Frontend note: `apps/frontend` is the Angular UI. `apps/api` is the backend/data API and should be treated as API-only going forward.
-
----
+Full-stack pet-shop project managed with **npm workspaces** + **Turborepo**:
+- `apps/api`: Express 5 + TypeScript + Mongoose backend API
+- `apps/frontend`: Angular frontend
 
 ## Monorepo Structure
 
-```
+```text
 shop-pet-monorepo/
 ├── apps/
-│   ├── api/          # Node.js + Express 5 backend/data API (TypeScript)
-│   └── frontend/     # Angular frontend
-├── turbo.json        # Turborepo pipeline config
-└── package.json      # Root workspace (npm workspaces)
+│   ├── api/
+│   └── frontend/
+├── turbo.json
+└── package.json
 ```
-
-> Commands run from the **root** use Turborepo to orchestrate tasks across all apps in parallel.
-
----
 
 ## Stack
 
 ### `apps/api`
 - Node.js + Express 5
-- Backend/data API only
-- TypeScript
-- MongoDB (Mongoose)
-- Sessions: `express-session` + `connect-mongo`
-- CSRF protection: `csurf` (deprecated package, planned replacement)
-- PDF generation: `pdfkit`
-- File uploads: `multer`
-- Email: `nodemailer`
-- Payments: `stripe`
-- Socket transport: `socket.io`
+- TypeScript + Mongoose (MongoDB)
+- JWT auth middleware (`Authorization: Bearer <token>`)
+- Uploads via `multer`
+- PDF invoices via `pdfkit`
+- Email + password reset via `nodemailer` + JWT reset tokens
+- Optional 2FA flow via `otplib` + QR (`qrcode`)
+- Realtime transport via `socket.io`
 
 ### Tooling
-- **Turborepo** — build orchestration and task caching
-- **npm workspaces** — package management across apps
-- **Husky** — git hooks (in `apps/api`)
-- **Jest + Supertest** — testing
-- **ts-node / nodemon** — TypeScript dev runtime
-
----
+- Turborepo
+- npm workspaces
+- Jest + Supertest
+- ts-node + nodemon
 
 ## Prerequisites
-- Node.js ≥ 20 and npm ≥ 11
-- Network access to MongoDB Atlas (or your own Mongo URI)
+- Node.js >= 20
+- npm >= 11
+- MongoDB connection string
 
----
+## Environment Variables (`apps/api/.env`)
 
-## Environment Variables
+| Variable | Description |
+|---|---|
+| `MONGO_URI` | Mongo connection string |
+| `JWT_SECRET` | Access token signing secret |
+| `JWT_STATE_SECRET` | MFA state-token secret |
+| `DB_SESSION_SECRET` | Reset-token signing secret |
+| `NODE_MAIL_SERVICE` | Mail transport service |
+| `NODE_MAIL_USER` | Mail auth username |
+| `NODE_MAIL_PASSWORD` | Mail auth password |
+| `MAIN_URL` | Base app URL for reset links |
+| `ENV` | Optional environment flag (`prod` for prod links) |
 
-Create a `.env` file inside `apps/api/` (or export variables in your shell):
+## Install
 
-| Variable    | Description                                      |
-|-------------|--------------------------------------------------|
-| `MONGO_URI` | MongoDB connection string (Atlas or local)       |
+Run from repo root:
 
-Notes:
-- The session store (`connect-mongo`) also uses `MONGO_URI`.
-- Set `DB_SESSION_SECRET` in `apps/api/.env` for session encryption.
-- Set `JWT_SECRET` in `apps/api/.env` for auth token generation/verification.
-
-Example (zsh):
-```zsh
-export MONGO_URI="mongodb+srv://<user>:<pass>@<cluster>.mongodb.net/?appName=Cluster0"
-```
-
----
-
-## Install Dependencies
-
-From the **repo root** (installs all workspaces):
 ```zsh
 npm install
 ```
 
----
+## Scripts
 
-## Common Scripts
+Root scripts (run in repo root):
 
-All of the following commands are run from the **repo root** and delegate to Turborepo:
+| Command | Description |
+|---|---|
+| `npm run build` | `turbo run build` |
+| `npm run dev` | `turbo run dev` |
+| `npm run start` | `turbo run start` |
+| `npm run lint` | `turbo run lint` |
+| `npm test` | `turbo run test` |
 
-| Command              | Description                                    |
-|----------------------|------------------------------------------------|
-| `npm run build`      | Build all apps (`turbo run build`)             |
-| `npm run dev`        | Start all apps in dev mode (`turbo run dev`)   |
-| `npm run start`     | Start all apps in start mode (`turbo run start`) |
-| `npm run lint`       | Lint all apps (`turbo run lint`)               |
-| `npm test`           | Run all test suites (`turbo run test`)         |
+API scripts (`apps/api`):
 
-### `apps/api`-specific scripts (run from `apps/api/`)
+| Command | Description |
+|---|---|
+| `npm run start` | Run API with `ts-node app.ts` |
+| `npm run start-dev` | Run API in watch mode |
+| `npm run typecheck` | Type-check TypeScript |
+| `npm run build` | Build API TypeScript |
+| `npm test` | Run API tests |
+| `npm run test:watch` | Watch API tests |
+| `npm run test:coverage` | API coverage |
 
-| Command                  | Description                        |
-|--------------------------|------------------------------------|
-| `npm run start`          | Run API with `ts-node`             |
-| `npm run start-dev`      | Watch mode with `nodemon + ts-node`|
-| `npm run typecheck`      | TypeScript type-check only         |
-| `npm run build`          | Compile TypeScript → `dist/`       |
-| `npm test`               | Run Jest test suite                |
-| `npm run test:watch`     | Jest watch mode                    |
-| `npm run test:coverage`  | Jest with coverage report          |
+## Request Flow (`apps/api/app.ts`)
+1. `helmet()`
+2. CORS middleware (allowlist: `http://localhost:3000`, `http://localhost:4200`)
+3. Static serving (`public` + `/public`)
+4. Parsers (`express.urlencoded`, `express.json`, `multer.single('image')`)
+5. Route mounts: `/admin` (JWT `isAuth`) -> `/auth` -> `/v1`
+6. Error route `/500`, then `notFound`, then final redirect error handler
 
----
+## API Surface
 
-## CI
+### Admin (`/admin`, protected)
+- `GET /products`
+- `POST /add-product`
+- `POST /edit-product`
+- `DELETE /delete-product/:id`
 
-| Workflow        | File                              | Trigger                      | Steps                                                |
-|-----------------|-----------------------------------|------------------------------|------------------------------------------------------|
-| **Build**       | `.github/workflows/build.yml`     | Push / PR → `main`, `master` | `npm ci` → `npm run build`                           |
-| **Tests**       | `.github/workflows/test.yml`      | Push / PR → `main`, `master` | `npm ci` → `npm run test:coverage` → upload Codecov  |
+### Shop (`/v1`)
+- `GET /`
+- `GET /products`
+- `GET /products/:id`
+- `GET /cart` (protected)
+- `POST /cart` (protected)
+- `GET /cart-delete-item/:id` (protected)
+- `GET /checkout` (protected)
+- `GET /checkout/success` (protected)
+- `GET /orders` (protected)
+- `POST /order-delete-item` (protected)
+- `GET /invoices/:orderId` (protected)
 
----
-
-## Request Flow — `apps/api` (High Level)
-1. Security middleware (`helmet`) + manual CORS headers
-2. Static files from `public/`
-3. Body parsing (`express.urlencoded`, `express.json`, `multer.single('image')`)
-4. Session middleware (`express-session`) with Mongo-backed store (`connect-mongo`)
-5. CSRF middleware (`csurf`)
-6. Flash middleware (`connect-flash`)
-7. User middleware loads by `req.session.user._id` and attaches `req.user`
-8. Locals middleware sets `res.locals.isLoggedIn`, `res.locals.userName`, `res.locals.csrfToken`, `res.locals.error`, `res.locals.success`
-9. Routes mounted in order: `/admin` (guarded by `isAuth`) → auth routes → shop routes
-10. Fallback handlers (`404`, `/500`) and CSRF error handler (`EBADCSRFTOKEN` -> 403)
-
----
-
-## Important Routes
-
-### Admin
-- `GET  /admin/products`
-- `GET  /admin/add-product`
-- `POST /admin/add-product`
-- `GET  /admin/edit-product/:id`
-- `POST /admin/edit-product`
-- `GET  /admin/delete-product/:id`
-
-### Shop
-- `GET  /`
-- `GET  /products`
-- `GET  /products/:id`
-- `GET  /cart`
-- `POST /cart`
-- `GET  /cart-delete-item/:id`
-- `GET  /orders`
-- `POST /create-order`
-- `POST /order-delete-item`
-
-### Auth
+### Auth (`/auth`)
 - `POST /login`
-- `GET  /logout`
+- `POST /login-twofa`
 - `POST /signup`
-- `GET  /status` (protected by JWT `Authorization: Bearer <token>`)
+- `GET /status` (protected)
+- `GET /profile` (protected)
+- `PUT /profile` (protected)
+- `GET /2fa` (protected)
+- `POST /reset`
+- `GET /reset-password`
+- `POST /reset-password`
 
-Auth JSON examples:
-
-```json
-// POST /login -> 200
-{
-  "userId": "<user-id>",
-  "message": "Login successfully",
-  "token": "<jwt-token>"
-}
-```
-
-```json
-// POST /signup -> 201
-{
-  "message": "User created successfully"
-}
-```
-
-```json
-// GET /status -> 200
-{
-  "status": "success"
-}
-```
-
----
-
-## Common Pitfalls
-- `ObjectId` throws on invalid IDs — validate/sanitize before `new ObjectId(...)`.
-- Database calls fail if `mongoConnect` has not completed before the app starts handling requests.
-- `global.d.ts` request typing must stay aligned with `UserModel` usage in `app.ts`.
-- Any `POST` form without the hidden `_csrf` token will return `403 Invalid CSRF token`.
-- Missing `req.session.save()` before a redirect after login/logout can silently drop session updates.
-
----
-
-## UI Notes
-- Bootstrap is used in the Angular frontend.
-- UI work belongs in `apps/frontend`.
-- Backend responses in `apps/api` should stay API-first.
+## Notes
+- Frontend/UI work belongs in `apps/frontend` (Angular).
+- `apps/api` should remain API/backend-focused.

@@ -17,6 +17,8 @@
 | `apps/api/models/order.model.ts` | `OrderModel` | `products[]` with `{ product, quantity }` and `userId` |
 | `apps/api/models/token.model.ts` | `TokenModel` | Password reset token storage |
 | `apps/api/models/node-mail.model.ts` | `NodeMailModel` | Welcome/reset email and JWT token helpers |
+| `apps/api/models/profile.model.ts` | `ProfileModel` | User profile state including `twoFA` toggle |
+| `apps/api/models/two-fa.model.ts` | `TwoFAModel` | Persisted MFA secret for TOTP verification |
 
 ## UserModel Static Methods
 - `isValidEmail(email): boolean`
@@ -39,7 +41,7 @@
 
 ## Population Pattern
 - Cart reads should populate `cart.items.productId`.
-- Orders should populate `products.product` when rendering order views.
+- Orders should populate `products.product` before returning API order data or building invoices.
 
 ## Do Not
 - Do not move cart mutation logic into controllers.
