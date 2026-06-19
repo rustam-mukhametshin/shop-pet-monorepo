@@ -8,6 +8,8 @@ import jwt from "jsonwebtoken";
 import {generateSecret, generateURI} from "otplib";
 import QRCode from "qrcode";
 import {ProfileModel} from "../models/profile.model";
+import {env} from "../env";
+import {TwoFAModel} from "../models/two-fa.model";
 
 
 export const postLogin = (req: Request, res: Response) => {
@@ -123,22 +125,28 @@ export let getProfile = async (req: Request, res: Response, next: NextFunction) 
 }
 
 export const get2FA = async (req: Request, res: Response) => {
+  const userSecret = generateSecret();
 
+  const user = await UserModel.findById(req.user.userId);
 
-  const secret = generateSecret();
-
-  const otpauth = generateURI(
+  const otpAuthURI = generateURI(
     {
-      secret: secret,
-      issuer: 'shop-pet-monorepo',
-      label: 'shop-pet-monorepo'
+      secret: userSecret,
+      issuer: user.email,
+      label: env.projectLabel
     }
   )
 
-  const qrCodeDataURL = await QRCode.toDataURL(otpauth);
+  const qrCodeDataURL = await QRCode.toDataURL(otpAuthURI);
+
+  // Save the secret to the database
+  await TwoFAModel.create({
+    userId: req.user.userId,
+    secret: userSecret
+  });
 
   return res.status(200).json({
-    secret,
+    userSecret,
     qrCode: qrCodeDataURL
   })
 }
