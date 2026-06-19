@@ -1,0 +1,15 @@
+<nav class="navbar navbar-expand navbar-light bg-light border-bottom px-3">
+  <a class="navbar-brand fw-semibold" routerLink="/products">Shop Pet</a>
+  <div class="navbar-nav">
+    <ng-container *ngIf="isLoggedIn$ | async as isLoggedIn">
+      <a class="nav-link" *ngIf="isLoggedIn" routerLink="/products" routerLinkActive="active">Products</a>
+      <a class="nav-link" *ngIf="isLoggedIn" routerLink="/products/create" routerLinkActive="active">Create product</a>
+      <a class="nav-link" *ngIf="isLoggedIn" routerLink="/profile" routerLinkActive="active">Profile</a>
+      <button class="nav-link btn btn-link border-0 p-0" *ngIf="isLoggedIn" type="button" (click)="logout()">
+        Logout
+      </button>
+      <a class="nav-link" *ngIf="!isLoggedIn" routerLink="/login" routerLinkActive="active">Login</a>
+      <a class="nav-link" *ngIf="!isLoggedIn" routerLink="/signup" routerLinkActive="active">Sign up</a>
+    </ng-container>
+  </div>
+</nav>

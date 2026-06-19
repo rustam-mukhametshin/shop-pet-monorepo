@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../environments/environment';
 
 export interface LoginCredentials {
@@ -29,6 +29,7 @@ export interface SignupResponse {
 })
 export class AuthService {
   private readonly tokenKey = 'shop-pet-auth-token';
+  private readonly isLoggedInSubj$ = new BehaviorSubject<boolean>(this.hasToken());
 
   constructor(private readonly http: HttpClient) {}
 
@@ -39,7 +40,10 @@ export class AuthService {
           'Content-Type': 'application/json',
         }
       })
-      .pipe(tap(response => this.setToken(response.token)));
+      .pipe(tap(response => {
+        this.setToken(response.token);
+        this.isLoggedInSubj$.next(true);
+      }))
   }
 
   signup(credentials: SignupCredentials): Observable<SignupResponse> {
@@ -58,11 +62,20 @@ export class AuthService {
     return this.getToken() !== null;
   }
 
+  isLoggedIn$(): Observable<boolean> {
+    return this.isLoggedInSubj$.asObservable();
+  }
+
   logout(): void {
     localStorage.removeItem(this.tokenKey);
+    this.isLoggedInSubj$.next(false);
   }
 
   private setToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
+  }
+
+  private hasToken(): boolean {
+    return this.getToken() !== null;
   }
 }
