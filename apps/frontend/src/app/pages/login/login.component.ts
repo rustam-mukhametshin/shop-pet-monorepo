@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { first } from 'rxjs';
 import { AuthService } from '../../auth.service';
 
@@ -10,7 +10,7 @@ import { AuthService } from '../../auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   readonly loginForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
@@ -19,12 +19,18 @@ export class LoginComponent {
   isSubmitting = false;
   errorMessage = '';
   successMessage = '';
+  private returnUrl = '';
 
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
     private readonly router: Router,
+    private readonly route: ActivatedRoute,
   ) {}
+
+  ngOnInit(): void {
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/products';
+  }
 
   get emailControl() {
     return this.loginForm.controls.email;
@@ -51,7 +57,7 @@ export class LoginComponent {
         next: response => {
           this.successMessage = response.message;
           this.isSubmitting = false;
-          this.router.navigate(['/products']);
+          this.router.navigateByUrl(this.returnUrl);
         },
         error: (error: HttpErrorResponse) => {
           this.errorMessage = this.getErrorMessage(error);
