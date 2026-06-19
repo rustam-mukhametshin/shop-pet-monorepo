@@ -229,18 +229,35 @@ export const postResetPassword = async (req: Request, res: Response) => {
   res.redirect('/login');
 }
 
+/**
+ * PUT
+ * profile
+ *
+ * @param req
+ * @param res
+ * @param next
+ */
 export const putProfile = async (req: Request, res: Response, next: NextFunction) => {
   const {name, twoFA} = req.body;
-  return ProfileModel.findOne({userId: req.user.userId})
-    .then((profile: any) => {
-      if (!profile) {
-        return res.status(404).json({message: 'Not found'})
-      }
 
-      profile.name = name || profile?.name;
-      profile.twoFA = twoFA === undefined ? profile.twoFA : twoFA;
-      return profile.save();
-    })
-    .then(updatedProfile => res.status(200).json(updatedProfile))
-    .catch((err: any) => next(err));
+  try {
+    const profile = await ProfileModel.findOne({userId: req.user.userId});
+
+    if (!profile) {
+      return res.status(404).json({message: 'Not found'})
+    }
+
+    if (profile.twoFA && twoFA === false) {
+      await TwoFAModel.deleteMany({userId: req.user.userId});
+    }
+
+    profile.name = name || profile?.name;
+    profile.twoFA = twoFA === undefined ? profile.twoFA : twoFA;
+    return profile.save()
+      .then(updatedProfile => res.status(200).json(updatedProfile))
+
+
+  } catch (error: Error | any) {
+    return next(error)
+  }
 }
