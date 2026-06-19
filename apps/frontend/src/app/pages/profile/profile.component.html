@@ -34,4 +34,40 @@
       <label for="twoFA" class="form-check-label">Enable 2FA</label>
     </div>
   </form>
+
+  <div *ngIf="showTwoFAModal" class="modal d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Two-Factor Authentication Setup</h5>
+          <button type="button" class="btn-close" (click)="closeTwoFAModal()"></button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="twoFAError" class="alert alert-danger" role="alert">
+            {{ twoFAError }}
+          </div>
+
+          <div *ngIf="isLoadingTwoFA" class="text-center">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading QR code...</span>
+            </div>
+          </div>
+
+          <div *ngIf="!isLoadingTwoFA && twoFAQRCode">
+            <p class="text-muted mb-3">Scan this QR code with your authenticator app:</p>
+            <div class="text-center mb-4">
+              <img [src]="twoFAQRCode" alt="2FA QR Code" class="img-fluid" style="max-width: 250px;">
+            </div>
+            <p class="text-muted small">Can't scan? Enter this code manually:</p>
+            <div class="alert alert-light" role="alert">
+              <code class="user-select-all">{{ twoFASecret }}</code>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeTwoFAModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>

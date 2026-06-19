@@ -16,6 +16,11 @@ export interface TwoFactorStatus {
   enabled: boolean;
 }
 
+export interface TwoFactorSetup {
+  secret: string;
+  qrCode: string;
+}
+
 export interface UpdateProfilePayload {
   name: string | null;
 }
@@ -48,8 +53,12 @@ export class ProfileService {
     });
   }
 
-  get2fa(): Observable<TwoFactorStatus> {
-    return this.http.get<TwoFactorStatus>(this.twoFactorUrl);
+  get2fa(): Observable<TwoFactorSetup> {
+    return this.http.get<TwoFactorSetup>(this.twoFactorUrl, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('shop-pet-auth-token')}`,
+      },
+    });
   }
 
   set2fa(enabled: boolean): Observable<TwoFactorStatus> {

@@ -21,6 +21,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
   errorMessage = '';
   successMessage = '';
 
+  showTwoFAModal = false;
+  twoFAQRCode: string | null = null;
+  twoFASecret: string | null = null;
+  isLoadingTwoFA = false;
+  twoFAError = '';
+
   constructor(
     private readonly profileService: ProfileService,
   ) {
@@ -28,6 +34,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   get nameControl() {
     return this.profileForm.controls.name;
+  }
+
+  get twoFAControl() {
+    return this.profileForm.controls.twoFA;
   }
 
   ngOnInit(): void {
@@ -40,6 +50,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
         shareReplay(),
       )
       .subscribe(values => {
+        if (values.twoFA) {
+          this.openTwoFAModal();
+        } else {
+          this.closeTwoFAModal();
+        }
         this.save();
       })
   }
@@ -52,6 +67,36 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (this.profileUpdateSub$) {
       this.profileUpdateSub$.unsubscribe();
     }
+  }
+
+  openTwoFAModal(): void {
+    this.showTwoFAModal = true;
+    this.isLoadingTwoFA = true;
+    this.twoFAError = '';
+
+    this.profileService.get2fa()
+      .pipe(
+        take(1),
+        shareReplay(),
+        distinctUntilChanged()
+      ).subscribe({
+      next: (response) => {
+        this.twoFAQRCode = response.qrCode;
+        this.twoFASecret = response.secret;
+        this.isLoadingTwoFA = false;
+      },
+      error: (error: HttpErrorResponse) => {
+        this.twoFAError = this.getErrorMessage(error, 'Unable to load 2FA QR code.');
+        this.isLoadingTwoFA = false;
+        this.twoFAControl.setValue(false, {emitEvent: false});
+      },
+    });
+  }
+
+  closeTwoFAModal(): void {
+    this.showTwoFAModal = false;
+    this.twoFAQRCode = null;
+    this.twoFASecret = null;
   }
 
   private save(): void {
@@ -86,7 +131,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.profileForm.patchValue({
           name: profile.name,
           twoFA: profile.twoFA,
-        });
+        }, {emitEvent: false});
         this.isLoading = false;
       },
       error: (error: HttpErrorResponse) => {
