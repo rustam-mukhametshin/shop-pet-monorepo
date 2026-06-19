@@ -113,7 +113,7 @@ export const getStatus = (req: Request, res: Response) => {
 }
 
 
-export let getProfile =  async (req: Request, res: Response, next: NextFunction) => {
+export let getProfile = async (req: Request, res: Response, next: NextFunction) => {
 
   const profile = await ProfileModel.findOne({
     userId: req.user.userId
@@ -219,4 +219,20 @@ export const postResetPassword = async (req: Request, res: Response) => {
 
   req.flash('success', 'Success. Password reset successfully')
   res.redirect('/login');
+}
+
+export const putProfile = async (req: Request, res: Response, next: NextFunction) => {
+  const {name, twoFA} = req.body;
+  return ProfileModel.findOne({userId: req.user.userId})
+    .then((profile: any) => {
+      if (!profile) {
+        return res.status(404).json({message: 'Not found'})
+      }
+
+      profile.name = name || profile?.name;
+      profile.twoFA = twoFA === undefined ? profile.twoFA : twoFA;
+      return profile.save();
+    })
+    .then(updatedProfile => res.status(200).json(updatedProfile))
+    .catch((err: any) => next(err));
 }
