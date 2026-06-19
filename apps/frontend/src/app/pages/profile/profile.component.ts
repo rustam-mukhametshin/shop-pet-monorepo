@@ -86,7 +86,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       ).subscribe({
       next: (response) => {
         this.twoFAQRCode = response.qrCode;
-        this.twoFASecret = response.secret;
+        this.twoFASecret = response.twoFASecret;
         this.isLoadingTwoFA = false;
       },
       error: (error: HttpErrorResponse) => {

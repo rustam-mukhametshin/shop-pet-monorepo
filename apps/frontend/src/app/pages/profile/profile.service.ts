@@ -17,7 +17,7 @@ export interface TwoFactorStatus {
 }
 
 export interface TwoFactorSetup {
-  secret: string;
+  twoFASecret: string;
   qrCode: string;
 }
 

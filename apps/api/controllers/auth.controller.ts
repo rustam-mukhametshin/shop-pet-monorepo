@@ -196,21 +196,28 @@ export const getStatus = (req: Request, res: Response) => {
 
 export let getProfile = async (req: Request, res: Response, next: NextFunction) => {
 
-  const profile = await ProfileModel.findOne({
-    userId: req.user.userId
-  })
+  try {
+    const profile = await ProfileModel.findOne({
+      userId: req.user.userId
+    })
 
-  return res.status(200).json(profile)
+    return res.status(200).json(profile)
+  } catch (error: Error | any) {
+    return res.status(400).json({
+      error: error,
+      status: 'error',
+    })
+  }
 }
 
 export const get2FA = async (req: Request, res: Response) => {
-  const userSecret = generateSecret();
+  const twoFASecret = generateSecret();
 
   const user = await UserModel.findById(req.user.userId);
 
   const otpAuthURI = generateURI(
     {
-      secret: userSecret,
+      secret: twoFASecret,
       issuer: env.projectLabel,
       label: user.email
     }
@@ -221,11 +228,11 @@ export const get2FA = async (req: Request, res: Response) => {
   // Save the secret to the database
   await TwoFAModel.create({
     userId: req.user.userId,
-    secret: userSecret
+    secret: twoFASecret
   });
 
   return res.status(200).json({
-    userSecret,
+    twoFASecret: twoFASecret,
     qrCode: qrCodeDataURL
   })
 }
