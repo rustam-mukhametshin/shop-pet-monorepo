@@ -211,25 +211,42 @@ export let getProfile = async (req: Request, res: Response, next: NextFunction) 
 }
 
 export const get2FA = async (req: Request, res: Response) => {
-  const twoFASecret = generateSecret();
-
   const user = await UserModel.findById(req.user.userId);
+  let twoFASecret: string;
+  let qrCodeDataURL: string;
 
-  const otpAuthURI = generateURI(
-    {
-      secret: twoFASecret,
-      issuer: env.projectLabel,
-      label: user.email
-    }
-  )
+  if (!user) {
+    return res.status(422).json({
+      status: 'error',
+      message: 'Login failed',
+      error: 'No user found',
+    })
+  }
 
-  const qrCodeDataURL = await QRCode.toDataURL(otpAuthURI);
+  const oldToken = await TwoFAModel.findOne({userId: req.user.userId});
 
-  // Save the secret to the database
-  await TwoFAModel.create({
-    userId: req.user.userId,
-    secret: twoFASecret
-  });
+  if (!oldToken) {
+    twoFASecret = generateSecret();
+
+    const otpAuthURI = generateURI(
+      {
+        secret: twoFASecret,
+        issuer: env.projectLabel,
+        label: user.email
+      }
+    )
+
+    qrCodeDataURL = await QRCode.toDataURL(otpAuthURI);
+
+    // Save the secret to the database
+    await TwoFAModel.create({
+      userId: req.user.userId,
+      secret: twoFASecret
+    });
+  } else {
+    twoFASecret = oldToken.secret;
+    qrCodeDataURL = oldToken.qrCodeDataURL;
+  }
 
   return res.status(200).json({
     twoFASecret: twoFASecret,
@@ -339,6 +356,12 @@ export const putProfile = async (req: Request, res: Response, next: NextFunction
       return res.status(404).json({message: 'Not found'})
     }
 
+    /**
+     * Todo: refactor
+     * We already checking in get2FA if token already created in db
+     * If maybe user is deleted we should delete a secret from table
+     * or moved to archive table
+     */
     if (profile.twoFA && twoFA === false) {
       await TwoFAModel.deleteMany({userId: req.user.userId});
     }
