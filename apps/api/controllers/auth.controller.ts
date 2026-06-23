@@ -130,6 +130,11 @@ export const postLoginWithTwoFa = async (req: Request, res: Response, next: Next
       status: 'error',
       message: 'Login failed',
     })
+  } else {
+    return res.status(422).json({
+      status: 'error',
+      message: 'Login failed',
+    })
   }
 };
 
