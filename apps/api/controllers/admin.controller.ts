@@ -44,7 +44,7 @@ export const postAddProduct = (req: Request, res: Response, next: NextFunction) 
 
 export const getProducts = (req: Request, res: Response, next: NextFunction) => {
     return Product.find({
-        userId: new ObjectId(req?.user?.id),
+        userId: new ObjectId(req?.user?.userId),
     })
         .populate('userId', 'name')
         .then((products) => {
@@ -70,7 +70,7 @@ export const postEditProduct = (req: Request, res: Response, next: NextFunction)
 
             if (!product) throw new Error('Product not found');
 
-            if (product?.userId?.toString() !== req.user.id.toString()) {
+            if (product?.userId?.toString() !== req.user.userId.toString()) {
                 return res.redirect('/');
             }
 

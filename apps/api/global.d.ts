@@ -11,7 +11,10 @@ declare module 'express-session' {
 declare global {
     namespace Express {
         interface Request {
-            user: User;
+            user: {
+                userId: string;
+                status: string;
+            };
         }
     }
 }

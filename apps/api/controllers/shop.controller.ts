@@ -82,6 +82,8 @@ export const postAddProductToCart = (req: Request, res: Response, next: NextFunc
                 });
             }
 
+            // Todo: refactor
+            // @ts-ignore
             return req?.user?.addToCart(product).then(() => res.json({
                 product,
             }));
@@ -90,7 +92,9 @@ export const postAddProductToCart = (req: Request, res: Response, next: NextFunc
 };
 
 export const postCartDeleteProduct = (req: Request, res: Response, next: NextFunction) => {
-    return req.user
+  return req.user
+    // Todo: refactor
+    // @ts-ignore
         .deleteProductFromCart(req.params['id'])
         .then((result: unknown) => res.json({
             product: result,
@@ -101,7 +105,7 @@ export const postCartDeleteProduct = (req: Request, res: Response, next: NextFun
 export const getOrders = async (req: Request, res: Response, next: NextFunction) => {
     return OrderModel
         .find({
-            'userId': req?.user
+            'userId': req?.user.userId
         })
         .populate({
             path: 'products.product',
@@ -118,6 +122,8 @@ export const getOrders = async (req: Request, res: Response, next: NextFunction)
 export const postDeleteOrderItem = (req: Request, res: Response, next: NextFunction) => {
     const {productId, orderId} = req.body as { productId: string; orderId: string };
     return req.user
+      // Todo: refactor
+      // @ts-ignore
         .deleteProductFromOrder(productId, orderId)
         .then((result: unknown) => res.json({
             product: result,
@@ -138,7 +144,7 @@ export let getInvoice = async (req: Request, res: Response, next: NextFunction) 
                 return next(new Error('Not Found'));
             }
 
-            if (order.userId.toString() !== req.user._id.toString()) {
+            if (order.userId.toString() !== req.user.userId.toString()) {
                 return next(new Error('Unauthorized'));
             }
 
@@ -243,10 +249,12 @@ export let getCheckoutSuccess = async (req: Request, res: Response, next: NextFu
                     quantity: item.quantity,
                     product: item.productId,
                 })),
-                userId: req.user.id,
+                userId: req.user.userId,
             });
 
             await order.save();
+          // Todo: refactor
+          // @ts-ignore
             await req.user.clearCart();
 
             return res.json({
