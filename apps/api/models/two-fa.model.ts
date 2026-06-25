@@ -11,6 +11,10 @@ const twoFASchema = new Schema({
   secret: {
     type: Schema.Types.String,
     required: true,
+  },
+  qrCodeDataURL: {
+    type: Schema.Types.String,
+    required: true,
   }
 }, {
   timestamps: true
