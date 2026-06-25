@@ -271,14 +271,12 @@ export const get2FA = async (req: Request, res: Response) => {
 export const postReset = async (req: Request, res: Response) => {
   const {email} = req.body;
   if (!email || !UserModel.isValidEmail(email)) {
-    req.flash('error', 'Invalid email format');
     return res.status(500).redirect('/reset');
   }
 
   const user = await UserModel.getUserByEmail(email)
 
   if (!user) {
-    req.flash('error', 'Invalid email format');
     return res.status(500).redirect('/reset');
   }
 
@@ -292,7 +290,6 @@ export const postReset = async (req: Request, res: Response) => {
 
   return NodeMailModel
     .sendResetPasswordEmail(email, NodeMailModel.getResetPasswordTokenLink(email, token))
-    .then(() => req.flash('success', 'Success. Check your email'))
     .then(() => res.redirect('/'))
     .catch((err: any) => {
       throw new Error(err);
@@ -305,18 +302,15 @@ export const getResetPassword = (req: Request, res: Response) => {
   const payload = NodeMailModel.verifyResetPasswordToken(token);
 
   if (!token || !payload) {
-    req.flash('error', 'Invalid token');
     return res.status(422).redirect('/reset');
   }
 
   // Todo: check validation
   if (!payload) {
-    req.flash('error', 'Invalid token');
     return res.status(422).redirect('/reset');
   }
 
   return res.json({
-    errorMessage: req.flash('error'),
     _email: payload.email,
     _token: token,
   });
@@ -336,7 +330,6 @@ export const postResetPassword = async (req: Request, res: Response) => {
   const user = await UserModel.findOne({email: _email})
 
   if (!user) {
-    req.flash('error', 'Unable to find user');
     return res.status(422).redirect('/reset-password');
   }
 
@@ -347,8 +340,6 @@ export const postResetPassword = async (req: Request, res: Response) => {
     .catch((err: any) => {
       throw new Error(err);
     });
-
-  req.flash('success', 'Success. Password reset successfully')
   res.redirect('/login');
 }
 
