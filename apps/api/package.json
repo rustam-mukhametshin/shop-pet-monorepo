@@ -37,6 +37,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@simplewebauthn/server": "^13.3.2",
     "bcryptjs": "^3.0.3",
     "connect-mongo": "^6.0.0",
     "dotenv": "^17.4.2",
