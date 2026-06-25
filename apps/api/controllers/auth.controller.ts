@@ -134,9 +134,9 @@ export const postLoginWithTwoFa = async (req: Request, res: Response, next: Next
         token: createToken(user),
       })
     }
-    return res.status(402).json({
+    return res.status(422).json({
       status: 'error',
-      message: 'Login failed',
+      message: 'Invalid 2FA code',
     })
   } else {
     return res.status(422).json({
