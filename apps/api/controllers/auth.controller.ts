@@ -2,7 +2,6 @@ import {NextFunction, Request, Response} from 'express';
 import {UserModel} from "../models/user.model";
 import bcrypt from "bcryptjs";
 import {NodeMailModel} from "../models/node-mail.model";
-import {TokenModel} from "../models/token.model";
 import {validationResult} from "express-validator";
 import jwt, {JwtPayload} from "jsonwebtoken";
 import {generateSecret, generateURI, verify} from "otplib";
@@ -268,6 +267,11 @@ export const get2FA = async (req: Request, res: Response) => {
   })
 }
 
+/**
+ * TODO: refactor, now no TokenModel
+ * @param req
+ * @param res
+ */
 export const postReset = async (req: Request, res: Response) => {
   const {email} = req.body;
   if (!email || !UserModel.isValidEmail(email)) {
@@ -283,10 +287,10 @@ export const postReset = async (req: Request, res: Response) => {
   const token = NodeMailModel.createResetPasswordToken(email);
 
   // Save to db
-  await new TokenModel({
-    userId: user._id,
-    token,
-  }).save()
+  // await new TokenModel({
+  //   userId: user._id,
+  //   token,
+  // }).save()
 
   return NodeMailModel
     .sendResetPasswordEmail(email, NodeMailModel.getResetPasswordTokenLink(email, token))
@@ -319,6 +323,7 @@ export const getResetPassword = (req: Request, res: Response) => {
 /**
  * POST
  * reset password
+ * TODO: refactor, now no TokenModel
  * @param req
  * @param res
  */
@@ -336,7 +341,7 @@ export const postResetPassword = async (req: Request, res: Response) => {
   user.password = await bcrypt.hash(password, 12);
   user.confirmPassword = await bcrypt.hash(confirmPassword, 12);
   await user.save()
-    .then(() => TokenModel.deleteOne({token: _token}))
+    // .then(() => TokenModel.deleteOne({token: _token}))
     .catch((err: any) => {
       throw new Error(err);
     });
