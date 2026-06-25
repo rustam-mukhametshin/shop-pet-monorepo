@@ -238,6 +238,7 @@ export const get2FA = async (req: Request, res: Response) => {
 
   const oldToken = await TwoFAModel.findOne({userId: req.user.userId});
 
+  // Todo: refactor steps to create (maybe it should be Post)
   if (!oldToken) {
     twoFASecret = generateSecret();
 
@@ -262,7 +263,7 @@ export const get2FA = async (req: Request, res: Response) => {
   }
 
   return res.status(200).json({
-    twoFASecret: twoFASecret,
+    twoFASecret: twoFASecret, // Todo: refactor secret exposure
     qrCode: qrCodeDataURL
   })
 }
