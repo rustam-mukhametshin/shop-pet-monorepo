@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import {NodeMailModel} from "../models/node-mail.model";
 import {TokenModel} from "../models/token.model";
 import {validationResult} from "express-validator";
-import jwt from "jsonwebtoken";
+import jwt, {JwtPayload} from "jsonwebtoken";
 import {generateSecret, generateURI, verify} from "otplib";
 import QRCode from "qrcode";
 import {ProfileModel} from "../models/profile.model";
@@ -88,14 +88,22 @@ export const postLoginWithTwoFa = async (req: Request, res: Response, next: Next
 
   const {twoFACode, stateToken} = req.body;
 
-  // Validate code from authentificator
-  const payload = validateStateToken(stateToken);
+  let payload: string | JwtPayload = jwt.verify(stateToken, process.env.JWT_STATE_SECRET!);
 
-  // Todo: check how it works
-  if (!payload || typeof payload === 'string') {
-    return res.status(422).json({
+  try {
+    payload = jwt.verify(stateToken, process.env.JWT_STATE_SECRET!);
+
+    if (!payload || typeof payload === "string") {
+      return res.status(422).json({
+        status: 'error',
+        message: 'Login failed',
+      })
+    }
+
+  } catch (error) {
+    return res.status(200).json({
       status: 'error',
-      message: 'Login failed',
+      message: error,
     })
   }
 
