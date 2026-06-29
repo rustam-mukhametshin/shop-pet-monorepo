@@ -1,2 +1,8 @@
 /* Global application styles */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
 
+html,
+body {
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}

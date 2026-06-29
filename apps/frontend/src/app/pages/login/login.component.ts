@@ -69,8 +69,7 @@ export class LoginComponent implements OnInit {
             this.router.navigateByUrl(this.returnUrl);
           } else if (response.status === 'MFA_REQUIRED') {
             this.isTwoFASubmit = true;
-            console.log('true')
-            this.stateToken = response.state_token as any;
+            this.stateToken = response.state_token;
           }
 
           this.isSubmitting = false;
