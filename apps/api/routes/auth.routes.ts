@@ -76,12 +76,16 @@ authRoutes.post(
 );
 authRoutes.post('/reset', AuthController.postReset);
 authRoutes.post('/reset-password', AuthController.postResetPassword);
+authRoutes.post('/webauthn/register/options', isAuth, AuthController.webAuthnRegisterOptions)
+authRoutes.post('/webauthn/register/verify', isAuth, AuthController.webAuthnRegisterVerify)
+authRoutes.post('/auth/webauthn/authenticate/options', AuthController.webAuthnAuthenticateOptions)
+
 
 /**
  *  PUT
  */
 // Todo: add data validation
-authRoutes.put('/profile', isAuth, AuthController.putProfile)
+authRoutes.put('/profile', isAuth, AuthController.putProfile);
 
 export default authRoutes;
 

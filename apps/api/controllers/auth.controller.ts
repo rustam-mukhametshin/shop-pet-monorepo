@@ -9,6 +9,11 @@ import QRCode from "qrcode";
 import {ProfileModel} from "../models/profile.model";
 import {env} from "../env";
 import {TwoFAModel} from "../models/two-fa.model";
+import {
+  generateAuthenticationOptions,
+  generateRegistrationOptions,
+  verifyRegistrationResponse
+} from "@simplewebauthn/server";
 
 
 function createToken(user: any) {
@@ -81,7 +86,7 @@ export const postLoginWithTwoFa = async (req: Request, res: Response, next: Next
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({
-      error: [errors.array()[0].msg],
+      error: errors.array(),
     });
   }
 
@@ -385,4 +390,94 @@ export const putProfile = async (req: Request, res: Response, next: NextFunction
   } catch (error: Error | any) {
     return next(error)
   }
+}
+
+export const webAuthnRegisterOptions = async (req: Request, res: Response, next: NextFunction) => {
+
+  // const email = req.user.email;
+  const id = req.user.userId;
+
+  const user = await UserModel.findById(id);
+
+  if (!user) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'Not found'
+    })
+  }
+
+  const options = await generateRegistrationOptions({
+    rpName: env.projectLabel,
+    rpID: env.projectName,
+    // userID: id,
+    userName: user.email,
+  })
+
+  return res.status(200).json(options)
+}
+
+export const webAuthnRegisterVerify = async (req: Request, res: Response, next: NextFunction) => {
+
+  // const email = req.user.email;
+  const id = req.user.userId;
+
+  const user = await UserModel.findById(id);
+
+  if (!user) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'Not found'
+    })
+  }
+
+  const attestation = req.body.attestation;
+
+  const verification = await verifyRegistrationResponse({
+    response: attestation,
+    expectedChallenge: user.challenge,
+    expectedOrigin: 'http://localhost:3000',
+    expectedRPID: 'localhost',
+  })
+
+  if (verification.verified) {
+    return res.status(200).json({
+      status: 'success',
+      message: 'Verification successfully'
+    })
+  }
+  return res.status(400)
+    .json({
+      status: 'error',
+      message: 'Registration failed'
+    })
+}
+
+
+export const webAuthnAuthenticateOptions = async (req: Request, res: Response, next: NextFunction) => {
+
+  // const email = req.user.email;
+  const id = req.user.userId;
+
+  const user = await UserModel.findById(id);
+
+  if (!user) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'Not found'
+    })
+  }
+
+  const options = await generateAuthenticationOptions({
+    rpID: env.projectName,
+    userVerification: 'preferred',
+    allowCredentials: user.credentials.map((cred: any) => ({
+      id: cred.credentialId,
+      type: 'public-key',
+      transport: cred.transport,
+    }))
+  })
+
+  // Todo: Save options.challenge in DB for this user/session
+
+  return res.status(200).json(options);
 }
