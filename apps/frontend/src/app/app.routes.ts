@@ -10,14 +10,14 @@ import {ProductComponent} from "./products/product/product.component";
 import {UpdateProductComponent} from "./products/update-product/update-product.component";
 
 export const appRoutes: Routes = [
-  {path: '', redirectTo: 'products', pathMatch: 'full'},
-  {path: 'login', component: LoginComponent},
-  {path: 'signup', component: SignupComponent},
-  {path: 'profile', component: ProfileComponent, canActivate: [canActivate]},
-  {path: 'products', component: ProductsComponent},
-  {path: 'products/create', component: CreateProductComponent, canActivate: [canActivate]},
-  {path: 'products/form', component: FormProductComponent, canActivate: [canActivate]},
-  {path: 'products/:id', component: ProductComponent},
-  {path: 'products/:id/update', component: UpdateProductComponent, canActivate: [canActivate]},
+  {path: '', redirectTo: 'products', pathMatch: 'full',},
+  {path: 'login', component: LoginComponent, title: 'Login',},
+  {path: 'signup', component: SignupComponent, title: 'Signup',},
+  {path: 'profile', component: ProfileComponent, title: 'Profile', canActivate: [canActivate]},
+  {path: 'products', component: ProductsComponent, title: 'Products',},
+  {path: 'products/create', component: CreateProductComponent, title: 'Create', canActivate: [canActivate]},
+  {path: 'products/form', component: FormProductComponent, title: 'Form', canActivate: [canActivate]},
+  {path: 'products/:id', component: ProductComponent, title: 'Product',},
+  {path: 'products/:id/update', component: UpdateProductComponent, title: 'Update product', canActivate: [canActivate]},
   {path: '**', redirectTo: 'products'},
 ];
