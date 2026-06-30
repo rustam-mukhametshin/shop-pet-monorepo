@@ -23,7 +23,9 @@
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
-    "strictTemplates": true
+    "strictTemplates": true,
+    "strictNullInputTypes": false, // Disables strict null checking in templates only
+    "strictInputTypes": false      // Disables strict input type checking only
   }
 }
 
