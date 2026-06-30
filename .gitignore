@@ -9,3 +9,5 @@ apps/api/private/invoices
 api/images
 .turbo
 .DS_Store
+
+todo.txt
