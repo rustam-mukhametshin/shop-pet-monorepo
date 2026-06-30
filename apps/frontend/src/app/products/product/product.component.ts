@@ -1,11 +1,18 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, RouterLink} from '@angular/router';
 import { Product, ProductsService } from '../products.service';
+import {DecimalPipe, NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-product',
   templateUrl: './product.component.html',
   styleUrls: ['./product.component.css'],
+  standalone: true,
+  imports: [
+    NgIf,
+    RouterLink,
+    DecimalPipe
+  ]
 })
 export class ProductComponent implements OnInit {
   @Input() product?: Product;

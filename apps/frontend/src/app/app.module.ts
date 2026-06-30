@@ -37,15 +37,6 @@ const routes: Routes = [
 @NgModule({
   declarations: [
     AppComponent,
-    LoginComponent,
-    SignupComponent,
-    ProductsComponent,
-    CreateProductComponent,
-    UpdateProductComponent,
-    FormProductComponent,
-    ProductComponent,
-    ProfileComponent,
-    MenuComponent,
   ],
   imports: [
     BrowserModule,
@@ -60,6 +51,15 @@ const routes: Routes = [
     MatInputModule,
     MatButtonModule,
     MatCheckboxModule,
+    LoginComponent,
+    SignupComponent,
+    ProductsComponent,
+    CreateProductComponent,
+    UpdateProductComponent,
+    FormProductComponent,
+    ProductComponent,
+    ProfileComponent,
+    MenuComponent,
   ],
   bootstrap: [AppComponent],
 })

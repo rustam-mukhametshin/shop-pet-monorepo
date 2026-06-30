@@ -1,11 +1,19 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import {Router, RouterLink, RouterLinkActive} from '@angular/router';
 import { AuthService } from '../../auth.service';
+import {AsyncPipe, NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-menu',
   templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.css']
+  styleUrls: ['./menu.component.css'],
+  standalone: true,
+  imports: [
+    NgIf,
+    AsyncPipe,
+    RouterLink,
+    RouterLinkActive
+  ]
 })
 export class MenuComponent {
   isLoggedIn$ = this.authService.isLoggedIn$();

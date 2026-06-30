@@ -1,13 +1,28 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { AbstractControl, FormBuilder, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
 import { first } from 'rxjs';
 import { AuthService } from '../../auth.service';
+import {NgIf} from "@angular/common";
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-signup-page',
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.css'],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    NgIf,
+    RouterLink
+  ]
 })
 export class SignupComponent {
   readonly signupForm = this.formBuilder.nonNullable.group({

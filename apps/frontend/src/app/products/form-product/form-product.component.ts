@@ -1,11 +1,17 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import { ProductPayload } from '../products.service';
+import {NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-form-product',
   templateUrl: './form-product.component.html',
   styleUrls: ['./form-product.component.css'],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    NgIf
+  ]
 })
 export class FormProductComponent implements OnChanges {
   @Input() initialValue?: Partial<ProductPayload>;

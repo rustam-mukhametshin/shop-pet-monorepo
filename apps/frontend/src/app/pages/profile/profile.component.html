@@ -56,7 +56,7 @@
           <div *ngIf="!isLoadingTwoFA && twoFAQRCode">
             <p class="text-muted mb-3">Scan this QR code with your authenticator app:</p>
             <div class="text-center mb-4">
-              <img [src]="twoFAQRCode" alt="2FA QR Code" class="img-fluid" style="max-width: 250px;">
+              <img [ngSrc]="twoFAQRCode" alt="2FA QR Code" class="img-fluid" style="max-width: 250px;" fill>
             </div>
             <p class="text-muted small">Can't scan? Enter this code manually:</p>
             <div class="alert alert-light" role="alert">

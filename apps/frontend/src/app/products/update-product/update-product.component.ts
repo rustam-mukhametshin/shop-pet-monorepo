@@ -1,11 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Product, ProductPayload, ProductsService } from '../products.service';
+import {FormProductComponent} from "../form-product/form-product.component";
+import {NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-update-product',
   templateUrl: './update-product.component.html',
   styleUrls: ['./update-product.component.css'],
+  standalone: true,
+  imports: [
+    FormProductComponent,
+    NgIf
+  ]
 })
 export class UpdateProductComponent implements OnInit {
   product?: Product;
