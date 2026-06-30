@@ -1,106 +1,52 @@
-<main class="login-page d-flex align-items-center justify-content-center py-5">
-  <section class="login-card card shadow-sm border-0">
-    <div class="card-body p-4 p-md-5">
-      <div class="mb-4 text-center">
-        <p class="text-uppercase text-primary fw-semibold mb-2 small">Shop Pet</p>
-        <h1 class="h3 mb-2">Sign in to your account</h1>
-        <p class="text-muted mb-0">Use your email and password to continue.</p>
-      </div>
+<main class="login-page">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>Sign in to your account</mat-card-title>
+      <mat-card-subtitle>Use your email and password to continue.</mat-card-subtitle>
+    </mat-card-header>
 
-      <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
-        {{ errorMessage }}
-      </div>
+    <mat-card-content>
+      <p *ngIf="errorMessage" class="message message-error">{{ errorMessage }}</p>
+      <p *ngIf="successMessage" class="message message-success">{{ successMessage }}</p>
 
-      <div *ngIf="successMessage" class="alert alert-success" role="alert">
-        {{ successMessage }}
-      </div>
-
-      <form [formGroup]="loginForm">
-        <div class="mb-3" *ngIf="!isTwoFASubmit">
-          <label for="email" class="form-label">Email address</label>
-          <input
-                  id="email"
-                  type="email"
-                  class="form-control form-control-lg"
-                  formControlName="email"
-                  placeholder="name@example.com"
-                  [class.is-invalid]="emailControl.touched && emailControl.invalid"
-          />
-          <div class="invalid-feedback" *ngIf="emailControl.touched && emailControl.errors?.['required']">
-            Email is required.
-          </div>
-          <div class="invalid-feedback" *ngIf="emailControl.touched && emailControl.errors?.['email']">
-            Enter a valid email address.
-          </div>
-        </div>
-
-        <div class="mb-3" *ngIf="!isTwoFASubmit">
-          <label for="password" class="form-label">Password</label>
-          <input
-                  id="password"
-                  type="password"
-                  class="form-control form-control-lg"
-                  formControlName="password"
-                  placeholder="Your password"
-                  [class.is-invalid]="passwordControl.touched && passwordControl.invalid"
-          />
-          <div class="invalid-feedback" *ngIf="passwordControl.touched && passwordControl.errors?.['required']">
-            Password is required.
-          </div>
-          <div class="invalid-feedback" *ngIf="passwordControl.touched && passwordControl.errors?.['minlength']">
-            Password must be at least 6 characters.
-          </div>
-        </div>
-
-        <div class="mb-3" *ngIf="isTwoFASubmit">
-          <label for="twoFA" class="form-label">2FA</label>
-          <input
-                  id="twoFA"
-                  type="text"
-                  minlength="6"
-                  maxlength="6"
-                  class="form-control form-control-lg"
-                  formControlName="twoFA"
-                  placeholder="Your 2fa"
-                  [class.is-invalid]="twoFAControl.touched && twoFAControl.invalid"
-          />
-          <div class="invalid-feedback" *ngIf="twoFAControl.touched && twoFAControl.errors?.['minlength']">
-            twoFA must be at least 6 characters.
-          </div>
-        </div>
-
-        <div class="d-flex align-items-center justify-content-between mb-4">
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="remember"/>
-            <label class="form-check-label" for="remember">Remember me</label>
-          </div>
-          <a href="#" class="text-decoration-none small">Forgot password?</a>
-        </div>
-
+      <form [formGroup]="loginForm" (ngSubmit)="isTwoFASubmit ? submitTwoFA() : submit()">
         <ng-container *ngIf="!isTwoFASubmit">
-          <button type="button" class="btn btn-primary btn-lg w-100" [disabled]="isSubmitting"
-                  (click)="submit()"
-          >
-            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-            {{ isSubmitting ? 'Signing in...' : 'Sign in' }}
-          </button>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email address</mat-label>
+            <input matInput type="email" formControlName="email" />
+            <mat-error *ngIf="emailControl.touched && emailControl.errors?.['required']">Email is required.</mat-error>
+            <mat-error *ngIf="emailControl.touched && emailControl.errors?.['email']">Enter a valid email address.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Password</mat-label>
+            <input matInput type="password" formControlName="password" />
+            <mat-error *ngIf="passwordControl.touched && passwordControl.errors?.['required']">Password is required.</mat-error>
+            <mat-error *ngIf="passwordControl.touched && passwordControl.errors?.['minlength']">Password must be at least 6 characters.</mat-error>
+          </mat-form-field>
         </ng-container>
 
-        <ng-container *ngIf="isTwoFASubmit">
-          <button type="submit" class="btn btn-primary btn-lg w-100" [disabled]="isSubmitting"
-                  (click)="submitTwoFA()"
-          >
-            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-            {{ isSubmitting ? 'Signing in...' : 'Sign in with 2FA' }}
-          </button>
-        </ng-container>
+        <mat-form-field *ngIf="isTwoFASubmit" appearance="outline" class="full-width">
+          <mat-label>2FA code</mat-label>
+          <input matInput type="text" minlength="6" maxlength="6" formControlName="twoFA" />
+          <mat-error *ngIf="twoFAControl.touched && twoFAControl.errors?.['minlength']">2FA must be at least 6 characters.</mat-error>
+          <mat-error *ngIf="twoFAControl.touched && twoFAControl.errors?.['maxlength']">2FA cannot be more than 6 characters.</mat-error>
+        </mat-form-field>
 
+        <div class="login-actions">
+          <mat-checkbox>Remember me</mat-checkbox>
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Signing in...' : (isTwoFASubmit ? 'Sign in with 2FA' : 'Sign in') }}
+        </button>
       </form>
+    </mat-card-content>
 
-      <p class="text-center mt-4 mb-0">
-        <span class="text-muted">Don’t have an account?</span>
-        <a routerLink="/signup" class="ms-1 text-decoration-none">Sign up</a>
-      </p>
-    </div>
-  </section>
+    <mat-card-actions class="signup-link">
+      <span>Don’t have an account?</span>
+      <a routerLink="/signup">Sign up</a>
+    </mat-card-actions>
+  </mat-card>
 </main>
