@@ -4,6 +4,7 @@ import {ProductComponent} from "../product/product.component";
 import {RouterLink} from "@angular/router";
 import {NgForOf, NgIf} from "@angular/common";
 import {first} from "rxjs";
+import {NotificationService} from "../../services/notification.service";
 
 @Component({
   selector: 'app-products',
@@ -20,7 +21,10 @@ import {first} from "rxjs";
 export class ProductsComponent implements OnInit {
   products?: WritableSignal<Product[] | undefined> = signal(undefined);
 
-  constructor(private readonly productsService: ProductsService) {
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly notificationService: NotificationService,
+  ) {
   }
 
   ngOnInit() {
@@ -28,7 +32,8 @@ export class ProductsComponent implements OnInit {
       .pipe(
         first()
       ).subscribe(value => {
-      this.products?.set(value)
+      this.products?.set(value);
+      this.notificationService.success('Products successfully loaded!');
     })
   }
 

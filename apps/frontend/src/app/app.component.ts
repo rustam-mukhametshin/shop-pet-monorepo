@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import {RouterOutlet} from "@angular/router";
 import {MenuComponent} from "./components/menu/menu.component";
+import {NotificationsComponent} from "./components/notifications/notifications.component";
 
 @Component({
   selector: 'app-root',
@@ -9,7 +10,8 @@ import {MenuComponent} from "./components/menu/menu.component";
   standalone: true,
   imports: [
     RouterOutlet,
-    MenuComponent
+    MenuComponent,
+    NotificationsComponent
   ]
 })
 export class AppComponent {

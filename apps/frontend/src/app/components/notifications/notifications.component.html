@@ -1,0 +1,8 @@
+<div class="notification-container">
+  <div *ngFor="let notif of notifications"
+       class="notification"
+       [class]="'notification-' + notif.type">
+    <span>{{ notif.message }}</span>
+    <button (click)="close(notif.id)" class="close-btn">&times;</button>
+  </div>
+</div>
