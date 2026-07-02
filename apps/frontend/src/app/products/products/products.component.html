@@ -6,7 +6,7 @@
 <ng-container *ngIf="products">
   <div class="row g-3" *ngIf="products() as products">
     <div class="col-12 col-md-6 col-lg-4" *ngFor="let product of products">
-      <app-product [product]="product" (remove)="removeProduct($event)"></app-product>
+      <app-product [product]="product" (remove)="removeProduct($event)"/>
     </div>
 
     <div class="col-12" *ngIf="products.length === 0">
