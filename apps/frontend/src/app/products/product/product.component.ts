@@ -17,7 +17,7 @@ import {MatButtonModule} from "@angular/material/button";
   ]
 })
 export class ProductComponent implements OnInit {
-  @Input() product?: Product;
+  @Input({required: true}) product?: Product;
   @Input() showActions = true;
   @Output() remove = new EventEmitter<string>();
 
