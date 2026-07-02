@@ -16,7 +16,7 @@ import {AsyncPipe, NgIf} from "@angular/common";
   ]
 })
 export class MenuComponent {
-  isLoggedIn$ = this.authService.isLoggedIn$();
+  isAuth = this.authService.isAuth;
 
   constructor(
     private readonly authService: AuthService,

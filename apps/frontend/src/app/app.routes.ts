@@ -14,7 +14,7 @@ export const appRoutes: Routes = [
   {path: 'login', component: LoginComponent, title: 'Login',},
   {path: 'signup', component: SignupComponent, title: 'Signup',},
   {path: 'profile', component: ProfileComponent, title: 'Profile', canActivate: [canActivate]},
-  {path: 'products', component: ProductsComponent, title: 'Products',},
+  {path: 'products', component: ProductsComponent, title: 'Products', canActivate: [canActivate]},
   {path: 'products/create', component: CreateProductComponent, title: 'Create', canActivate: [canActivate]},
   {path: 'products/form', component: FormProductComponent, title: 'Form', canActivate: [canActivate]},
   {path: 'products/:id', component: ProductComponent, title: 'Product',},

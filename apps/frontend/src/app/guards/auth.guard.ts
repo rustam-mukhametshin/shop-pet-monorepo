@@ -7,7 +7,7 @@ export function canActivate() {
   const authService = inject(AuthService);
   const router = inject(Router);
   return (_: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-    if (authService.isLoggedIn()) {
+    if (authService.isAuth()) {
       return true;
     }
     return router.createUrlTree(['/login'], {queryParams: {returnUrl: state.url}});

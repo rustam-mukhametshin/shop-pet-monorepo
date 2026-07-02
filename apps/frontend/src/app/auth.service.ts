@@ -1,6 +1,6 @@
 import {HttpClient} from '@angular/common/http';
-import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable, tap} from 'rxjs';
+import {computed, Injectable, Signal, signal, WritableSignal} from '@angular/core';
+import {Observable, tap} from 'rxjs';
 import {environment} from '../environments/environment';
 
 export interface LoginCredentials {
@@ -31,10 +31,12 @@ export interface SignupResponse {
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly tokenKey = 'shop-pet-auth-token';
-  private readonly isLoggedInSubj$ = new BehaviorSubject<boolean>(this.hasToken());
+  private readonly tokenKey: string = 'shop-pet-auth-token';
+  private readonly isLoggedIn: WritableSignal<boolean> = signal(this.hasToken());
+  public readonly isAuth: Signal<boolean> = computed(() => this.isLoggedIn());
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {
+  }
 
   login(credentials: LoginCredentials): Observable<LoginResponse> {
     return this.http
@@ -46,12 +48,12 @@ export class AuthService {
       .pipe(tap(response => {
         if (response.status !== 'MFA_REQUIRED' && response.status === 'success') {
           this.setToken(response.token);
-          this.isLoggedInSubj$.next(true);
+          this.isLoggedIn.set(true);
         }
       }))
   }
 
-  loginWithTwoFA(twoFACode: string, stateToken: string) {
+  loginWithTwoFA(twoFACode: string, stateToken: string): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(
         `${environment.apiUrl}auth/login-twofa`, {
@@ -68,7 +70,7 @@ export class AuthService {
           if (response.token) {
             this.setToken(response.token);
           }
-          this.isLoggedInSubj$.next(true);
+          this.isLoggedIn.set(true);
         }
       }))
   }
@@ -85,17 +87,9 @@ export class AuthService {
     return localStorage.getItem(this.tokenKey);
   }
 
-  isLoggedIn(): boolean {
-    return this.getToken() !== null;
-  }
-
-  isLoggedIn$(): Observable<boolean> {
-    return this.isLoggedInSubj$.asObservable();
-  }
-
   logout(): void {
     localStorage.removeItem(this.tokenKey);
-    this.isLoggedInSubj$.next(false);
+    this.isLoggedIn.set(false);
   }
 
   private setToken(token: string): void {
