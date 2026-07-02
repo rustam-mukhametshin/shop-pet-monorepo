@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ActivatedRoute, RouterLink} from '@angular/router';
-import { Product, ProductsService } from '../products.service';
+import {Product, ProductsService} from '../products.service';
 import {DecimalPipe, NgIf} from "@angular/common";
+import {MatButtonModule} from "@angular/material/button";
 
 @Component({
   selector: 'app-product',
@@ -11,7 +12,8 @@ import {DecimalPipe, NgIf} from "@angular/common";
   imports: [
     NgIf,
     RouterLink,
-    DecimalPipe
+    DecimalPipe,
+    MatButtonModule
   ]
 })
 export class ProductComponent implements OnInit {
@@ -24,7 +26,8 @@ export class ProductComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly productsService: ProductsService,
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     if (this.product) {
