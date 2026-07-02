@@ -38,7 +38,7 @@ export class UpdateProductComponent implements OnInit {
       return;
     }
 
-    this.productsService.updateProduct(this.product.id, payload);
-    void this.router.navigate(['/products', this.product.id]);
+    this.productsService.updateProduct(this.product._id, payload);
+    void this.router.navigate(['/products', this.product._id]);
   }
 }

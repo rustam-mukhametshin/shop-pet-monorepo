@@ -50,6 +50,6 @@ export class ProductComponent implements OnInit {
       return;
     }
 
-    this.remove.emit(this.product.id);
+    this.remove.emit(this.product._id);
   }
 }

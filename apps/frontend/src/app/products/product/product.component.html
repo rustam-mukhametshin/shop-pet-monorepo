@@ -5,8 +5,8 @@
     <p class="fw-semibold mb-4">${{ product.price | number: '1.2-2' }}</p>
 
     <div class="d-flex gap-2" *ngIf="showActions">
-      <a class="btn btn-outline-primary btn-sm" [routerLink]="['/products', product.id]">View</a>
-      <a class="btn btn-outline-secondary btn-sm" [routerLink]="['/products', product.id, 'update']">Update</a>
+      <a class="btn btn-outline-primary btn-sm" [routerLink]="['/products', product._id]">View</a>
+      <a class="btn btn-outline-secondary btn-sm" [routerLink]="['/products', product._id, 'update']">Update</a>
       <button mat-button color="warn" (click)="deleteProduct()">Delete</button>
     </div>
 

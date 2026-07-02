@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Product, ProductsService } from '../products.service';
+import {Component, OnInit, signal, WritableSignal} from '@angular/core';
+import {Product, ProductsService} from '../products.service';
 import {ProductComponent} from "../product/product.component";
 import {RouterLink} from "@angular/router";
-import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
+import {NgForOf, NgIf} from "@angular/common";
+import {first} from "rxjs";
 
 @Component({
   selector: 'app-products',
@@ -14,14 +14,23 @@ import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
     ProductComponent,
     RouterLink,
     NgIf,
-    AsyncPipe,
     NgForOf
   ]
 })
-export class ProductsComponent {
-  readonly products$: Observable<Product[]> = this.productsService.getProducts();
+export class ProductsComponent implements OnInit {
+  products?: WritableSignal<Product[] | undefined> = signal(undefined);
 
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) {
+  }
+
+  ngOnInit() {
+    this.productsService.getProducts()
+      .pipe(
+        first()
+      ).subscribe(value => {
+      this.products?.set(value)
+    })
+  }
 
   removeProduct(productId: string): void {
     this.productsService.deleteProduct(productId);

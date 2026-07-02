@@ -1,67 +1,88 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {computed, Injectable, signal} from '@angular/core';
+import {HttpClient} from "@angular/common/http";
+import {environment} from "../../environments/environment";
+import {distinctUntilChanged, map, Observable, shareReplay} from "rxjs";
 
 export interface Product {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   price: number;
+  imageUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export type ProductPayload = Omit<Product, 'id'>;
+interface Response {
+  prods: Product[];
+  currentPage: number;
+  lastPage: number;
+}
+
+export type ProductPayload = Omit<Product, '_id'>;
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductsService {
-  private readonly productsSubject = new BehaviorSubject<Product[]>([
+  private readonly products = signal<Product[]>([
     {
-      id: '1',
+      _id: '1',
       title: 'Dog Food',
       description: 'Balanced dry food for adult dogs.',
       price: 19.99,
     },
     {
-      id: '2',
+      _id: '2',
       title: 'Cat Toy',
       description: 'Soft toy mouse with catnip.',
       price: 7.5,
     },
   ]);
 
+  constructor(
+    private readonly httpClient: HttpClient,
+  ) {
+  }
+
   getProducts(): Observable<Product[]> {
-    return this.productsSubject.asObservable();
+    return this.httpClient.get<Response>(
+      environment.apiUrl + 'v1/products'
+    )
+      .pipe(
+        map(res => res.prods)
+      );
   }
 
   getProductById(id: string): Product | undefined {
-    return this.productsSubject.value.find(product => product.id === id);
+    return computed(() => this.products().find(product => product._id === id))()
   }
 
   createProduct(payload: ProductPayload): Product {
     const product: Product = {
       ...payload,
-      id: Date.now().toString(),
+      _id: Date.now().toString(),
     };
-    this.productsSubject.next([...this.productsSubject.value, product]);
+    this.products.set([...this.products(), product]);
     return product;
   }
 
   updateProduct(id: string, payload: ProductPayload): Product | undefined {
-    const products = this.productsSubject.value;
-    const productIndex = products.findIndex(product => product.id === id);
+    const products = this.products();
+    const productIndex = products.findIndex(product => product._id === id);
 
     if (productIndex < 0) {
       return undefined;
     }
 
-    const updatedProduct: Product = { id, ...payload };
+    const updatedProduct: Product = {_id: id, ...payload};
     const nextProducts = [...products];
     nextProducts[productIndex] = updatedProduct;
-    this.productsSubject.next(nextProducts);
+    this.products.set(nextProducts);
     return updatedProduct;
   }
 
   deleteProduct(id: string): void {
-    this.productsSubject.next(this.productsSubject.value.filter(product => product.id !== id));
+    this.products.set(this.products().filter(product => product._id !== id));
   }
 }
