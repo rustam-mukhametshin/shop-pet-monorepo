@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {booleanAttribute, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {Product, ProductsService} from '../products.service';
 import {DecimalPipe} from "@angular/common";
@@ -17,7 +17,9 @@ import {MatButtonModule} from "@angular/material/button";
 })
 export class ProductComponent implements OnInit {
   @Input({required: true}) product?: Product;
-  @Input() showActions = true;
+  @Input({
+    transform: booleanAttribute
+  }) showActions = true;
   @Output() remove = new EventEmitter<string>();
 
   detailView = false;

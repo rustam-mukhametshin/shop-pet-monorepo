@@ -1,8 +1,7 @@
-import {Component, OnInit, signal, WritableSignal} from '@angular/core';
+import {afterNextRender, afterRender, Component, OnInit, signal, WritableSignal} from '@angular/core';
 import {Product, ProductsService} from '../products.service';
 import {ProductComponent} from "../product/product.component";
 import {RouterLink} from "@angular/router";
-import {NgForOf, NgIf} from "@angular/common";
 import {first} from "rxjs";
 import {NotificationService} from "../../services/notification.service";
 
@@ -13,9 +12,7 @@ import {NotificationService} from "../../services/notification.service";
   standalone: true,
   imports: [
     ProductComponent,
-    RouterLink,
-    NgIf,
-    NgForOf
+    RouterLink
   ]
 })
 export class ProductsComponent implements OnInit {
@@ -25,6 +22,13 @@ export class ProductsComponent implements OnInit {
     private readonly productsService: ProductsService,
     private readonly notificationService: NotificationService,
   ) {
+    afterRender(() => {
+      console.log('afterRender');
+    })
+
+    afterNextRender(() => {
+      console.log('afterNextRender');
+    })
   }
 
   ngOnInit() {
