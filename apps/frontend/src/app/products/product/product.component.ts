@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {Product, ProductsService} from '../products.service';
-import {DecimalPipe, NgIf} from "@angular/common";
+import {DecimalPipe} from "@angular/common";
 import {MatButtonModule} from "@angular/material/button";
 
 @Component({
@@ -10,7 +10,6 @@ import {MatButtonModule} from "@angular/material/button";
   styleUrls: ['./product.component.css'],
   standalone: true,
   imports: [
-    NgIf,
     RouterLink,
     DecimalPipe,
     MatButtonModule

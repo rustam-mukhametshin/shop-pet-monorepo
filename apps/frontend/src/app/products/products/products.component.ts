@@ -19,7 +19,7 @@ import {NotificationService} from "../../services/notification.service";
   ]
 })
 export class ProductsComponent implements OnInit {
-  products?: WritableSignal<Product[] | undefined> = signal(undefined);
+  products: WritableSignal<Product[]> = signal([]);
 
   constructor(
     private readonly productsService: ProductsService,

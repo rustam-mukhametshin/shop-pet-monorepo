@@ -3,15 +3,14 @@
   <a class="btn btn-primary" routerLink="/products/create">Create product</a>
 </div>
 
-<ng-container *ngIf="products">
-  <div class="row g-3" *ngIf="products() as products">
-    <div class="col-12 col-md-6 col-lg-4" *ngFor="let product of products">
+<div class="row g-3">
+  @for (product of products(); track product._id) {
+    <div class="col-12 col-md-6 col-lg-4">
       <app-product [product]="product" (remove)="removeProduct($event)"/>
     </div>
-
-    <div class="col-12" *ngIf="products.length === 0">
+  } @empty {
+    <div class="col-12">
       <p class="text-muted mb-0">No products yet.</p>
     </div>
-  </div>
-
-</ng-container>
+  }
+</div>

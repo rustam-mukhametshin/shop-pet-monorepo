@@ -1,7 +1,6 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {Router, RouterLink, RouterLinkActive} from '@angular/router';
-import { AuthService } from '../../auth.service';
-import {AsyncPipe, NgIf} from "@angular/common";
+import {AuthService} from '../../auth.service';
 
 @Component({
   selector: 'app-menu',
@@ -9,8 +8,6 @@ import {AsyncPipe, NgIf} from "@angular/common";
   styleUrls: ['./menu.component.css'],
   standalone: true,
   imports: [
-    NgIf,
-    AsyncPipe,
     RouterLink,
     RouterLinkActive
   ]
@@ -21,7 +18,8 @@ export class MenuComponent {
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router,
-  ) {}
+  ) {
+  }
 
   logout(): void {
     const confirmed = window.confirm('Are you sure you want to log out?');

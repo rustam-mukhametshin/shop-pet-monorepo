@@ -1,15 +1,16 @@
 <nav class="navbar navbar-expand navbar-light bg-light border-bottom px-3">
   <a class="navbar-brand fw-semibold" routerLink="/products">Shop Pet</a>
   <div class="navbar-nav">
-    <ng-container>
-      <a class="nav-link" *ngIf="isAuth()" routerLink="/products" routerLinkActive="active">Products</a>
-      <a class="nav-link" *ngIf="isAuth()" routerLink="/products/create" routerLinkActive="active">Create product</a>
-      <a class="nav-link" *ngIf="isAuth()" routerLink="/profile" routerLinkActive="active">Profile</a>
-      <button class="nav-link btn btn-link border-0 p-0" *ngIf="isAuth()" type="button" (click)="logout()">
+    @if (isAuth()) {
+      <a class="nav-link" routerLink="/products" routerLinkActive="active">Products</a>
+      <a class="nav-link" routerLink="/products/create" routerLinkActive="active">Create product</a>
+      <a class="nav-link" routerLink="/profile" routerLinkActive="active">Profile</a>
+      <button class="nav-link btn btn-link border-0 p-0" type="button" (click)="logout()">
         Logout
       </button>
-      <a class="nav-link" *ngIf="!isAuth()" routerLink="/login" routerLinkActive="active">Login</a>
-      <a class="nav-link" *ngIf="!isAuth()" routerLink="/signup" routerLinkActive="active">Sign up</a>
-    </ng-container>
+    } @else {
+      <a class="nav-link" routerLink="/login" routerLinkActive="active">Login</a>
+      <a class="nav-link" routerLink="/signup" routerLinkActive="active">Sign up</a>
+    }
   </div>
 </nav>
