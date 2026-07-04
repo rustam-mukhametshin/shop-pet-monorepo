@@ -41,7 +41,7 @@ export class ProductComponent implements OnInit {
       return;
     }
 
-    this.product = this.productsService.getProductById(id);
+    // this.product = this.productsService.getProductById(id);
     this.detailView = true;
     this.showActions = false;
   }

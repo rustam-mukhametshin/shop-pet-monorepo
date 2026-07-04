@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import { ProductPayload } from '../products.service';
-import {NgIf} from "@angular/common";
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ProductPayload} from '../products.service';
+import {MatError, MatFormField, MatInput, MatLabel} from "@angular/material/input";
+import {MatButton} from "@angular/material/button";
 
 @Component({
   selector: 'app-form-product',
@@ -10,7 +11,11 @@ import {NgIf} from "@angular/common";
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    NgIf
+    MatFormField,
+    MatInput,
+    MatLabel,
+    MatError,
+    MatButton
   ]
 })
 export class FormProductComponent implements OnChanges {
@@ -18,13 +23,26 @@ export class FormProductComponent implements OnChanges {
   @Input() submitLabel = 'Save';
   @Output() formSubmit = new EventEmitter<ProductPayload>();
 
-  readonly productForm = this.formBuilder.nonNullable.group({
-    title: ['', [Validators.required]],
-    description: ['', [Validators.required]],
-    price: [0, [Validators.required, Validators.min(0)]],
+  readonly productForm = new FormGroup({
+    title: new FormControl<string>('', [Validators.required]),
+    description: new FormControl<string>('', [Validators.required]),
+    price: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
   });
 
-  constructor(private readonly formBuilder: FormBuilder) {}
+  constructor() {
+  }
+
+  get titleControl() {
+    return this.productForm.controls.title;
+  }
+
+  get descriptionControl() {
+    return this.productForm.controls.description;
+  }
+
+  get priceControl() {
+    return this.productForm.controls.price;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes['initialValue'] || !this.initialValue) {
@@ -44,18 +62,6 @@ export class FormProductComponent implements OnChanges {
       return;
     }
 
-    this.formSubmit.emit(this.productForm.getRawValue());
-  }
-
-  get titleControl() {
-    return this.productForm.controls.title;
-  }
-
-  get descriptionControl() {
-    return this.productForm.controls.description;
-  }
-
-  get priceControl() {
-    return this.productForm.controls.price;
+    // this.formSubmit.emit(this.productForm.getRawValue());
   }
 }

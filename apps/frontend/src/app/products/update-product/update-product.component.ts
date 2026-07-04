@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Product, ProductPayload, ProductsService } from '../products.service';
 import {FormProductComponent} from "../form-product/form-product.component";
-import {NgIf} from "@angular/common";
+import {AsyncPipe, NgIf} from "@angular/common";
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'app-update-product',
@@ -11,11 +12,12 @@ import {NgIf} from "@angular/common";
   standalone: true,
   imports: [
     FormProductComponent,
-    NgIf
+    NgIf,
+    AsyncPipe
   ]
 })
 export class UpdateProductComponent implements OnInit {
-  product?: Product;
+  product$?: Observable<Product>;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -30,15 +32,15 @@ export class UpdateProductComponent implements OnInit {
       return;
     }
 
-    this.product = this.productsService.getProductById(id);
+    this.product$ = this.productsService.getProductById(id);
   }
 
   updateProduct(payload: ProductPayload): void {
-    if (!this.product) {
+    if (!this.product$) {
       return;
     }
 
-    this.productsService.updateProduct(this.product._id, payload);
-    void this.router.navigate(['/products', this.product._id]);
+    // this.productsService.updateProduct(this.product._id, payload);
+    // void this.router.navigate(['/products', this.product._id]);
   }
 }

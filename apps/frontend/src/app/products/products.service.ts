@@ -1,7 +1,7 @@
 import {computed, Injectable, signal} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
-import {distinctUntilChanged, map, Observable, shareReplay} from "rxjs";
+import {map, Observable} from "rxjs";
 
 export interface Product {
   _id: string;
@@ -54,8 +54,12 @@ export class ProductsService {
       );
   }
 
-  getProductById(id: string): Product | undefined {
-    return computed(() => this.products().find(product => product._id === id))()
+  getProductById(id: string): Observable<Product> {
+    return this.httpClient.get<{ product: Product }>(
+      environment.apiUrl + `v1/products/${id}`
+    ).pipe(
+      map(res => res.product)
+    )
   }
 
   createProduct(payload: ProductPayload): Product {

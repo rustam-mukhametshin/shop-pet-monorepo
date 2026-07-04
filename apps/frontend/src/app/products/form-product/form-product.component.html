@@ -1,48 +1,44 @@
 <form [formGroup]="productForm" (ngSubmit)="submit()" novalidate>
-  <div class="mb-3">
-    <label class="form-label" for="title">Title</label>
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Title</mat-label>
     <input
-      id="title"
-      type="text"
-      class="form-control"
-      formControlName="title"
-      [class.is-invalid]="titleControl.touched && titleControl.invalid"
+            matInput
+            type="text"
+            formControlName="title"
+            [class.is-invalid]="titleControl.touched && titleControl.invalid"
     />
-    <div class="invalid-feedback" *ngIf="titleControl.touched && titleControl.errors?.['required']">
-      Title is required.
-    </div>
-  </div>
+    @if (titleControl.touched && titleControl.errors?.['required']) {
+      <mat-error>Title is required.</mat-error>
+    }
+  </mat-form-field>
 
-  <div class="mb-3">
-    <label class="form-label" for="description">Description</label>
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Description</mat-label>
     <textarea
-      id="description"
-      class="form-control"
-      rows="4"
-      formControlName="description"
-      [class.is-invalid]="descriptionControl.touched && descriptionControl.invalid"
+            matInput
+            rows="4"
+            formControlName="description"
+            [class.is-invalid]="descriptionControl.touched && descriptionControl.invalid"
     ></textarea>
-    <div class="invalid-feedback" *ngIf="descriptionControl.touched && descriptionControl.errors?.['required']">
-      Description is required.
-    </div>
-  </div>
+    @if (descriptionControl.touched && descriptionControl.errors?.['required']) {
+      <mat-error>Description is required.</mat-error>
+    }
+  </mat-form-field>
 
-  <div class="mb-4">
-    <label class="form-label" for="price">Price</label>
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Price</mat-label>
     <input
-      id="price"
-      type="number"
-      class="form-control"
-      formControlName="price"
-      [class.is-invalid]="priceControl.touched && priceControl.invalid"
+            matInput
+            type="number"
+            formControlName="price"
+            [class.is-invalid]="priceControl.touched && priceControl.invalid"
     />
-    <div class="invalid-feedback" *ngIf="priceControl.touched && priceControl.errors?.['required']">
-      Price is required.
-    </div>
-    <div class="invalid-feedback" *ngIf="priceControl.touched && priceControl.errors?.['min']">
-      Price must be a positive number.
-    </div>
-  </div>
+    @if (priceControl.touched && priceControl.errors?.['required']) {
+      <mat-error>Price is required.</mat-error>
+    } @else if (priceControl.touched && priceControl.errors?.['min']) {
+      <mat-error>Price must be a positive number.</mat-error>
+    }
+  </mat-form-field>
 
-  <button class="btn btn-primary" type="submit">{{ submitLabel }}</button>
+  <button mat-button="elevated" type="submit">{{ submitLabel }}</button>
 </form>

@@ -1,19 +1,19 @@
-<div *ngIf="product; else notFound">
+@if (product$ | async) {
   <div class="mb-4">
     <h1 class="h3 mb-1">Update product</h1>
     <p class="text-muted mb-0">Edit product details and save changes.</p>
   </div>
+  <!--Todo: refactor on angular 18-->
   <app-form-product
-    [initialValue]="{
+          *ngIf="product$ | async as product"
+          [initialValue]="{
       title: product.title,
       description: product.description,
       price: product.price
     }"
-    submitLabel="Update product"
-    (formSubmit)="updateProduct($event)"
+          submitLabel="Update product"
+          (formSubmit)="updateProduct($event)"
   ></app-form-product>
-</div>
-
-<ng-template #notFound>
+} @else {
   <p class="text-danger mb-0">Product not found.</p>
-</ng-template>
+}
