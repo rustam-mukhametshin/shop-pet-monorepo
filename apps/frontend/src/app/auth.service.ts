@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import {computed, Injectable, Signal, signal, WritableSignal} from '@angular/core';
+import {Injectable, Signal, signal, WritableSignal} from '@angular/core';
 import {Observable, tap} from 'rxjs';
 import {environment} from '../environments/environment';
 
@@ -8,9 +8,7 @@ export interface LoginCredentials {
   password: string;
 }
 
-export interface SignupCredentials {
-  email: string;
-  password: string;
+export interface SignupCredentials extends LoginCredentials {
   confirmPassword: string;
 }
 
@@ -33,7 +31,7 @@ export interface SignupResponse {
 export class AuthService {
   private readonly tokenKey: string = 'shop-pet-auth-token';
   private readonly isLoggedIn: WritableSignal<boolean> = signal(this.hasToken());
-  public readonly isAuth: Signal<boolean> = computed(() => this.isLoggedIn());
+  public readonly isAuth: Signal<boolean> = this.isLoggedIn.asReadonly();
 
   constructor(private readonly http: HttpClient) {
   }
