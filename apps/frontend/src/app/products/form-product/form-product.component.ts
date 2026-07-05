@@ -27,7 +27,7 @@ export class FormProductComponent implements OnChanges {
     title: new FormControl<string | null>('', [Validators.required]),
     description: new FormControl<string | null>('', [Validators.required]),
     price: new FormControl<number | null>(0, [Validators.required, Validators.min(0)]),
-    image: new FormControl(null),
+    image: new FormControl<File | null>(null, [Validators.required]),
   });
 
   constructor() {
@@ -59,6 +59,13 @@ export class FormProductComponent implements OnChanges {
       description: this.initialValue.description ?? '',
       price: this.initialValue.price ?? 0,
     });
+  }
+
+  onFileChange(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.productForm.patchValue({image: file});
+    }
   }
 
   submit(): void {

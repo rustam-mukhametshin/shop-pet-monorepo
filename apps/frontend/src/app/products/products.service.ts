@@ -1,14 +1,14 @@
-import {computed, Injectable, signal} from '@angular/core';
+import {Injectable, signal} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {map, Observable} from "rxjs";
 
 export interface Product {
   _id: string;
-  title: string;
-  description: string;
-  price: number;
-  imageUrl?: string;
+  title: string | null;
+  description: string | null;
+  price: number | null;
+  image?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -62,13 +62,11 @@ export class ProductsService {
     )
   }
 
-  createProduct(payload: ProductPayload): Product {
-    const product: Product = {
-      ...payload,
-      _id: Date.now().toString(),
-    };
-    this.products.set([...this.products(), product]);
-    return product;
+  createProduct(payload: FormData): Observable<Product> {
+    return this.httpClient.post<Product>(
+      environment.apiUrl + `v1/add-product`,
+      payload,
+    )
   }
 
   updateProduct(id: string, payload: ProductPayload): Product | undefined {

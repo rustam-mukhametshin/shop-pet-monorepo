@@ -1,4 +1,4 @@
-<form [formGroup]="productForm" (ngSubmit)="submit()" novalidate>
+<form [formGroup]="productForm" (ngSubmit)="submit()" enctype="multipart/form-data">
   <mat-form-field class="w-100 mb-3">
     <mat-label>Title</mat-label>
     <input
@@ -43,7 +43,7 @@
   <div class="mb-3">
     <label for="formFile" class="form-label">Drop images here, or click to upload.</label>
     <input class="form-control" type="file" id="formFile"
-           formControlName="image">
+           (change)="onFileChange($event)" accept="image/*">
     @if (imageControl.touched && imageControl.errors?.['required']) {
       <div class="invalid-feedback">
         Image is required.
