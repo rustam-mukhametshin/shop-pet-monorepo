@@ -40,5 +40,16 @@
     }
   </mat-form-field>
 
+  <div class="mb-3">
+    <label for="formFile" class="form-label">Drop images here, or click to upload.</label>
+    <input class="form-control" type="file" id="formFile"
+           formControlName="image">
+    @if (imageControl.touched && imageControl.errors?.['required']) {
+      <div class="invalid-feedback">
+        Image is required.
+      </div>
+    }
+  </div>
+
   <button mat-button="elevated" type="submit">{{ submitLabel }}</button>
 </form>

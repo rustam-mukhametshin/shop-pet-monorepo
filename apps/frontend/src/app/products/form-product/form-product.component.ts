@@ -24,9 +24,10 @@ export class FormProductComponent implements OnChanges {
   @Output() formSubmit = new EventEmitter<ProductPayload>();
 
   readonly productForm = new FormGroup({
-    title: new FormControl<string>('', [Validators.required]),
-    description: new FormControl<string>('', [Validators.required]),
-    price: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
+    title: new FormControl<string | null>('', [Validators.required]),
+    description: new FormControl<string | null>('', [Validators.required]),
+    price: new FormControl<number | null>(0, [Validators.required, Validators.min(0)]),
+    image: new FormControl(null),
   });
 
   constructor() {
@@ -42,6 +43,10 @@ export class FormProductComponent implements OnChanges {
 
   get priceControl() {
     return this.productForm.controls.price;
+  }
+
+  get imageControl() {
+    return this.productForm.controls.image;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -62,6 +67,8 @@ export class FormProductComponent implements OnChanges {
       return;
     }
 
-    // this.formSubmit.emit(this.productForm.getRawValue());
+    // console.log(this.productForm.value)
+    // Todo: fix type
+    this.formSubmit.emit(this.productForm.value as any);
   }
 }
