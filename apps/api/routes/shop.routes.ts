@@ -1,6 +1,7 @@
 import {Router} from 'express';
 import * as ShopController from '../controllers/shop.controller';
 import {isAuth} from "../middleware/is-auth";
+import {body} from "express-validator";
 
 const shopRoutes = Router();
 /**
@@ -17,6 +18,25 @@ shopRoutes.get('/invoices/:orderId', isAuth, ShopController.getInvoice);
 /**
  *  POST
  */
+shopRoutes.post(
+  '/add-product',
+  [
+    body('title', 'Only alphanumeric characters for title')
+      .isString()
+      .escape()
+      .isLength({min: 1, max: 100})
+      .trim(),
+    body('price')
+      .escape()
+      .isFloat(),
+    body('description', 'Only alphanumeric characters for description')
+      .isString()
+      .escape()
+      .isLength({min: 1, max: 200})
+      .trim(),
+  ],
+  ShopController.postAddProduct
+);
 shopRoutes.post('/cart', isAuth, ShopController.postAddProductToCart);
 // shopRoutes.post('/create-order', isAuth, ShopController.postCreateOrder);
 shopRoutes.post('/order-delete-item', isAuth, ShopController.postDeleteOrderItem);
