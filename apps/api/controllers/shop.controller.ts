@@ -9,7 +9,7 @@ import {validationResult} from "express-validator";
 
 // const stripe = new Stripe(process.env.STRIPE_SECRET!);
 
-const ITEMS_PER_PAGE = 2;
+const ITEMS_PER_PAGE = 10;
 
 export const getIndex = async (req: Request, res: Response, next: NextFunction) => {
   return getProducts(req, res, next);
