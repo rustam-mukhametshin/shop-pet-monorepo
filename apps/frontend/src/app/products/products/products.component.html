@@ -4,6 +4,45 @@
 </div>
 
 @defer (on viewport; prefetch on idle) {
+  @if (products().length > 0) {
+    <table mat-table [dataSource]="products()">
+      <tr mat-header-row *matHeaderRowDef="columnsToDisplay" class="header-tr"></tr>
+      <tr mat-row *matRowDef="let myRowData; columns: columnsToDisplay" class="body-tr"></tr>
+      <ng-container matColumnDef="_id">
+        <th mat-header-cell *matHeaderCellDef><strong>Id</strong></th>
+        <td mat-cell *matCellDef="let product"> {{ product._id }}</td>
+      </ng-container>
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef><strong>Title</strong></th>
+        <td mat-cell *matCellDef="let product"> {{ product.title }}</td>
+      </ng-container>
+      <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef><strong>Description</strong></th>
+        <td mat-cell *matCellDef="let product"> {{ product.description }}</td>
+      </ng-container>
+      <ng-container matColumnDef="price">
+        <th mat-header-cell *matHeaderCellDef><strong>Price</strong></th>
+        <td mat-cell *matCellDef="let product"> {{ product.price | currency }}</td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let product">
+          <button mat-button>View</button>
+          <button mat-button>Update</button>
+          <button mat-button>Delete</button>
+        </td>
+      </ng-container>
+    </table>
+  }
+} @loading {
+  <p>Loading ...</p>
+} @error {
+  <p>Error loading products.</p>
+} @placeholder {
+  <p>No products</p>
+}
+
+@defer (on viewport; prefetch on idle) {
   <div class="row g-3">
     @for (product of products(); track product._id) {
       <div class="col-12 col-md-6 col-lg-4">

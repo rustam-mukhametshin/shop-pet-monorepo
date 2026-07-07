@@ -4,6 +4,20 @@ import {ProductComponent} from "../product/product.component";
 import {RouterLink} from "@angular/router";
 import {first} from "rxjs";
 import {NotificationService} from "../../services/notification.service";
+import {
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable
+} from "@angular/material/table";
+import {CurrencyPipe} from "@angular/common";
+import {MatButton} from "@angular/material/button";
 
 @Component({
   selector: 'app-products',
@@ -12,11 +26,30 @@ import {NotificationService} from "../../services/notification.service";
   standalone: true,
   imports: [
     ProductComponent,
-    RouterLink
+    RouterLink,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderRow,
+    MatRow,
+    MatRowDef,
+    MatHeaderRowDef,
+    CurrencyPipe,
+    MatButton
   ]
 })
 export class ProductsComponent implements OnInit {
   products: WritableSignal<Product[]> = signal([]);
+  columnsToDisplay: string[] = [
+    '_id',
+    'title',
+    'description',
+    'price',
+    'actions',
+  ]
 
   constructor(
     private readonly productsService: ProductsService,
