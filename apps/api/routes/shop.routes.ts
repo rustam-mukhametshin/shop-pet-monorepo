@@ -42,6 +42,15 @@ shopRoutes.post('/cart', isAuth, ShopController.postAddProductToCart);
 shopRoutes.post('/order-delete-item', isAuth, ShopController.postDeleteOrderItem);
 
 /**
+ *  UPDATE
+ */
+
+/**
+ *  DELETE
+ */
+shopRoutes.delete('/products/:id', ShopController.deleteProduct)
+
+/**
  * DEFAULT HOME PAGE
  */
 shopRoutes.get('/', ShopController.getIndex);

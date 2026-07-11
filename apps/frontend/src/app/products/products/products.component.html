@@ -29,7 +29,7 @@
         <td mat-cell *matCellDef="let product">
           <button mat-button>View</button>
           <button mat-button>Update</button>
-          <button mat-button>Delete</button>
+          <button mat-button (click)="removeProduct(product._id)">Delete</button>
         </td>
       </ng-container>
     </table>

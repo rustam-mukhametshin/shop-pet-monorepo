@@ -84,7 +84,9 @@ export class ProductsService {
     return updatedProduct;
   }
 
-  deleteProduct(id: string): void {
-    this.products.set(this.products().filter(product => product._id !== id));
+  deleteProduct(id: string) {
+    return this.httpClient.delete<unknown>(
+      environment.apiUrl + `v1/products/${id}`,
+    )
   }
 }

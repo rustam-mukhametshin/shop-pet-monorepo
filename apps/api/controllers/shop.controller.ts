@@ -6,6 +6,7 @@ import * as fs from "node:fs";
 import path from "path";
 import PDFDocument from "pdfkit";
 import {validationResult} from "express-validator";
+import {ObjectId} from "mongodb";
 
 // const stripe = new Stripe(process.env.STRIPE_SECRET!);
 
@@ -306,3 +307,36 @@ export const postAddProduct = async (req: Request, res: Response, next: NextFunc
     next(new Error(err as string));
   }
 };
+
+/**
+ * Delete single product
+ *
+ * @param req
+ * @param res
+ * @param next
+ */
+export const deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
+  const productId = req.params['id'] as string;
+
+  const product = await Product.findById(productId);
+  if (!product) {
+    return res.status(404).json({
+      status: 'error',
+      message: 'Product not found',
+    } as ResponseJsonType)
+  }
+
+  return Product.deleteOne({
+    _id: new ObjectId(product._id),
+  })
+    .then(result => {
+      return res.status(200).json({
+        status: 'success',
+        message: 'Successfully deleted product',
+        data: result,
+      } as ResponseJsonType)
+    })
+    .catch((err: any) => {
+      return next(new Error(err))
+    });
+}

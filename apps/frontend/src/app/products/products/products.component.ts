@@ -2,7 +2,7 @@ import {afterNextRender, afterRender, Component, OnInit, signal, WritableSignal}
 import {Product, ProductsService} from '../products.service';
 import {ProductComponent} from "../product/product.component";
 import {RouterLink} from "@angular/router";
-import {first} from "rxjs";
+import {catchError, first, switchMap, take} from "rxjs";
 import {NotificationService} from "../../services/notification.service";
 import {
   MatCell,
@@ -74,7 +74,25 @@ export class ProductsComponent implements OnInit {
     })
   }
 
-  removeProduct(productId: string): void {
-    this.productsService.deleteProduct(productId);
+  removeProduct(productId: string) {
+    this.productsService.deleteProduct(productId)
+      .pipe(
+        take(1),
+        switchMap((response: any) => {
+          if (response.status === 'success') {
+            return this.productsService.getProducts();
+          }
+          throw new Error('Product not found');
+        }),
+        catchError((error: any) => {
+          console.error(error);
+          this.notificationService.error('Error deleting product: ' + error.message);
+          throw error;
+        })
+      )
+      .subscribe(products => {
+        this.notificationService.success('Product successfully deleted!');
+        this.products?.set(products);
+      })
   }
 }
