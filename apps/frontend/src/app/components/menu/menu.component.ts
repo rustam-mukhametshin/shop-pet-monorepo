@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {Router, RouterLink, RouterLinkActive} from '@angular/router';
 import {AuthService} from '../../auth.service';
+import {MatDivider} from "@angular/material/divider";
 
 @Component({
   selector: 'app-menu',
@@ -9,7 +10,8 @@ import {AuthService} from '../../auth.service';
   standalone: true,
   imports: [
     RouterLink,
-    RouterLinkActive
+    RouterLinkActive,
+    MatDivider
   ]
 })
 export class MenuComponent {
