@@ -18,6 +18,7 @@ import {
 } from "@angular/material/table";
 import {CurrencyPipe} from "@angular/common";
 import {MatButton} from "@angular/material/button";
+import {MatPaginator, PageEvent} from "@angular/material/paginator";
 
 @Component({
   selector: 'app-products',
@@ -38,11 +39,16 @@ import {MatButton} from "@angular/material/button";
     MatRowDef,
     MatHeaderRowDef,
     CurrencyPipe,
-    MatButton
+    MatButton,
+    MatPaginator
   ]
 })
 export class ProductsComponent implements OnInit {
   products: WritableSignal<Product[]> = signal([]);
+  currentPage?: number;
+  lastPage?: number;
+  length?: number;
+  pageSize?: number;
   columnsToDisplay: string[] = [
     '_id',
     'title',
@@ -69,7 +75,11 @@ export class ProductsComponent implements OnInit {
       .pipe(
         first()
       ).subscribe(value => {
-      this.products?.set(value);
+      this.products?.set(value.prods);
+      this.currentPage = value.currentPage;
+      this.lastPage = value.lastPage;
+      this.length = value.length;
+      this.pageSize = value.pageSize;
       this.notificationService.success('Products successfully loaded!');
     })
   }
@@ -92,7 +102,28 @@ export class ProductsComponent implements OnInit {
       )
       .subscribe(products => {
         this.notificationService.success('Product successfully deleted!');
-        this.products?.set(products);
+        this.currentPage = products.currentPage;
+        this.lastPage = products.lastPage;
+        this.length = products.length;
+        this.pageSize = products.pageSize;
+        this.products?.set(products.prods);
       })
+  }
+
+  protected onPageChange($event: PageEvent) {
+    this.productsService.getProducts({
+      pageIndex: $event.pageIndex + 1,
+      pageSize: $event.pageSize
+    })
+      .pipe(
+        first()
+      ).subscribe(value => {
+      this.products?.set(value.prods);
+      this.currentPage = value.currentPage;
+      this.lastPage = value.lastPage;
+      this.length = value.length;
+      this.pageSize = value.pageSize;
+      this.notificationService.success('Products successfully loaded!');
+    })
   }
 }

@@ -20,17 +20,20 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
   const currentPage: number = parseInt(req.query?.page as string) || 1;
   const totalNumberOfPages = await Product.countDocuments();
   const lastPage = Math.ceil(totalNumberOfPages / 2);
+  const pageSize = parseInt(req.query?.pageSize as string) || ITEMS_PER_PAGE;
 
   return Product
     .find()
-    .skip((currentPage - 1) * ITEMS_PER_PAGE)
-    .limit(ITEMS_PER_PAGE)
+    .skip((currentPage - 1) * pageSize)
+    .limit(pageSize)
     .populate('userId')
     .then((products) => {
       return res.json({
         prods: products,
         currentPage,
         lastPage,
+        length: totalNumberOfPages,
+        pageSize: pageSize
       });
     })
     .catch((err: any) => next(new Error(err)));

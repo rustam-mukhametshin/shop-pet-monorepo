@@ -17,6 +17,8 @@ interface Response {
   prods: Product[];
   currentPage: number;
   lastPage: number;
+  length: number,
+  pageSize: number
 }
 
 export type ProductPayload = Omit<Product, '_id'>;
@@ -45,13 +47,19 @@ export class ProductsService {
   ) {
   }
 
-  getProducts(): Observable<Product[]> {
+  getProducts(params = {
+    pageIndex: 0,
+    pageSize: 10,
+  }): Observable<Response> {
     return this.httpClient.get<Response>(
-      environment.apiUrl + 'v1/products'
+      environment.apiUrl + 'v1/products',
+      {
+        params: {
+          page: params.pageIndex,
+          pageSize: params.pageSize,
+        }
+      }
     )
-      .pipe(
-        map(res => res.prods)
-      );
   }
 
   getProductById(id: string): Observable<Product> {
