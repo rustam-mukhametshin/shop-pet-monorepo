@@ -11,19 +11,18 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
 import {MatButtonModule} from "@angular/material/button";
 
 @Component({
-  selector: 'app-login-page',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
-  standalone: true,
-  imports: [
-    MatCardModule,
-    ReactiveFormsModule,
-    MatInputModule,
-    NgIf,
-    MatCheckboxModule,
-    MatButtonModule,
-    RouterLink
-  ]
+    selector: 'app-login-page',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.css'],
+    imports: [
+        MatCardModule,
+        ReactiveFormsModule,
+        MatInputModule,
+        NgIf,
+        MatCheckboxModule,
+        MatButtonModule,
+        RouterLink
+    ]
 })
 export class LoginComponent implements OnInit {
   readonly loginForm = this.formBuilder.nonNullable.group({

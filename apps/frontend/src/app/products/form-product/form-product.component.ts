@@ -5,18 +5,17 @@ import {MatError, MatFormField, MatInput, MatLabel} from "@angular/material/inpu
 import {MatButton} from "@angular/material/button";
 
 @Component({
-  selector: 'app-form-product',
-  templateUrl: './form-product.component.html',
-  styleUrls: ['./form-product.component.css'],
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    MatFormField,
-    MatInput,
-    MatLabel,
-    MatError,
-    MatButton
-  ]
+    selector: 'app-form-product',
+    templateUrl: './form-product.component.html',
+    styleUrls: ['./form-product.component.css'],
+    imports: [
+        ReactiveFormsModule,
+        MatFormField,
+        MatInput,
+        MatLabel,
+        MatError,
+        MatButton
+    ]
 })
 export class FormProductComponent implements OnChanges {
   @Input() initialValue?: Partial<ProductPayload>;

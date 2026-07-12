@@ -5,15 +5,14 @@ import {DecimalPipe} from "@angular/common";
 import {MatButtonModule} from "@angular/material/button";
 
 @Component({
-  selector: 'app-product',
-  templateUrl: './product.component.html',
-  styleUrls: ['./product.component.css'],
-  standalone: true,
-  imports: [
-    RouterLink,
-    DecimalPipe,
-    MatButtonModule
-  ]
+    selector: 'app-product',
+    templateUrl: './product.component.html',
+    styleUrls: ['./product.component.css'],
+    imports: [
+        RouterLink,
+        DecimalPipe,
+        MatButtonModule
+    ]
 })
 export class ProductComponent implements OnInit {
   @Input({required: true}) product?: Product;

@@ -21,27 +21,26 @@ import {MatButton} from "@angular/material/button";
 import {MatPaginator, PageEvent} from "@angular/material/paginator";
 
 @Component({
-  selector: 'app-products',
-  templateUrl: './products.component.html',
-  styleUrls: ['./products.component.css'],
-  standalone: true,
-  imports: [
-    ProductComponent,
-    RouterLink,
-    MatTable,
-    MatColumnDef,
-    MatHeaderCell,
-    MatCell,
-    MatHeaderCellDef,
-    MatCellDef,
-    MatHeaderRow,
-    MatRow,
-    MatRowDef,
-    MatHeaderRowDef,
-    CurrencyPipe,
-    MatButton,
-    MatPaginator
-  ]
+    selector: 'app-products',
+    templateUrl: './products.component.html',
+    styleUrls: ['./products.component.css'],
+    imports: [
+        ProductComponent,
+        RouterLink,
+        MatTable,
+        MatColumnDef,
+        MatHeaderCell,
+        MatCell,
+        MatHeaderCellDef,
+        MatCellDef,
+        MatHeaderRow,
+        MatRow,
+        MatRowDef,
+        MatHeaderRowDef,
+        CurrencyPipe,
+        MatButton,
+        MatPaginator
+    ]
 })
 export class ProductsComponent implements OnInit {
   products: WritableSignal<Product[]> = signal([]);

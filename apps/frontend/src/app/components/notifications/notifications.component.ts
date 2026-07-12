@@ -4,11 +4,10 @@ import {Notification, NotificationService} from '../../services/notification.ser
 import {Subscription} from "rxjs";
 
 @Component({
-  selector: 'app-notifications',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './notifications.component.html',
-  styleUrl: './notifications.component.css'
+    selector: 'app-notifications',
+    imports: [CommonModule],
+    templateUrl: './notifications.component.html',
+    styleUrl: './notifications.component.css'
 })
 export class NotificationsComponent implements OnInit, OnDestroy {
   notifications: WritableSignal<Notification[]> = signal([]);

@@ -14,15 +14,14 @@ import {NgIf} from "@angular/common";
 import {RouterLink} from "@angular/router";
 
 @Component({
-  selector: 'app-signup-page',
-  templateUrl: './signup.component.html',
-  styleUrls: ['./signup.component.css'],
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgIf,
-    RouterLink
-  ]
+    selector: 'app-signup-page',
+    templateUrl: './signup.component.html',
+    styleUrls: ['./signup.component.css'],
+    imports: [
+        ReactiveFormsModule,
+        NgIf,
+        RouterLink
+    ]
 })
 export class SignupComponent {
   readonly signupForm = this.formBuilder.nonNullable.group({

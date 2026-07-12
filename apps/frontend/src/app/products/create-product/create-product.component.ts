@@ -5,13 +5,12 @@ import {FormProductComponent} from "../form-product/form-product.component";
 import {first} from "rxjs";
 
 @Component({
-  selector: 'app-create-product',
-  templateUrl: './create-product.component.html',
-  styleUrls: ['./create-product.component.css'],
-  standalone: true,
-  imports: [
-    FormProductComponent
-  ]
+    selector: 'app-create-product',
+    templateUrl: './create-product.component.html',
+    styleUrls: ['./create-product.component.css'],
+    imports: [
+        FormProductComponent
+    ]
 })
 export class CreateProductComponent {
   constructor(

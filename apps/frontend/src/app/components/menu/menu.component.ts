@@ -4,15 +4,14 @@ import {AuthService} from '../../auth.service';
 import {MatDivider} from "@angular/material/divider";
 
 @Component({
-  selector: 'app-menu',
-  templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.css'],
-  standalone: true,
-  imports: [
-    RouterLink,
-    RouterLinkActive,
-    MatDivider
-  ]
+    selector: 'app-menu',
+    templateUrl: './menu.component.html',
+    styleUrls: ['./menu.component.css'],
+    imports: [
+        RouterLink,
+        RouterLinkActive,
+        MatDivider
+    ]
 })
 export class MenuComponent {
   isAuth = this.authService.isAuth;

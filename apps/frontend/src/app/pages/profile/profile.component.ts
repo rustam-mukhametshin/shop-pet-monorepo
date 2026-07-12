@@ -8,15 +8,14 @@ import {Router} from "@angular/router";
 import {NgIf, NgOptimizedImage} from "@angular/common";
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.css'],
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgIf,
-    NgOptimizedImage
-  ]
+    selector: 'app-profile',
+    templateUrl: './profile.component.html',
+    styleUrls: ['./profile.component.css'],
+    imports: [
+        ReactiveFormsModule,
+        NgIf,
+        NgOptimizedImage
+    ]
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   readonly profileForm = new FormGroup({

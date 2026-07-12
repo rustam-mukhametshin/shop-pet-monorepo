@@ -6,15 +6,14 @@ import {AsyncPipe, NgIf} from "@angular/common";
 import {Observable} from "rxjs";
 
 @Component({
-  selector: 'app-update-product',
-  templateUrl: './update-product.component.html',
-  styleUrls: ['./update-product.component.css'],
-  standalone: true,
-  imports: [
-    FormProductComponent,
-    NgIf,
-    AsyncPipe
-  ]
+    selector: 'app-update-product',
+    templateUrl: './update-product.component.html',
+    styleUrls: ['./update-product.component.css'],
+    imports: [
+        FormProductComponent,
+        NgIf,
+        AsyncPipe
+    ]
 })
 export class UpdateProductComponent implements OnInit {
   product$?: Observable<Product>;
