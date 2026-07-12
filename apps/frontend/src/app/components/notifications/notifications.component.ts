@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { NotificationService } from '../../services/notification.service';
-import { Notification } from '../../services/notification.service';
+import {Component, OnDestroy, OnInit, signal, WritableSignal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Notification, NotificationService} from '../../services/notification.service';
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-notifications',
@@ -10,15 +10,25 @@ import { Notification } from '../../services/notification.service';
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.css'
 })
-export class NotificationsComponent implements OnInit {
-  notifications: Notification[] = [];
+export class NotificationsComponent implements OnInit, OnDestroy {
+  notifications: WritableSignal<Notification[]> = signal([]);
+  sub$?: Subscription;
 
-  constructor(private notificationService: NotificationService) {}
+  constructor(private notificationService: NotificationService) {
+  }
 
   ngOnInit() {
-    this.notificationService.notifications$.subscribe(
-      notifs => this.notifications = notifs
+    this.sub$ = this.notificationService.notifications$.subscribe(
+      notifs => {
+        this.notifications.set(notifs)
+      }
     );
+  }
+
+  ngOnDestroy() {
+    if (this.sub$) {
+      this.sub$.unsubscribe();
+    }
   }
 
   close(id: string) {
