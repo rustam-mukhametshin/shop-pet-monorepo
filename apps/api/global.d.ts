@@ -17,6 +17,11 @@ declare global {
             };
         }
     }
+    type ResponseJsonType = {
+        status: 'success' | 'error';
+        message: string;
+        data?: any;
+    }
 }
 
 export {};
