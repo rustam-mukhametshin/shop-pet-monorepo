@@ -1,8 +1,8 @@
 import {HttpErrorResponse} from '@angular/common/http';
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {finalize, first} from 'rxjs';
+import {distinctUntilChanged, filter, finalize, first, shareReplay, Subscription} from 'rxjs';
 import {AuthService} from '../../auth.service';
 import {MatCardModule} from "@angular/material/card";
 import {MatInputModule} from "@angular/material/input";
@@ -24,7 +24,7 @@ import {MatButtonModule} from "@angular/material/button";
     RouterLink
   ]
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
   readonly loginForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
@@ -37,6 +37,7 @@ export class LoginComponent implements OnInit {
   isTwoFASubmit = false;
   private returnUrl = '';
   private stateToken = '';
+  #twoFASubscription?: Subscription;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -45,6 +46,7 @@ export class LoginComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly changeDetectorRef: ChangeDetectorRef,
   ) {
+    this.autoSubmitTwoFA();
   }
 
   get emailControl() {
@@ -61,6 +63,12 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/products';
+  }
+
+  ngOnDestroy() {
+    if (this.#twoFASubscription) {
+      this.#twoFASubscription.unsubscribe();
+    }
   }
 
   submit(): void {
@@ -125,6 +133,19 @@ export class LoginComponent implements OnInit {
           this.isSubmitting = false;
         },
       });
+  }
+
+  private autoSubmitTwoFA(): void {
+    this.#twoFASubscription = this.loginForm.get('twoFA')
+      ?.valueChanges
+      ?.pipe(
+        filter(value => value !== null && value.length === 6),
+        distinctUntilChanged(),
+        shareReplay()
+      )
+      .subscribe(_ => {
+        this.submitTwoFA();
+      })
   }
 
   private getErrorMessage(error: HttpErrorResponse): string {
