@@ -57,7 +57,10 @@
               "namedChunks": true
             }
           },
-          "defaultConfiguration": "production"
+          "defaultConfiguration": "production",
+          "security": {
+            "autoCSP": true
+          }
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -69,7 +72,8 @@
               "buildTarget": "frontend:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "hmr": true
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
