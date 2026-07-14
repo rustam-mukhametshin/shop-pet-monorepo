@@ -29,7 +29,8 @@
     "strictInputAccessModifiers": true,
     "strictTemplates": true,
     "strictNullInputTypes": false, // Disables strict null checking in templates only
-    "strictInputTypes": false      // Disables strict input type checking only
+    "strictInputTypes": false,      // Disables strict input type checking only
+    "strictStandalone": true
   }
 }
 
