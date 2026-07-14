@@ -1,8 +1,8 @@
 import {HttpErrorResponse} from '@angular/common/http';
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {first} from 'rxjs';
+import {finalize, first} from 'rxjs';
 import {AuthService} from '../../auth.service';
 import {MatCardModule} from "@angular/material/card";
 import {MatInputModule} from "@angular/material/input";
@@ -11,18 +11,18 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
 import {MatButtonModule} from "@angular/material/button";
 
 @Component({
-    selector: 'app-login-page',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.css'],
-    imports: [
-        MatCardModule,
-        ReactiveFormsModule,
-        MatInputModule,
-        NgIf,
-        MatCheckboxModule,
-        MatButtonModule,
-        RouterLink
-    ]
+  selector: 'app-login-page',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css'],
+  imports: [
+    MatCardModule,
+    ReactiveFormsModule,
+    MatInputModule,
+    NgIf,
+    MatCheckboxModule,
+    MatButtonModule,
+    RouterLink
+  ]
 })
 export class LoginComponent implements OnInit {
   readonly loginForm = this.formBuilder.nonNullable.group({
@@ -43,6 +43,7 @@ export class LoginComponent implements OnInit {
     private readonly authService: AuthService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
+    private readonly changeDetectorRef: ChangeDetectorRef,
   ) {
   }
 
@@ -74,9 +75,14 @@ export class LoginComponent implements OnInit {
 
     this.authService
       .login(this.loginForm.getRawValue())
-      .pipe(first())
+      .pipe(
+        first(),
+        finalize(() => {
+          this.changeDetectorRef.markForCheck();
+        }))
       .subscribe({
         next: response => {
+          this.changeDetectorRef.markForCheck();
           if (response.status === 'success') {
             // loginWithTwoFA
             this.successMessage = response.message;
@@ -85,7 +91,6 @@ export class LoginComponent implements OnInit {
             this.isTwoFASubmit = true;
             this.stateToken = response.state_token;
           }
-
           this.isSubmitting = false;
         },
         error: (error: HttpErrorResponse) => {
