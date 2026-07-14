@@ -1,4 +1,4 @@
-import {afterNextRender, afterRender, Component, OnInit, signal, WritableSignal} from '@angular/core';
+import {Component, OnInit, signal, WritableSignal} from '@angular/core';
 import {Product, ProductsService} from '../products.service';
 import {ProductComponent} from "../product/product.component";
 import {RouterLink} from "@angular/router";
@@ -21,26 +21,26 @@ import {MatButton} from "@angular/material/button";
 import {MatPaginator, PageEvent} from "@angular/material/paginator";
 
 @Component({
-    selector: 'app-products',
-    templateUrl: './products.component.html',
-    styleUrls: ['./products.component.css'],
-    imports: [
-        ProductComponent,
-        RouterLink,
-        MatTable,
-        MatColumnDef,
-        MatHeaderCell,
-        MatCell,
-        MatHeaderCellDef,
-        MatCellDef,
-        MatHeaderRow,
-        MatRow,
-        MatRowDef,
-        MatHeaderRowDef,
-        CurrencyPipe,
-        MatButton,
-        MatPaginator
-    ]
+  selector: 'app-products',
+  templateUrl: './products.component.html',
+  styleUrls: ['./products.component.css'],
+  imports: [
+    ProductComponent,
+    RouterLink,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderRow,
+    MatRow,
+    MatRowDef,
+    MatHeaderRowDef,
+    CurrencyPipe,
+    MatButton,
+    MatPaginator
+  ]
 })
 export class ProductsComponent implements OnInit {
   products: WritableSignal<Product[]> = signal([]);
@@ -60,30 +60,27 @@ export class ProductsComponent implements OnInit {
     private readonly productsService: ProductsService,
     private readonly notificationService: NotificationService,
   ) {
-    afterRender(() => {
-      console.log('afterRender');
-    })
-
-    afterNextRender(() => {
-      console.log('afterNextRender');
-    })
   }
 
   ngOnInit() {
     this.productsService.getProducts()
       .pipe(
         first()
-      ).subscribe(value => {
-      this.products?.set(value.prods);
-      this.currentPage = value.currentPage;
-      this.lastPage = value.lastPage;
-      this.length = value.length;
-      this.pageSize = value.pageSize;
-      this.notificationService.success('Products successfully loaded!');
-    })
+      )
+      .subscribe(value => {
+        this.products?.set(value.prods);
+        this.currentPage = value.currentPage;
+        this.lastPage = value.lastPage;
+        this.length = value.length;
+        this.pageSize = value.pageSize;
+        this.notificationService.success('Products successfully loaded!');
+      })
   }
 
-  removeProduct(productId: string) {
+  removeProduct(productId?: string) {
+    if (!productId) {
+      return;
+    }
     this.productsService.deleteProduct(productId)
       .pipe(
         take(1),
@@ -116,13 +113,14 @@ export class ProductsComponent implements OnInit {
     })
       .pipe(
         first()
-      ).subscribe(value => {
-      this.products?.set(value.prods);
-      this.currentPage = value.currentPage;
-      this.lastPage = value.lastPage;
-      this.length = value.length;
-      this.pageSize = value.pageSize;
-      this.notificationService.success('Products successfully loaded!');
-    })
+      )
+      .subscribe(value => {
+        this.products?.set(value.prods);
+        this.currentPage = value.currentPage;
+        this.lastPage = value.lastPage;
+        this.length = value.length;
+        this.pageSize = value.pageSize;
+        this.notificationService.success('Products successfully loaded!');
+      })
   }
 }

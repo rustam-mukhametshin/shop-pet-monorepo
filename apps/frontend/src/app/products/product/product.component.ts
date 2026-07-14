@@ -1,25 +1,25 @@
-import {booleanAttribute, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {booleanAttribute, Component, input, Input, InputSignal, OnInit, output} from '@angular/core';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {Product, ProductsService} from '../products.service';
 import {DecimalPipe} from "@angular/common";
 import {MatButtonModule} from "@angular/material/button";
 
 @Component({
-    selector: 'app-product',
-    templateUrl: './product.component.html',
-    styleUrls: ['./product.component.css'],
-    imports: [
-        RouterLink,
-        DecimalPipe,
-        MatButtonModule
-    ]
+  selector: 'app-product',
+  templateUrl: './product.component.html',
+  styleUrls: ['./product.component.css'],
+  imports: [
+    RouterLink,
+    DecimalPipe,
+    MatButtonModule
+  ]
 })
 export class ProductComponent implements OnInit {
-  @Input({required: true}) product?: Product;
+  product: InputSignal<Product | undefined> = input.required<Product | undefined>()
   @Input({
     transform: booleanAttribute
   }) showActions = true;
-  @Output() remove = new EventEmitter<string>();
+  remove = output<string | undefined>();
 
   detailView = false;
 
@@ -30,7 +30,7 @@ export class ProductComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.product) {
+    if (this.product()) {
       return;
     }
 
@@ -41,15 +41,13 @@ export class ProductComponent implements OnInit {
     }
 
     // this.product = this.productsService.getProductById(id);
-    this.detailView = true;
-    this.showActions = false;
   }
 
   deleteProduct(): void {
-    if (!this.product) {
+    if (!this.product()) {
       return;
     }
 
-    this.remove.emit(this.product._id);
+    this.remove.emit(this.product()?._id);
   }
 }

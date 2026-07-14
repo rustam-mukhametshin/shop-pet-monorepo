@@ -1,13 +1,13 @@
-@if (product) {
+@if (product()) {
   <div class="card h-100">
     <div class="card-body">
-      <h2 [class.h5]="!detailView" [class.h3]="detailView">{{ product.title }}</h2>
-      <p class="text-muted mb-3">{{ product.description }}</p>
-      <p class="fw-semibold mb-4">${{ product.price | number: '1.2-2' }}</p>
+      <h2 [class.h5]="!detailView" [class.h3]="detailView">{{ product()?.title }}</h2>
+      <p class="text-muted mb-3">{{ product()?.description }}</p>
+      <p class="fw-semibold mb-4">${{ product()?.price | number: '1.2-2' }}</p>
       @if (showActions) {
         <div class="d-flex gap-2">
-          <a class="btn btn-outline-primary btn-sm" [routerLink]="['/products', product._id]">View</a>
-          <a class="btn btn-outline-secondary btn-sm" [routerLink]="['/products', product._id, 'update']">Update</a>
+          <a class="btn btn-outline-primary btn-sm" [routerLink]="['/products', product()?._id]">View</a>
+          <a class="btn btn-outline-secondary btn-sm" [routerLink]="['/products', product()?._id, 'update']">Update</a>
           <button mat-button color="warn" (click)="deleteProduct()">Delete</button>
         </div>
       }
