@@ -1,17 +1,61 @@
-<nav class="navbar navbar-expand navbar-light bg-light border-bottom px-3">
-  <a class="navbar-brand fw-semibold" routerLink="/products">Shop Pet</a>
-  <div class="navbar-nav">
+<mat-toolbar color="primary">
+  <!-- Mobile: hamburger button -->
+  <button mat-icon-button class="mobile-only" [matMenuTriggerFor]="mobileMenu" aria-label="Open navigation menu">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <a class="brand" routerLink="/products">Shop Pet</a>
+  <span class="spacer"></span>
+
+  <!-- Desktop: inline nav links -->
+  <nav class="desktop-only">
     @if (isAuth()) {
-      <a class="nav-link" routerLink="/products" routerLinkActive="active">Products</a>
-      <a class="nav-link" routerLink="/products/create" routerLinkActive="active">Create product</a>
-      <a class="nav-link" routerLink="/profile" routerLinkActive="active">Profile</a>
-      <mat-divider vertical/>
-      <button class="nav-link btn btn-link border-0" type="button" (click)="logout()">
-        Logout
+      <a mat-button routerLink="/products" routerLinkActive="active">
+        <mat-icon>store</mat-icon> Products
+      </a>
+      <a mat-button routerLink="/products/create" routerLinkActive="active">
+        <mat-icon>add_circle</mat-icon> Create product
+      </a>
+      <a mat-button routerLink="/profile" routerLinkActive="active">
+        <mat-icon>person</mat-icon> Profile
+      </a>
+      <mat-divider vertical />
+      <button mat-button (click)="logout()">
+        <mat-icon>logout</mat-icon> Logout
       </button>
     } @else {
-      <a class="nav-link" routerLink="/login" routerLinkActive="active">Login</a>
-      <a class="nav-link" routerLink="/signup" routerLinkActive="active">Sign up</a>
+      <a mat-button routerLink="/login" routerLinkActive="active">
+        <mat-icon>login</mat-icon> Login
+      </a>
+      <a mat-button routerLink="/signup" routerLinkActive="active">
+        <mat-icon>person_add</mat-icon> Sign up
+      </a>
     }
-  </div>
-</nav>
+  </nav>
+</mat-toolbar>
+
+<!-- Mobile: dropdown menu -->
+<mat-menu #mobileMenu="matMenu">
+  @if (isAuth()) {
+    <a mat-menu-item routerLink="/products">
+      <mat-icon>store</mat-icon> Products
+    </a>
+    <a mat-menu-item routerLink="/products/create">
+      <mat-icon>add_circle</mat-icon> Create product
+    </a>
+    <a mat-menu-item routerLink="/profile">
+      <mat-icon>person</mat-icon> Profile
+    </a>
+    <mat-divider />
+    <button mat-menu-item (click)="logout()">
+      <mat-icon>logout</mat-icon> Logout
+    </button>
+  } @else {
+    <a mat-menu-item routerLink="/login">
+      <mat-icon>login</mat-icon> Login
+    </a>
+    <a mat-menu-item routerLink="/signup">
+      <mat-icon>person_add</mat-icon> Sign up
+    </a>
+  }
+</mat-menu>
