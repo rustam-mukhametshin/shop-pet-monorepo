@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:3333/',
+  apiUrl: 'https://shop-pet-monorepo-api.vercel.app/',
 };
