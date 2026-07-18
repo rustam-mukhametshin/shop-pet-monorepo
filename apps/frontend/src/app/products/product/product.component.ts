@@ -3,6 +3,15 @@ import {ActivatedRoute, RouterLink} from '@angular/router';
 import {Product, ProductsService} from '../products.service';
 import {DecimalPipe} from "@angular/common";
 import {MatButtonModule} from "@angular/material/button";
+import {
+  MatCard,
+  MatCardActions,
+  MatCardContent,
+  MatCardFooter,
+  MatCardHeader,
+  MatCardSubtitle,
+  MatCardTitle
+} from "@angular/material/card";
 
 @Component({
   selector: 'app-product',
@@ -11,7 +20,14 @@ import {MatButtonModule} from "@angular/material/button";
   imports: [
     RouterLink,
     DecimalPipe,
-    MatButtonModule
+    MatButtonModule,
+    MatCard,
+    MatCardHeader,
+    MatCardContent,
+    MatCardFooter,
+    MatCardActions,
+    MatCardTitle,
+    MatCardSubtitle
   ]
 })
 export class ProductComponent implements OnInit {
