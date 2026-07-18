@@ -5,17 +5,20 @@
 [![Coverage](https://codecov.io/gh/rustam-mukhametshin/shop-pet-monorepo/branch/master/graph/badge.svg)](https://codecov.io/gh/rustam-mukhametshin/shop-pet-monorepo)
 
 Full-stack pet-shop project managed with **npm workspaces** + **Turborepo**:
-- `apps/api`: Express 5 + TypeScript + Mongoose backend API
-- `apps/frontend`: Angular frontend
+- `apps/api`: Express 5 + TypeScript + Mongoose backend API (port `3333`)
+- `apps/frontend`: Angular 19 frontend (port `4200`)
 
 ## Monorepo Structure
 
 ```text
 shop-pet-monorepo/
 ├── apps/
-│   ├── api/
-│   └── frontend/
+│   ├── api/          # Express backend
+│   └── frontend/     # Angular frontend
 ├── turbo.json
+├── tsconfig.json
+├── tsconfig.build.json
+├── jest.config.js
 └── package.json
 ```
 
@@ -24,18 +27,32 @@ shop-pet-monorepo/
 ### `apps/api`
 - Node.js + Express 5
 - TypeScript + Mongoose (MongoDB)
-- JWT auth middleware (`Authorization: Bearer <token>`)
-- Uploads via `multer`
+- JWT auth (`Authorization: Bearer <token>`, 1 h expiry)
+- Rate limiting via `express-rate-limit` (100 req / 15 min window)
+- File uploads via `multer` (disk storage, `public/images/`, PNG/JPG/JPEG only)
 - PDF invoices via `pdfkit`
 - Email + password reset via `nodemailer` + JWT reset tokens
-- Optional 2FA flow via `otplib` + QR (`qrcode`)
-- Realtime transport via `socket.io`
+- Optional TOTP 2FA via `otplib` + QR code (`qrcode`)
+- WebAuthn / Passkey registration & authentication via `@simplewebauthn/server`
+- Realtime events via `socket.io`
+- Payments via `stripe`
+- Project constants in `apps/api/env.ts` (`projectName`, `projectLabel`)
+
+### `apps/frontend`
+- Angular 19 (standalone components)
+- Angular Material + CDK (`@angular/material`, `@angular/cdk`)
+- Angular Signals for reactive state (`AuthService`)
+- `socket.io-client` for realtime updates
+- Functional route guard (`canActivate`)
+- `NotificationService` with toast-style notifications
 
 ### Tooling
 - Turborepo
 - npm workspaces
-- Jest + Supertest
+- Jest + Supertest (API)
+- Karma + Jasmine (frontend)
 - ts-node + nodemon
+- ESLint + Prettier
 
 ## Prerequisites
 - Node.js >= 20
@@ -48,7 +65,7 @@ shop-pet-monorepo/
 |---|---|
 | `MONGO_URI` | Mongo connection string |
 | `JWT_SECRET` | Access token signing secret |
-| `JWT_STATE_SECRET` | MFA state-token secret |
+| `JWT_STATE_SECRET` | MFA state-token secret (10 min expiry) |
 | `DB_SESSION_SECRET` | Reset-token signing secret |
 | `NODE_MAIL_SERVICE` | Mail transport service |
 | `NODE_MAIL_USER` | Mail auth username |
@@ -81,54 +98,93 @@ API scripts (`apps/api`):
 | Command | Description |
 |---|---|
 | `npm run start` | Run API with `ts-node app.ts` |
-| `npm run start-dev` | Run API in watch mode |
+| `npm run start-dev` | Run API in watch mode (`nodemon`) |
 | `npm run typecheck` | Type-check TypeScript |
 | `npm run build` | Build API TypeScript |
 | `npm test` | Run API tests |
 | `npm run test:watch` | Watch API tests |
-| `npm run test:coverage` | API coverage |
+| `npm run test:coverage` | API coverage report |
+
+Frontend scripts (`apps/frontend`):
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Serve with `ng serve` (port 4200) |
+| `npm run build` | Build with `ng build` |
+| `npm test` | Run Karma tests (headless Chrome) |
+| `npm run lint` | Lint with `ng lint` |
 
 ## Request Flow (`apps/api/app.ts`)
-1. `helmet()`
-2. CORS middleware (allowlist: `http://localhost:3000`, `http://localhost:4200`)
-3. Static serving (`public` + `/public`)
-4. Parsers (`express.urlencoded`, `express.json`, `multer.single('image')`)
-5. Route mounts: `/admin` (JWT `isAuth`) -> `/auth` -> `/v1`
-6. Error route `/500`, then `notFound`, then final redirect error handler
+1. `express-rate-limit` (100 req / 15 min)
+2. `helmet()`
+3. CORS (allowlist: `http://localhost:3000`, `http://localhost:4200`)
+4. Static serving (`public/` + `/public` alias)
+5. Body parsers: `express.urlencoded`, `express.json`, `multer.diskStorage` (field `image`)
+6. Route mounts: `/admin` (JWT `isAuth`) → `/auth` → `/v1`
+7. Error route `/500`, `notFound` fallback, final redirect error handler
+8. `socket.io` server attached on the same HTTP server (CORS-aware)
 
 ## API Surface
 
-### Admin (`/admin`, protected)
-- `GET /products`
-- `POST /add-product`
-- `POST /edit-product`
-- `DELETE /delete-product/:id`
+### Admin (`/admin`, protected by `isAuth`)
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/admin/products` | List all products |
+| `POST` | `/admin/add-product` | Create a product (with validation) |
+| `POST` | `/admin/edit-product` | Edit a product (with validation) |
+| `DELETE` | `/admin/delete-product/:id` | Delete a product |
 
 ### Shop (`/v1`)
-- `GET /`
-- `GET /products`
-- `GET /products/:id`
-- `GET /cart` (protected)
-- `POST /cart` (protected)
-- `GET /cart-delete-item/:id` (protected)
-- `GET /checkout` (protected)
-- `GET /checkout/success` (protected)
-- `GET /orders` (protected)
-- `POST /order-delete-item` (protected)
-- `GET /invoices/:orderId` (protected)
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `GET` | `/v1/` | — | Index / home |
+| `GET` | `/v1/products` | — | List products (paginated) |
+| `GET` | `/v1/products/:id` | — | Get single product |
+| `POST` | `/v1/add-product` | — | Create product (public, with validation) |
+| `DELETE` | `/v1/products/:id` | — | Delete product (public) |
+| `GET` | `/v1/cart` | ✓ | View cart |
+| `POST` | `/v1/cart` | ✓ | Add product to cart |
+| `GET` | `/v1/cart-delete-item/:id` | ✓ | Remove item from cart |
+| `GET` | `/v1/checkout` | ✓ | Checkout page |
+| `GET` | `/v1/checkout/success` | ✓ | Checkout success (creates order) |
+| `GET` | `/v1/orders` | ✓ | List orders |
+| `POST` | `/v1/order-delete-item` | ✓ | Delete order item |
+| `GET` | `/v1/invoices/:orderId` | ✓ | Download PDF invoice |
 
 ### Auth (`/auth`)
-- `POST /login`
-- `POST /login-twofa`
-- `POST /signup`
-- `GET /status` (protected)
-- `GET /profile` (protected)
-- `PUT /profile` (protected)
-- `GET /2fa` (protected)
-- `POST /reset`
-- `GET /reset-password`
-- `POST /reset-password`
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `POST` | `/auth/login` | — | Login (returns JWT or MFA challenge) |
+| `POST` | `/auth/login-twofa` | — | Complete TOTP 2FA login |
+| `POST` | `/auth/signup` | — | Register new user |
+| `GET` | `/auth/status` | ✓ | Get user status |
+| `GET` | `/auth/profile` | ✓ | Get profile |
+| `PUT` | `/auth/profile` | ✓ | Update profile (name, twoFA toggle) |
+| `GET` | `/auth/2fa` | ✓ | Get TOTP secret + QR code |
+| `POST` | `/auth/reset` | — | Request password reset email |
+| `GET` | `/auth/reset-password` | — | Verify reset token |
+| `POST` | `/auth/reset-password` | — | Set new password |
+| `POST` | `/auth/webauthn/register/options` | ✓ | Get WebAuthn registration options |
+| `POST` | `/auth/webauthn/register/verify` | ✓ | Verify WebAuthn registration |
+| `POST` | `/auth/webauthn/authenticate/options` | — | Get WebAuthn authentication options |
+
+## Frontend Routes (`apps/frontend`)
+
+| Path | Component | Auth Guard |
+|---|---|---|
+| `/` | → redirects to `/products` | — |
+| `/login` | `LoginComponent` | — |
+| `/signup` | `SignupComponent` | — |
+| `/profile` | `ProfileComponent` | ✓ |
+| `/products` | `ProductsComponent` | ✓ |
+| `/products/create` | `CreateProductComponent` | ✓ |
+| `/products/form` | `FormProductComponent` | ✓ |
+| `/products/:id` | `ProductComponent` | — |
+| `/products/:id/update` | `UpdateProductComponent` | ✓ |
+| `**` | → redirects to `/products` | — |
 
 ## Notes
-- Frontend/UI work belongs in `apps/frontend` (Angular).
-- `apps/api` should remain API/backend-focused.
+- Frontend API base URL is `http://localhost:3333/` (configured in `src/environments/environment.ts`).
+- Frontend/UI work belongs in `apps/frontend`.
+- `apps/api` should remain API/backend-focused (`res.status(...).json(...)`).
+- JWT token stored in `localStorage` under key `shop-pet-auth-token`.

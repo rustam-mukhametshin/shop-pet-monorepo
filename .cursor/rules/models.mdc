@@ -15,7 +15,6 @@
 | `apps/api/models/user.model.ts` | `UserModel` | Cart instance methods + static email/password helpers |
 | `apps/api/models/product.model.ts` | `Product` | Product owned by user (`userId` ref) |
 | `apps/api/models/order.model.ts` | `OrderModel` | `products[]` with `{ product, quantity }` and `userId` |
-| `apps/api/models/token.model.ts` | `TokenModel` | Password reset token storage |
 | `apps/api/models/node-mail.model.ts` | `NodeMailModel` | Welcome/reset email and JWT token helpers |
 | `apps/api/models/profile.model.ts` | `ProfileModel` | User profile state including `twoFA` toggle |
 | `apps/api/models/two-fa.model.ts` | `TwoFAModel` | Persisted MFA secret for TOTP verification |
@@ -38,6 +37,7 @@
 - `createResetPasswordToken(email)`
 - `verifyResetPasswordToken(token)`
 - `getResetPasswordTokenLink(email, token?)`
+- Password reset is JWT-based; do not add new `TokenModel` dependencies without explicit refactor.
 
 ## Population Pattern
 - Cart reads should populate `cart.items.productId`.

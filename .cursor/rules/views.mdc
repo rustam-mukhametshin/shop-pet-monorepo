@@ -1,11 +1,12 @@
-# Frontend (Angular) Rules
+# Frontend (Angular 19) Rules
 
 ## Scope
 - UI lives in `apps/frontend`.
 - `apps/api` is backend/API only.
 
 ## Angular Structure
-- Keep feature logic in Angular components/services/modules under `apps/frontend/src`.
+- Angular app uses standalone components; do not introduce NgModules.
+- Keep feature logic in Angular components/services under `apps/frontend/src`.
 - Keep HTTP calls in frontend services, not inside presentational components when avoidable.
 - Keep route-driven pages in Angular router; backend should expose JSON endpoints only.
 
@@ -13,10 +14,17 @@
 - Consume backend routes with their prefixes (`/auth/*`, `/v1/*`, `/admin/*`).
 - Send JWT as `Authorization: Bearer <token>` for protected routes.
 - Handle auth and API errors in frontend state/UI, not in backend-rendered templates.
+- Keep API base URL from `src/environments/environment.ts` (`http://localhost:3333/`).
 
 ## Styling Rules
 - Prefer existing Angular styling patterns in the frontend workspace.
 - Keep backend static asset changes (`apps/api/public`) only for backend assets like uploaded files or generated artifacts.
+
+## Frontend App Contracts
+- Auth state is signal-based in `src/app/auth.service.ts` (`isAuth` signal).
+- Persist JWT under `localStorage` key `shop-pet-auth-token`.
+- Keep auth redirects through `src/app/guards/auth.guard.ts` (`/login?returnUrl=...`).
+- Use `NotificationService` (`BehaviorSubject`) for toast-style user feedback.
 
 ## Do Not
 - Do not add new EJS templates or server-rendered pages in `apps/api`.

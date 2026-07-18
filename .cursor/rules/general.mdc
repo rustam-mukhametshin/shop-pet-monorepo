@@ -4,7 +4,7 @@
 - Root uses `npm workspaces` and `turbo`.
 - Application code is under `apps/*`:
   - `apps/api` (backend API)
-  - `apps/frontend` (Angular UI)
+  - `apps/frontend` (Angular 19 UI)
 - Keep backend changes in `apps/api/*` and frontend/UI changes in `apps/frontend/*`.
 
 ## Stack (`apps/api`)
@@ -12,17 +12,19 @@
 - API-first backend with JSON responses.
 - App entry: `apps/api/app.ts`.
 - DB bootstrap: `apps/api/database.ts`.
-- Security: `helmet` + explicit CORS allowlist.
+- Security: `helmet` + explicit CORS allowlist + `express-rate-limit` (100 req / 15 min).
 - Auth guard: JWT `Authorization: Bearer <token>` via `isAuth`.
-- Uploads: `multer.single('image')`.
+- Uploads: `multer.diskStorage` + `multer.single('image')` (`public/images`, PNG/JPG/JPEG).
+- Realtime: `socket.io` attached to same HTTP server.
 
 ## Middleware Order in `apps/api/app.ts` - do not reorder without reason
-1. `helmet()`
-2. CORS headers middleware
-3. Static middleware (`express.static`, `/public` alias)
-4. Body parsers (`express.urlencoded`, `express.json`) + `multer.single('image')`
-5. Route mounts (`/admin` + `isAuth` -> `/auth` -> `/v1`)
-6. `GET /500`, `notFound`, final error redirect handler
+1. `express-rate-limit`
+2. `helmet()`
+3. CORS headers middleware
+4. Static middleware (`express.static`, `/public` alias)
+5. Body parsers (`express.urlencoded`, `express.json`) + `multer.single('image')`
+6. Route mounts (`/admin` + `isAuth` -> `/auth` -> `/v1`)
+7. `GET /500`, `notFound`, final error redirect handler
 
 ## Code Style
 - Use TypeScript for all new backend files.
@@ -30,6 +32,7 @@
 - Return JSON responses for API handlers (`res.status(...).json(...)`).
 - Keep cart/order mutation logic inside `userSchema.methods`, not controllers.
 - Keep request typing aligned with `apps/api/global.d.ts`.
+- Keep WebAuthn RP ID aligned with `env.projectName` from `apps/api/env.ts`.
 
 ## File Conventions
 - Controllers: `apps/api/controllers/*.controller.ts`
@@ -46,3 +49,4 @@
 - Do not remove or rename `req.user` augmentation.
 - Do not add server-rendered frontend behavior inside `apps/api`.
 - Do not move Angular UI concerns out of `apps/frontend`.
+- Do not hardcode `localhost` as WebAuthn RP ID in new backend code.

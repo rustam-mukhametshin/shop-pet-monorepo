@@ -19,6 +19,9 @@
 - `GET /auth/2fa` (guarded by `isAuth`)
 - `POST /auth/reset`
 - `GET /auth/reset-password`, `POST /auth/reset-password`
+- `POST /auth/webauthn/register/options` (guarded by `isAuth`)
+- `POST /auth/webauthn/register/verify` (guarded by `isAuth`)
+- `POST /auth/webauthn/authenticate/options`
 
 ## Controller Flow Expectations
 - `postLogin`: validate input, verify password, return success token or MFA-required payload.
@@ -29,7 +32,9 @@
 - `get2FA`: generate TOTP secret, persist to `TwoFAModel`, return QR data URL.
 - `postReset`: validate email and send reset email link.
 - `getResetPassword`: validate token and return `_email` + `_token`.
-- `postResetPassword`: hash and save new password, then consume reset token.
+- `postResetPassword`: hash and save new password (JWT reset flow, no `TokenModel` DB write/delete).
+- WebAuthn flow uses `@simplewebauthn/server` and must keep RP ID aligned with `env.projectName`.
+- `putProfile` handles disabling 2FA by deleting related `TwoFAModel` secrets.
 
 ## Do Not
 - Do not store raw passwords.
