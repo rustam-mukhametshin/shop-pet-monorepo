@@ -3,13 +3,14 @@ import {AppComponent} from "./app/app.component";
 import {provideHttpClient} from "@angular/common/http";
 import {provideRouter, withViewTransitions} from "@angular/router";
 import {appRoutes} from "./app/app.routes";
-import {provideZonelessChangeDetection} from "@angular/core";
+import {provideBrowserGlobalErrorListeners, provideZonelessChangeDetection} from "@angular/core";
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideZonelessChangeDetection(),
     provideHttpClient(),
     provideRouter(appRoutes, withViewTransitions()),
+    provideBrowserGlobalErrorListeners()
   ]
 })
   .catch(err => console.error(err));
