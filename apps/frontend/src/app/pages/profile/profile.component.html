@@ -4,70 +4,85 @@
     <p class="text-muted mb-0">Manage your account settings and 2FA status.</p>
   </div>
 
-  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
-    {{ errorMessage }}
-  </div>
+  @if (errorMessage) {
+    <div class="alert alert-danger" role="alert">
+      {{ errorMessage }}
+    </div>
+  }
 
-  <div *ngIf="successMessage" class="alert alert-success" role="alert">
-    {{ successMessage }}
-  </div>
+  @if (successMessage) {
+    <div class="alert alert-success" role="alert">
+      {{ successMessage }}
+    </div>
+  }
 
-  <div *ngIf="isLoading" class="text-muted">Loading profile...</div>
+  @if (isLoading) {
+    <div class="text-muted">Loading profile...</div>
+  }
 
-  <form *ngIf="!isLoading" [formGroup]="profileForm">
-    <div class="mb-3">
-      <label for="name" class="form-label">Name</label>
-      <input
-              id="name"
-              type="text"
-              class="form-control"
-              formControlName="name"
-              [class.is-invalid]="nameControl.touched && nameControl.invalid"
-      />
-      <div class="invalid-feedback" *ngIf="nameControl.touched && nameControl.errors?.['required']">
-        Name is required.
+  @if (!isLoading) {
+    <form [formGroup]="profileForm">
+      <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input
+          id="name"
+          type="text"
+          class="form-control"
+          formControlName="name"
+          [class.is-invalid]="nameControl.touched && nameControl.invalid"
+          />
+        @if (nameControl.touched && nameControl.errors?.['required']) {
+          <div class="invalid-feedback">
+            Name is required.
+          </div>
+        }
+      </div>
+      <div class="form-check mb-4">
+        <input id="twoFA" type="checkbox" class="form-check-input" formControlName="twoFA"/>
+        <label for="twoFA" class="form-check-label">Enable 2FA</label>
+      </div>
+    </form>
+  }
+
+  @if (showTwoFAModal) {
+    <div class="modal d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Two-Factor Authentication Setup</h5>
+            <button type="button" class="btn-close" (click)="closeTwoFAModal()"></button>
+          </div>
+          <div class="modal-body">
+            @if (twoFAError) {
+              <div class="alert alert-danger" role="alert">
+                {{ twoFAError }}
+              </div>
+            }
+            @if (isLoadingTwoFA) {
+              <div class="text-center">
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading QR code...</span>
+                </div>
+              </div>
+            }
+            @if (!isLoadingTwoFA && twoFAQRCode) {
+              <div>
+                <p class="text-muted mb-3">Scan this QR code with your authenticator app:</p>
+                <div class="text-center mb-4">
+                  <img [ngSrc]="twoFAQRCode" alt="2FA QR Code" class="img-fluid" style="max-width: 250px;" fill>
+                </div>
+                <p class="text-muted small">Can't scan? Enter this code manually:</p>
+                <div class="alert alert-light" role="alert">
+                  <code class="user-select-all">{{ twoFASecret }}</code>
+                </div>
+              </div>
+            }
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeTwoFAModal()">Close</button>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div class="form-check mb-4">
-      <input id="twoFA" type="checkbox" class="form-check-input" formControlName="twoFA"/>
-      <label for="twoFA" class="form-check-label">Enable 2FA</label>
-    </div>
-  </form>
-
-  <div *ngIf="showTwoFAModal" class="modal d-block" style="background-color: rgba(0, 0, 0, 0.5);">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Two-Factor Authentication Setup</h5>
-          <button type="button" class="btn-close" (click)="closeTwoFAModal()"></button>
-        </div>
-        <div class="modal-body">
-          <div *ngIf="twoFAError" class="alert alert-danger" role="alert">
-            {{ twoFAError }}
-          </div>
-
-          <div *ngIf="isLoadingTwoFA" class="text-center">
-            <div class="spinner-border" role="status">
-              <span class="visually-hidden">Loading QR code...</span>
-            </div>
-          </div>
-
-          <div *ngIf="!isLoadingTwoFA && twoFAQRCode">
-            <p class="text-muted mb-3">Scan this QR code with your authenticator app:</p>
-            <div class="text-center mb-4">
-              <img [ngSrc]="twoFAQRCode" alt="2FA QR Code" class="img-fluid" style="max-width: 250px;" fill>
-            </div>
-            <p class="text-muted small">Can't scan? Enter this code manually:</p>
-            <div class="alert alert-light" role="alert">
-              <code class="user-select-all">{{ twoFASecret }}</code>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="closeTwoFAModal()">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  }
 </section>

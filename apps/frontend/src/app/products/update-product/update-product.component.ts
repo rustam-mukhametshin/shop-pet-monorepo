@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Product, ProductPayload, ProductsService } from '../products.service';
 import {FormProductComponent} from "../form-product/form-product.component";
-import {AsyncPipe, NgIf} from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import {Observable} from "rxjs";
 
 @Component({
@@ -10,10 +10,9 @@ import {Observable} from "rxjs";
     templateUrl: './update-product.component.html',
     styleUrls: ['./update-product.component.css'],
     imports: [
-        FormProductComponent,
-        NgIf,
-        AsyncPipe
-    ]
+    FormProductComponent,
+    AsyncPipe
+]
 })
 export class UpdateProductComponent implements OnInit {
   product$?: Observable<Product>;

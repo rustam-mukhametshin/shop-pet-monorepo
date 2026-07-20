@@ -5,17 +5,16 @@ import {debounceTime, distinctUntilChanged, forkJoin, shareReplay, Subscription,
 import {ProfileService} from './profile.service';
 import {AuthService} from "../../auth.service";
 import {Router} from "@angular/router";
-import {NgIf, NgOptimizedImage} from "@angular/common";
+import { NgOptimizedImage } from "@angular/common";
 
 @Component({
     selector: 'app-profile',
     templateUrl: './profile.component.html',
     styleUrls: ['./profile.component.css'],
     imports: [
-        ReactiveFormsModule,
-        NgIf,
-        NgOptimizedImage
-    ]
+    ReactiveFormsModule,
+    NgOptimizedImage
+]
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   readonly profileForm = new FormGroup({

@@ -6,7 +6,7 @@ import {distinctUntilChanged, filter, finalize, first, shareReplay, Subscription
 import {AuthService} from '../../auth.service';
 import {MatCardModule} from "@angular/material/card";
 import {MatInputModule} from "@angular/material/input";
-import {NgIf} from "@angular/common";
+
 import {MatCheckboxModule} from "@angular/material/checkbox";
 import {MatButtonModule} from "@angular/material/button";
 
@@ -18,11 +18,10 @@ import {MatButtonModule} from "@angular/material/button";
     MatCardModule,
     ReactiveFormsModule,
     MatInputModule,
-    NgIf,
     MatCheckboxModule,
     MatButtonModule,
     RouterLink
-  ]
+]
 })
 export class LoginComponent implements OnInit, OnDestroy {
   readonly loginForm = this.formBuilder.nonNullable.group({

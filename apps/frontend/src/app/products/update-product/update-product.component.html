@@ -4,16 +4,17 @@
     <p class="text-muted mb-0">Edit product details and save changes.</p>
   </div>
   <!--Todo: refactor on angular 18-->
-  <app-form-product
-          *ngIf="product$ | async as product"
+  @if (product$ | async; as product) {
+    <app-form-product
           [initialValue]="{
       title: product.title,
       description: product.description,
       price: product.price
     }"
-          submitLabel="Update product"
-          (formSubmit)="updateProduct($event)"
-  ></app-form-product>
+      submitLabel="Update product"
+      (formSubmit)="updateProduct($event)"
+    ></app-form-product>
+  }
 } @else {
   <p class="text-danger mb-0">Product not found.</p>
 }

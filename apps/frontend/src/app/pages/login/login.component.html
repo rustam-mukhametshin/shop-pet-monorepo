@@ -6,32 +6,49 @@
     </mat-card-header>
 
     <mat-card-content>
-      <p *ngIf="errorMessage" class="message message-error">{{ errorMessage }}</p>
-      <p *ngIf="successMessage" class="message message-success">{{ successMessage }}</p>
+      @if (errorMessage) {
+        <p class="message message-error">{{ errorMessage }}</p>
+      }
+      @if (successMessage) {
+        <p class="message message-success">{{ successMessage }}</p>
+      }
 
       <form [formGroup]="loginForm" (ngSubmit)="isTwoFASubmit ? submitTwoFA() : submit()">
-        <ng-container *ngIf="!isTwoFASubmit">
+        @if (!isTwoFASubmit) {
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Email address</mat-label>
             <input matInput type="email" formControlName="email" />
-            <mat-error *ngIf="emailControl.touched && emailControl.errors?.['required']">Email is required.</mat-error>
-            <mat-error *ngIf="emailControl.touched && emailControl.errors?.['email']">Enter a valid email address.</mat-error>
+            @if (emailControl.touched && emailControl.errors?.['required']) {
+              <mat-error>Email is required.</mat-error>
+            }
+            @if (emailControl.touched && emailControl.errors?.['email']) {
+              <mat-error>Enter a valid email address.</mat-error>
+            }
           </mat-form-field>
-
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Password</mat-label>
             <input matInput type="password" formControlName="password" />
-            <mat-error *ngIf="passwordControl.touched && passwordControl.errors?.['required']">Password is required.</mat-error>
-            <mat-error *ngIf="passwordControl.touched && passwordControl.errors?.['minlength']">Password must be at least 6 characters.</mat-error>
+            @if (passwordControl.touched && passwordControl.errors?.['required']) {
+              <mat-error>Password is required.</mat-error>
+            }
+            @if (passwordControl.touched && passwordControl.errors?.['minlength']) {
+              <mat-error>Password must be at least 6 characters.</mat-error>
+            }
           </mat-form-field>
-        </ng-container>
+        }
 
-        <mat-form-field *ngIf="isTwoFASubmit" appearance="outline" class="full-width">
-          <mat-label>2FA code</mat-label>
-          <input matInput type="text" minlength="6" maxlength="6" formControlName="twoFA" />
-          <mat-error *ngIf="twoFAControl.touched && twoFAControl.errors?.['minlength']">2FA must be at least 6 characters.</mat-error>
-          <mat-error *ngIf="twoFAControl.touched && twoFAControl.errors?.['maxlength']">2FA cannot be more than 6 characters.</mat-error>
-        </mat-form-field>
+        @if (isTwoFASubmit) {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>2FA code</mat-label>
+            <input matInput type="text" minlength="6" maxlength="6" formControlName="twoFA" />
+            @if (twoFAControl.touched && twoFAControl.errors?.['minlength']) {
+              <mat-error>2FA must be at least 6 characters.</mat-error>
+            }
+            @if (twoFAControl.touched && twoFAControl.errors?.['maxlength']) {
+              <mat-error>2FA cannot be more than 6 characters.</mat-error>
+            }
+          </mat-form-field>
+        }
 
         <div class="login-actions">
           <mat-checkbox>Remember me</mat-checkbox>

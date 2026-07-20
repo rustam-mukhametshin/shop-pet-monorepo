@@ -10,7 +10,7 @@ import {
 } from '@angular/forms';
 import { first } from 'rxjs';
 import { AuthService } from '../../auth.service';
-import {NgIf} from "@angular/common";
+
 import {RouterLink} from "@angular/router";
 
 @Component({
@@ -18,10 +18,9 @@ import {RouterLink} from "@angular/router";
     templateUrl: './signup.component.html',
     styleUrls: ['./signup.component.css'],
     imports: [
-        ReactiveFormsModule,
-        NgIf,
-        RouterLink
-    ]
+    ReactiveFormsModule,
+    RouterLink
+]
 })
 export class SignupComponent {
   readonly signupForm = this.formBuilder.nonNullable.group({
