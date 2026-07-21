@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@angular/build": "^21.2.19",
+    "@angular/cli": "~21.2.18",
     "@angular/compiler-cli": "~21.2.18",
     "@types/node": "~20.19.43",
     "jsdom": "^29.1.1",
