@@ -32,8 +32,8 @@
           </button>
           <mat-menu #menu="matMenu">
             <ng-template matMenuContent>
-              <button mat-menu-item>View</button>
-              <button mat-menu-item>Update</button>
+              <button mat-menu-item (click)="viewProduct(product._id)">View</button>
+              <button mat-menu-item (click)="updateProduct(product._id)">Update</button>
               <button mat-menu-item (click)="removeProduct(product._id)">Delete</button>
             </ng-template>
           </mat-menu>

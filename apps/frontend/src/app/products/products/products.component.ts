@@ -1,7 +1,7 @@
 import {Component, OnInit, signal, WritableSignal} from '@angular/core';
 import {Product, ProductsService} from '../products.service';
 import {ProductComponent} from "../product/product.component";
-import {RouterLink} from "@angular/router";
+import {Router, RouterLink} from "@angular/router";
 import {catchError, first, switchMap, take} from "rxjs";
 import {NotificationService} from "../../services/notification.service";
 import {
@@ -68,6 +68,7 @@ export class ProductsComponent implements OnInit {
   constructor(
     private readonly productsService: ProductsService,
     private readonly notificationService: NotificationService,
+    private readonly router: Router,
   ) {
   }
 
@@ -84,6 +85,14 @@ export class ProductsComponent implements OnInit {
         this.pageSize = value.pageSize;
         this.notificationService.success('Products successfully loaded!');
       })
+  }
+
+  viewProduct(id: string) {
+    return this.router.navigate(['/products', id]);
+  }
+
+  updateProduct(id: string) {
+    return this.router.navigate(['/products', id, 'update']);
   }
 
   removeProduct(productId?: string) {

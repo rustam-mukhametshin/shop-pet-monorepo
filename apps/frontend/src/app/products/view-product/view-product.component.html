@@ -1,0 +1,14 @@
+@if (product$ | async; as product) {
+  <div class="mb-4">
+    <h1 class="h3 mb-1">Product details</h1>
+    <p class="text-muted mb-0">Review product information.</p>
+  </div>
+
+  <app-product [product]="product" [showActions]="false"></app-product>
+
+  <div class="mt-3">
+    <a class="btn btn-secondary" routerLink="/products">Back to products</a>
+  </div>
+} @else {
+  <p class="text-danger mb-0">Product not found.</p>
+}
