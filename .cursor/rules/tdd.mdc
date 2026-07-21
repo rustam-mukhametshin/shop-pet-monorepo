@@ -22,7 +22,7 @@ Examples:
 - Root: `npm test` (delegates to `turbo run test`).
 - API only: run tests from `apps/api` with `npm test`.
 - For focused loops in API workspace: `npm run test:watch`.
-- Frontend only: run tests from `apps/frontend` with `npm test` (`ng test --watch=false --browsers=ChromeHeadless`).
+- Frontend only: run tests from `apps/frontend` with `npm test` (`ng test --watch=false`, Vitest runner).
 
 ## Test Structure
 Recommended nesting:

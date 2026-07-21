@@ -21,7 +21,7 @@
 - `GET /auth/reset-password`, `POST /auth/reset-password`
 - `POST /auth/webauthn/register/options` (guarded by `isAuth`)
 - `POST /auth/webauthn/register/verify` (guarded by `isAuth`)
-- `POST /auth/webauthn/authenticate/options`
+- `POST /auth/auth/webauthn/authenticate/options`
 
 ## Controller Flow Expectations
 - `postLogin`: validate input, verify password, return success token or MFA-required payload.

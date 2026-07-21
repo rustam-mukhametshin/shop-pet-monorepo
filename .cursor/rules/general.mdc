@@ -4,7 +4,7 @@
 - Root uses `npm workspaces` and `turbo`.
 - Application code is under `apps/*`:
   - `apps/api` (backend API)
-  - `apps/frontend` (Angular 19 UI)
+  - `apps/frontend` (Angular 21 UI)
 - Keep backend changes in `apps/api/*` and frontend/UI changes in `apps/frontend/*`.
 
 ## Stack (`apps/api`)
@@ -12,7 +12,7 @@
 - API-first backend with JSON responses.
 - App entry: `apps/api/app.ts`.
 - DB bootstrap: `apps/api/database.ts`.
-- Security: `helmet` + explicit CORS allowlist + `express-rate-limit` (100 req / 15 min).
+- Security: `helmet` + explicit CORS allowlist (`http://localhost:3000`, `http://localhost:4200`, `process.env.FRONTEND_URL`) + `express-rate-limit` (100 req / 15 min).
 - Auth guard: JWT `Authorization: Bearer <token>` via `isAuth`.
 - Uploads: `multer.diskStorage` + `multer.single('image')` (`public/images`, PNG/JPG/JPEG).
 - Realtime: `socket.io` attached to same HTTP server.

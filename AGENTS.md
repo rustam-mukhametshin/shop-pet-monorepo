@@ -6,7 +6,7 @@
 - Backend app is `apps/api` (`Node.js + Express 5 + TypeScript + Mongoose`), listens on port `3333`.
 - Runtime entry is `apps/api/app.ts`; database bootstrap is `apps/api/database.ts` (`mongoConnect`).
 - Project constants (name, label) are in `apps/api/env.ts`.
-- UI lives in `apps/frontend` and is built with Angular 19 (standalone components), serves on port `4200`.
+- UI lives in `apps/frontend` and is built with Angular 21 (standalone components), serves on port `4200`.
 - `apps/api` is the backend/data API layer; UI work should not be added there.
 - CI workflows are in `.github/workflows/build.yml` and `.github/workflows/test.yml`.
 
@@ -14,11 +14,11 @@
 - Root config: `package.json`, `turbo.json`, `tsconfig*.json`, `tsconfig.build.json`, `jest*.js`, `eslint.config.mts`.
 - Workspaces:
   - `apps/api` — Express app and test suite.
-  - `apps/frontend` — Angular 19 frontend application.
+  - `apps/frontend` — Angular 21 frontend application.
 
 ## Request Flow (`apps/api/app.ts`)
 1. Rate limiting: `express-rate-limit` (100 req / 15 min window, `draft-8` standard headers).
-2. Security middleware: `helmet()` + manual CORS headers (allowlist: `http://localhost:3000`, `http://localhost:4200`).
+2. Security middleware: `helmet()` + manual CORS headers (allowlist: `http://localhost:3000`, `http://localhost:4200`, `process.env.FRONTEND_URL`).
 3. Static files: `express.static('public')` and `/public` alias.
 4. Body parsing: `express.urlencoded`, `express.json`, `multer.diskStorage` (field `image`, PNG/JPG/JPEG, stored in `public/images/`).
 5. Route mount order: `/admin` (with `isAuth`) → `/auth` → `/v1`.
@@ -53,7 +53,7 @@
 - `POST /auth/reset`, `GET /auth/reset-password`, `POST /auth/reset-password`
 - `POST /auth/webauthn/register/options` (protected)
 - `POST /auth/webauthn/register/verify` (protected)
-- `POST /auth/webauthn/authenticate/options`
+- `POST /auth/auth/webauthn/authenticate/options`
 
 ## Data Model Conventions (Mongoose)
 - `apps/api/models/product.model.ts`: product document with `userId` ref to `User`.
@@ -76,13 +76,13 @@
 - Profile update (`PUT /auth/profile`) also handles disabling 2FA: deletes `TwoFAModel` records when `twoFA` toggled off.
 
 ## Frontend Architecture (`apps/frontend`)
-- Angular 19 standalone components; no NgModules.
+- Angular 21 standalone components; no NgModules.
 - API base URL configured in `src/environments/environment.ts` (`http://localhost:3333/`).
 - **AuthService** (`src/app/auth.service.ts`): Angular Signal-based auth state (`isAuth` signal); token persisted to `localStorage` under key `shop-pet-auth-token`; exposes `login`, `loginWithTwoFA`, `signup`, `logout`.
 - **ProductsService** (`src/app/products/products.service.ts`): fetches products from `GET /v1/products` (paginated), `GET /v1/products/:id`; creates via `POST /v1/add-product`; deletes via `DELETE /v1/products/:id`.
 - **NotificationService** (`src/app/services/notification.service.ts`): `BehaviorSubject`-backed toast notifications with `success`, `error`, `warning`, `info` helpers and auto-dismiss.
 - **Auth guard** (`src/app/guards/auth.guard.ts`): functional guard `canActivate`; redirects to `/login` with `returnUrl` query param when unauthenticated.
-- **Routes** (`src/app/app.routes.ts`): `/` → `/products`, `/login`, `/signup`, `/profile` (guarded), `/products` (guarded), `/products/create` (guarded), `/products/form` (guarded), `/products/:id`, `/products/:id/update` (guarded), `**` → `/products`.
+- **Routes** (`src/app/app.routes.ts`): `/` → `/products`, `/login`, `/signup`, `/profile` (guarded), `/products` (guarded), `/products/create` (guarded), `/products/form` (guarded), `/products/:id` (`ViewProductComponent`), `/products/:id/update` (guarded), `**` → `/products`.
 - **Socket.io client** (`socket.io-client ~4.8.3`) included as a dependency for realtime features.
 
 ## Dev Workflows
@@ -101,7 +101,7 @@
 - Frontend workspace scripts (from `apps/frontend`):
   - `npm run dev` — `ng serve`
   - `npm run build` — `ng build`
-  - `npm test` — `ng test --watch=false --browsers=ChromeHeadless`
+  - `npm test` — `ng test --watch=false`
   - `npm run lint` — `ng lint`
 
 ## Guardrails For Agents

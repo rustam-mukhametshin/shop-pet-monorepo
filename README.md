@@ -6,7 +6,7 @@
 
 Full-stack pet-shop project managed with **npm workspaces** + **Turborepo**:
 - `apps/api`: Express 5 + TypeScript + Mongoose backend API (port `3333`)
-- `apps/frontend`: Angular 19 frontend (port `4200`)
+- `apps/frontend`: Angular 21 frontend (port `4200`)
 
 ## Monorepo Structure
 
@@ -39,7 +39,7 @@ shop-pet-monorepo/
 - Project constants in `apps/api/env.ts` (`projectName`, `projectLabel`)
 
 ### `apps/frontend`
-- Angular 19 (standalone components)
+- Angular 21 (standalone components)
 - Angular Material + CDK (`@angular/material`, `@angular/cdk`)
 - Angular Signals for reactive state (`AuthService`)
 - `socket.io-client` for realtime updates
@@ -50,7 +50,7 @@ shop-pet-monorepo/
 - Turborepo
 - npm workspaces
 - Jest + Supertest (API)
-- Karma + Jasmine (frontend)
+- Angular unit-test runner with Vitest (`@angular/build:unit-test`)
 - ts-node + nodemon
 - ESLint + Prettier
 
@@ -71,6 +71,7 @@ shop-pet-monorepo/
 | `NODE_MAIL_USER` | Mail auth username |
 | `NODE_MAIL_PASSWORD` | Mail auth password |
 | `MAIN_URL` | Base app URL for reset links |
+| `FRONTEND_URL` | Optional allowed CORS/socket origin |
 | `ENV` | Optional environment flag (`prod` for prod links) |
 
 ## Install
@@ -111,13 +112,13 @@ Frontend scripts (`apps/frontend`):
 |---|---|
 | `npm run dev` | Serve with `ng serve` (port 4200) |
 | `npm run build` | Build with `ng build` |
-| `npm test` | Run Karma tests (headless Chrome) |
+| `npm test` | Run Angular unit tests (`ng test --watch=false`) |
 | `npm run lint` | Lint with `ng lint` |
 
 ## Request Flow (`apps/api/app.ts`)
 1. `express-rate-limit` (100 req / 15 min)
 2. `helmet()`
-3. CORS (allowlist: `http://localhost:3000`, `http://localhost:4200`)
+3. CORS (allowlist: `http://localhost:3000`, `http://localhost:4200`, `process.env.FRONTEND_URL`)
 4. Static serving (`public/` + `/public` alias)
 5. Body parsers: `express.urlencoded`, `express.json`, `multer.diskStorage` (field `image`)
 6. Route mounts: `/admin` (JWT `isAuth`) → `/auth` → `/v1`
@@ -166,7 +167,7 @@ Frontend scripts (`apps/frontend`):
 | `POST` | `/auth/reset-password` | — | Set new password |
 | `POST` | `/auth/webauthn/register/options` | ✓ | Get WebAuthn registration options |
 | `POST` | `/auth/webauthn/register/verify` | ✓ | Verify WebAuthn registration |
-| `POST` | `/auth/webauthn/authenticate/options` | — | Get WebAuthn authentication options |
+| `POST` | `/auth/auth/webauthn/authenticate/options` | — | Get WebAuthn authentication options |
 
 ## Frontend Routes (`apps/frontend`)
 
@@ -179,7 +180,7 @@ Frontend scripts (`apps/frontend`):
 | `/products` | `ProductsComponent` | ✓ |
 | `/products/create` | `CreateProductComponent` | ✓ |
 | `/products/form` | `FormProductComponent` | ✓ |
-| `/products/:id` | `ProductComponent` | — |
+| `/products/:id` | `ViewProductComponent` | — |
 | `/products/:id/update` | `UpdateProductComponent` | ✓ |
 | `**` | → redirects to `/products` | — |
 
