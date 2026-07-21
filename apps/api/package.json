@@ -12,8 +12,8 @@
     "start-dev": "nodemon --exec ts-node app.ts",
     "start-api": "nodemon api/api.ts",
     "start-api-dev": "nodemon --exec ts-node api/api.ts",
-    "typecheck": "tsc --noEmit",
-    "build": "tsc -p ../../tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.build.json",
     "prepare": "husky"
   },
   "author": "Rustam",
