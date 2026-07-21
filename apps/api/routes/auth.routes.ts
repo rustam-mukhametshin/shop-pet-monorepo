@@ -78,7 +78,7 @@ authRoutes.post('/reset', AuthController.postReset);
 authRoutes.post('/reset-password', AuthController.postResetPassword);
 authRoutes.post('/webauthn/register/options', isAuth, AuthController.webAuthnRegisterOptions)
 authRoutes.post('/webauthn/register/verify', isAuth, AuthController.webAuthnRegisterVerify)
-authRoutes.post('/auth/webauthn/authenticate/options', AuthController.webAuthnAuthenticateOptions)
+authRoutes.post('/webauthn/authenticate/options', AuthController.webAuthnAuthenticateOptions)
 
 
 /**
@@ -88,4 +88,3 @@ authRoutes.post('/auth/webauthn/authenticate/options', AuthController.webAuthnAu
 authRoutes.put('/profile', isAuth, AuthController.putProfile);
 
 export default authRoutes;
-

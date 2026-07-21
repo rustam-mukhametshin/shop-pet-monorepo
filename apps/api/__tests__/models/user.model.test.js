@@ -11,7 +11,7 @@ describe('user.model', () => {
       expect(UserModel.schema.path('name')).toBeDefined();
       expect(UserModel.schema.path('email')).toBeDefined();
       expect(UserModel.schema.path('password')).toBeDefined();
-      expect(UserModel.schema.path('confirmPassword')).toBeDefined();
+      expect(UserModel.schema.path('status')).toBeDefined();
       expect(UserModel.schema.path('cart')).toBeDefined();
     });
 
@@ -102,7 +102,6 @@ describe('user.model', () => {
         name: 'john',
         email: 'john@example.com',
         password: 'secret',
-        confirmPassword: 'secret',
         cart: { items: [] },
       });
       user.save = jest.fn().mockResolvedValue(user);
@@ -119,7 +118,6 @@ describe('user.model', () => {
         name: 'john',
         email: 'john@example.com',
         password: 'secret',
-        confirmPassword: 'secret',
         cart: { items: [{ productId: 'p1', quantity: 1 }] },
       });
       user.save = jest.fn().mockResolvedValue(user);
@@ -137,7 +135,6 @@ describe('user.model', () => {
         name: 'john',
         email: 'john@example.com',
         password: 'secret',
-        confirmPassword: 'secret',
         cart: { items: [{ productId: 'p1', quantity: 1 }, { productId: 'p2', quantity: 2 }] },
       });
       user.save = jest.fn().mockResolvedValue(user);
@@ -156,7 +153,6 @@ describe('user.model', () => {
         name: 'john',
         email: 'john@example.com',
         password: 'secret',
-        confirmPassword: 'secret',
         cart: { items: [{ productId: 'p1', quantity: 1 }] },
       });
       user.save = jest.fn().mockResolvedValue(user);

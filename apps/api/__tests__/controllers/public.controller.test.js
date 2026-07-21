@@ -6,7 +6,7 @@ const mockReq = (overrides = {}) => ({
 
 const mockRes = () => {
   const res = {};
-  res.render = jest.fn();
+  res.json = jest.fn();
   res.status = jest.fn(() => res);
   return res;
 };
@@ -22,17 +22,15 @@ describe('public.controller', () => {
       expect(res.status).toHaveBeenCalledWith(404);
     });
 
-    it('renders the 404 view with page metadata', () => {
+    it('returns not-found json payload', () => {
       const req = mockReq();
       const res = mockRes();
 
       notFound(req, res, () => {});
 
-      expect(res.render).toHaveBeenCalledWith('404', expect.objectContaining({
-        pageTitle: 'Not Found',
-        url: '404',
-      }));
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Not Found',
+      });
     });
   });
 });
-

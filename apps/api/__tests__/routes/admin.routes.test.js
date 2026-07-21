@@ -1,7 +1,5 @@
 jest.mock('../../controllers/admin.controller', () => ({
-  getAddProduct: jest.fn(),
   postAddProduct: jest.fn(),
-  getEditProduct: jest.fn(),
   deleteProduct: jest.fn(),
   postEditProduct: jest.fn(),
   getProducts: jest.fn(),
@@ -19,13 +17,10 @@ describe('admin.routes', () => {
     const routes = getRouteMeta(adminRoutes);
 
     expect(routes).toEqual(expect.arrayContaining([
-      { path: '/add-product', methods: ['get'] },
+      { path: '/delete-product/:id', methods: ['delete'] },
       { path: '/add-product', methods: ['post'] },
-      { path: '/edit-product/:id', methods: ['get'] },
-      { path: '/delete-product/:id', methods: ['get'] },
       { path: '/edit-product', methods: ['post'] },
       { path: '/products', methods: ['get'] },
     ]));
   });
 });
-

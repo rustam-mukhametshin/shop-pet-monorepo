@@ -19,31 +19,25 @@ jest.mock('jsonwebtoken', () => ({
   },
 }));
 
-jest.mock('../../env', () => ({
-  env: {
-    production: true,
-    url: 'http://localhost:3333/',
-    nodeMail: {
-      service: 'gmail',
-      user: 'noreply@example.com',
-      password: 'test-password',
-    },
-    sessionSecret: 'test-secret',
-  },
-}));
-
-const { NodeMailModel } = require('../../models/node-mail.model.ts');
+const {NodeMailModel} = require('../../models/node-mail.model.ts');
 
 describe('node-mail.model', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    sendMailMock.mockResolvedValue({ accepted: ['user@example.com'] });
+    process.env.NODE_MAIL_SERVICE = 'gmail';
+    process.env.NODE_MAIL_USER = 'noreply@example.com';
+    process.env.NODE_MAIL_PASSWORD = 'test-password';
+    process.env.DB_SESSION_SECRET = 'test-secret';
+    process.env.MAIN_URL = 'http://localhost:3333/';
+    process.env.ENV = 'prod';
+
+    sendMailMock.mockResolvedValue({accepted: ['user@example.com']});
     signMock.mockReturnValue('signed-token');
-    verifyMock.mockReturnValue({ email: 'user@example.com', iat: 1, exp: 2 });
+    verifyMock.mockReturnValue({email: 'user@example.com', iat: 1, exp: 2});
   });
 
   describe('sendMail', () => {
-    it('sends email with provided receiver and content', async () => {
+    it('sends email with provided receiver and content in prod', async () => {
       const mailer = new NodeMailModel();
 
       await mailer.sendMail({
@@ -57,6 +51,20 @@ describe('node-mail.model', () => {
         subject: 'Welcome',
         text: 'Hello user',
       }));
+    });
+
+    it('returns dev sentinel when ENV is not prod', async () => {
+      process.env.ENV = 'dev';
+      const mailer = new NodeMailModel();
+
+      const result = await mailer.sendMail({
+        to: 'user@example.com',
+        subject: 'Welcome',
+        text: 'Hello user',
+      });
+
+      expect(result).toBe('DEV ENVIRONMENT');
+      expect(sendMailMock).not.toHaveBeenCalled();
     });
   });
 
@@ -85,17 +93,7 @@ describe('node-mail.model', () => {
   describe('getResetPasswordTokenLink', () => {
     it('builds a reset-password link with provided token', () => {
       const link = NodeMailModel.getResetPasswordTokenLink('user@example.com', 't1');
-
       expect(link).toBe('http://localhost:3333/reset-password?token=t1');
-    });
-
-    it('creates a token when token argument is not provided', () => {
-      signMock.mockReturnValue('generated-token');
-
-      const link = NodeMailModel.getResetPasswordTokenLink('user@example.com');
-
-      expect(signMock).toHaveBeenCalledTimes(1);
-      expect(link).toBe('http://localhost:3333/reset-password?token=generated-token');
     });
   });
 
@@ -104,9 +102,9 @@ describe('node-mail.model', () => {
       const token = NodeMailModel.createResetPasswordToken('user@example.com');
 
       expect(signMock).toHaveBeenCalledWith(
-        { email: 'user@example.com' },
-        expect.any(String),
-        { expiresIn: '1h' },
+        {email: 'user@example.com'},
+        'test-secret',
+        {expiresIn: '1h'},
       );
       expect(token).toBe('signed-token');
     });
@@ -116,9 +114,8 @@ describe('node-mail.model', () => {
     it('returns decoded token payload', () => {
       const payload = NodeMailModel.verifyResetPasswordToken('token-1');
 
-      expect(verifyMock).toHaveBeenCalledWith('token-1', expect.any(String));
-      expect(payload).toEqual({ email: 'user@example.com', iat: 1, exp: 2 });
+      expect(verifyMock).toHaveBeenCalledWith('token-1', 'test-secret');
+      expect(payload).toEqual({email: 'user@example.com', iat: 1, exp: 2});
     });
   });
 });
-

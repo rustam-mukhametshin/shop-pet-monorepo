@@ -160,36 +160,38 @@ export const postSignup = (req: Request, res: Response, next: any) => {
     });
   }
 
-  let user: any;
-
   // If user already exists
   return UserModel.isUserExistByEmail(email)
     .then(async userDoc => {
       if (userDoc) {
-        return undefined;
-      } else {
-        const hashedPassword: string = await bcrypt.hash(password, 12)
-
-        user = new UserModel({
-          name: email.split('@')[0],
-          email,
-          password: hashedPassword,
-          cart: {items: [],},
-          status: 'active',
-        })
-        return user.save()
+        return null;
       }
+
+      const hashedPassword: string = await bcrypt.hash(password, 12)
+
+      const user = new UserModel({
+        name: email.split('@')[0],
+        email,
+        password: hashedPassword,
+        cart: {items: [],},
+        status: 'active',
+      })
+      return user.save()
     })
     .then(user => {
+      if (!user) {
+        return null;
+      }
+
       const profile = new ProfileModel({
         name: user.name,
         twoFA: false,
         userId: user._id,
       })
 
-      return profile.save();
+      return profile.save().then(_ => user);
     })
-    .then(_ => {
+    .then(user => {
       if (!user) {
         return res.status(422).json({
           error: 'User or password are incorrect'

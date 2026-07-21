@@ -15,8 +15,8 @@ const mockUser = () => ({
 });
 
 const mockReq = (overrides = {}) => ({
-  session: { isLoggedIn: false },
   body: {},
+  query: {},
   params: {},
   user: mockUser(),
   ...overrides,
@@ -24,7 +24,7 @@ const mockReq = (overrides = {}) => ({
 
 const mockRes = () => {
   const res = {};
-  res.render = jest.fn();
+  res.json = jest.fn();
   res.redirect = jest.fn();
   res.status = jest.fn(() => res);
   return res;
@@ -44,42 +44,59 @@ describe('shop.controller', () => {
   } = require('../../controllers/shop.controller.ts');
 
   describe('getIndex', () => {
-    it('renders shop/index with products', async () => {
-      jest.spyOn(Product, 'find').mockResolvedValue([{ title: 'A' }]);
+    it('returns paginated json via getProducts', async () => {
+      const fakeProducts = [{ title: 'A' }];
+      jest.spyOn(Product, 'countDocuments').mockResolvedValue(1);
+      jest.spyOn(Product, 'find').mockReturnValue({
+        skip: jest.fn().mockReturnValue({
+          limit: jest.fn().mockReturnValue({
+            populate: jest.fn().mockResolvedValue(fakeProducts),
+          }),
+        }),
+      });
       const req = mockReq();
       const res = mockRes();
 
       await getIndex(req, res);
 
-      expect(res.render).toHaveBeenCalledWith('shop/index', expect.objectContaining({
-        pageTitle: 'Shop',
-        url: '/',
-        prods: [{ title: 'A' }],
-      }));
+      expect(res.json).toHaveBeenCalledWith({
+        prods: fakeProducts,
+        currentPage: 1,
+        lastPage: 1,
+        length: 1,
+        pageSize: 10,
+      });
     });
   });
 
   describe('getProducts', () => {
-    it('renders shop/product-list with products', async () => {
+    it('returns paginated json with products', async () => {
       const fakeProducts = [{ title: 'B' }];
+      jest.spyOn(Product, 'countDocuments').mockResolvedValue(5);
       jest.spyOn(Product, 'find').mockReturnValue({
-        populate: jest.fn().mockResolvedValue(fakeProducts),
+        skip: jest.fn().mockReturnValue({
+          limit: jest.fn().mockReturnValue({
+            populate: jest.fn().mockResolvedValue(fakeProducts),
+          }),
+        }),
       });
-      const req = mockReq();
+      const req = mockReq({ query: { page: '2', pageSize: '2' } });
       const res = mockRes();
 
       await getProducts(req, res);
 
-      expect(res.render).toHaveBeenCalledWith('shop/product-list', expect.objectContaining({
-        pageTitle: 'Products',
-        url: '/products',
+      expect(res.json).toHaveBeenCalledWith({
         prods: fakeProducts,
-      }));
+        currentPage: 2,
+        lastPage: 3,
+        length: 5,
+        pageSize: 2,
+      });
     });
   });
 
   describe('getProduct', () => {
-    it('renders shop/product-detail for a found product', async () => {
+    it('returns product json for a found product', async () => {
       const fakeProduct = { title: 'My Product' };
       jest.spyOn(Product, 'findById').mockResolvedValue(fakeProduct);
       const req = mockReq({ params: { id: VALID_ID } });
@@ -87,15 +104,27 @@ describe('shop.controller', () => {
 
       await getProduct(req, res);
 
-      expect(res.render).toHaveBeenCalledWith('shop/product-detail', expect.objectContaining({
+      expect(res.json).toHaveBeenCalledWith({
         product: fakeProduct,
-        url: '/products',
-      }));
+      });
+    });
+
+    it('returns 404 json for a missing product', async () => {
+      jest.spyOn(Product, 'findById').mockResolvedValue(null);
+      const req = mockReq({ params: { id: VALID_ID } });
+      const res = mockRes();
+
+      await getProduct(req, res, jest.fn());
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Product not found',
+      });
     });
   });
 
   describe('getCart', () => {
-    it('renders shop/cart with cart items when user has a cart', async () => {
+    it('returns cart json when user has a cart', async () => {
       const fakeItems = [{ productId: { title: 'P' }, quantity: 2 }];
       const fakeUser = { cart: { items: fakeItems } };
       jest.spyOn(UserModel, 'findById').mockReturnValue({
@@ -108,14 +137,13 @@ describe('shop.controller', () => {
 
       await getCart(req, res);
 
-      expect(res.render).toHaveBeenCalledWith('shop/cart', expect.objectContaining({
-        pageTitle: 'Cart',
-        url: '/cart',
+      expect(res.json).toHaveBeenCalledWith({
+        cart: fakeUser.cart,
         products: fakeItems,
-      }));
+      });
     });
 
-    it('renders shop/cart with empty products when user has no cart', async () => {
+    it('returns 404 json when user has no cart', async () => {
       jest.spyOn(UserModel, 'findById').mockReturnValue({
         populate: jest.fn().mockReturnValue({
           select: jest.fn().mockResolvedValue(null),
@@ -126,14 +154,16 @@ describe('shop.controller', () => {
 
       await getCart(req, res);
 
-      expect(res.render).toHaveBeenCalledWith('shop/cart', expect.objectContaining({
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        cart: {},
         products: [],
-      }));
+      });
     });
   });
 
   describe('postAddProductToCart', () => {
-    it('adds product to cart and redirects to /cart', async () => {
+    it('adds product to cart and returns it as json', async () => {
       const fakeProduct = { _id: VALID_ID, title: 'P' };
       jest.spyOn(Product, 'findById').mockResolvedValue(fakeProduct);
       const req = mockReq({ body: { id: VALID_ID } });
@@ -142,24 +172,41 @@ describe('shop.controller', () => {
       await postAddProductToCart(req, res);
 
       expect(req.user.addToCart).toHaveBeenCalledWith(fakeProduct);
-      expect(res.redirect).toHaveBeenCalledWith('/cart');
+      expect(res.json).toHaveBeenCalledWith({
+        product: fakeProduct,
+      });
+    });
+
+    it('returns 404 json when product is missing', async () => {
+      jest.spyOn(Product, 'findById').mockResolvedValue(null);
+      const req = mockReq({ body: { id: VALID_ID } });
+      const res = mockRes();
+
+      await postAddProductToCart(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Product not found',
+      });
     });
   });
 
   describe('postCartDeleteProduct', () => {
-    it('removes product from cart and redirects to /cart', async () => {
+    it('removes product from cart and returns operation result', async () => {
       const req = mockReq({ params: { id: VALID_ID } });
       const res = mockRes();
 
       await postCartDeleteProduct(req, res);
 
       expect(req.user.deleteProductFromCart).toHaveBeenCalledWith(VALID_ID);
-      expect(res.redirect).toHaveBeenCalledWith('/cart');
+      expect(res.json).toHaveBeenCalledWith({
+        product: {},
+      });
     });
   });
 
   describe('getOrders', () => {
-    it('renders shop/orders with user orders', async () => {
+    it('returns user orders json', async () => {
       const fakeOrders = [{ _id: VALID_ID2, products: [] }];
       jest.spyOn(OrderModel, 'find').mockReturnValue({
         populate: jest.fn().mockResolvedValue(fakeOrders),
@@ -169,11 +216,9 @@ describe('shop.controller', () => {
 
       await getOrders(req, res);
 
-      expect(res.render).toHaveBeenCalledWith('shop/orders', expect.objectContaining({
-        pageTitle: 'Orders',
-        url: '/orders',
+      expect(res.json).toHaveBeenCalledWith({
         orders: fakeOrders,
-      }));
+      });
     });
   });
 });

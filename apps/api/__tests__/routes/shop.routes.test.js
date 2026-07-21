@@ -1,14 +1,17 @@
 jest.mock('../../controllers/shop.controller', () => ({
+  getIndex: jest.fn(),
   getProducts: jest.fn(),
   getProduct: jest.fn(),
   getCart: jest.fn(),
+  getCheckout: jest.fn(),
+  getCheckoutSuccess: jest.fn(),
+  getOrders: jest.fn(),
+  getInvoice: jest.fn(),
+  postAddProduct: jest.fn(),
   postAddProductToCart: jest.fn(),
   postCartDeleteProduct: jest.fn(),
-  getOrders: jest.fn(),
-  postCreateOrder: jest.fn(),
   postDeleteOrderItem: jest.fn(),
-  getInvoice: jest.fn(),
-  getIndex: jest.fn(),
+  deleteProduct: jest.fn(),
 }));
 
 const shopRoutes = require('../../routes/shop.routes.ts').default;
@@ -28,12 +31,14 @@ describe('shop.routes', () => {
       { path: '/cart', methods: ['get'] },
       { path: '/cart', methods: ['post'] },
       { path: '/cart-delete-item/:id', methods: ['get'] },
+      { path: '/checkout', methods: ['get'] },
+      { path: '/checkout/success', methods: ['get'] },
       { path: '/orders', methods: ['get'] },
-      { path: '/create-order', methods: ['post'] },
+      { path: '/add-product', methods: ['post'] },
       { path: '/order-delete-item', methods: ['post'] },
       { path: '/invoices/:orderId', methods: ['get'] },
+      { path: '/products/:id', methods: ['delete'] },
       { path: '/', methods: ['get'] },
     ]));
   });
 });
-
