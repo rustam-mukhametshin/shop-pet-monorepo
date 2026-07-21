@@ -27,9 +27,16 @@
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let product">
-          <button mat-stroked-button>View</button>
-          <button mat-stroked-button color="accent">Update</button>
-          <button mat-stroked-button color="warn" (click)="removeProduct(product._id)">Delete</button>
+          <button matButton [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <ng-template matMenuContent>
+              <button mat-menu-item>View</button>
+              <button mat-menu-item>Update</button>
+              <button mat-menu-item (click)="removeProduct(product._id)">Delete</button>
+            </ng-template>
+          </mat-menu>
         </td>
       </ng-container>
     </table>

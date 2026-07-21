@@ -20,6 +20,8 @@ import {CurrencyPipe} from "@angular/common";
 import {MatButton} from "@angular/material/button";
 import {MatPaginator, PageEvent} from "@angular/material/paginator";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
+import {MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
+import {MatIcon} from "@angular/material/icon";
 
 @Component({
   selector: 'app-products',
@@ -41,7 +43,12 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
     CurrencyPipe,
     MatButton,
     MatPaginator,
-    MatProgressSpinner
+    MatProgressSpinner,
+    MatMenuTrigger,
+    MatMenuItem,
+    MatMenu,
+    MatIcon,
+    MatMenuContent
   ]
 })
 export class ProductsComponent implements OnInit {
