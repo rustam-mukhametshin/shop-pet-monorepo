@@ -11,14 +11,10 @@
   "bugs": {
     "url": "https://github.com/rustam-mukhametshin/shop-pet-monorepo/issues"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/rustam-mukhametshin/shop-pet-monorepo.git"
-  },
+  "repository": "git+https://github.com/rustam-mukhametshin/shop-pet-monorepo.git",
   "license": "MIT",
   "author": "Rustam Mukhametshin",
-  "type": "commonjs",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -38,5 +34,6 @@
   "packageManager": "npm@11.14.0",
   "workspaces": [
     "apps/*"
-  ]
+  ],
+  "main": "index.js"
 }
