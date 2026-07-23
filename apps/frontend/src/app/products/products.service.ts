@@ -13,8 +13,12 @@ export interface Product {
   updatedAt?: string;
 }
 
+export interface EditableProduct extends Product {
+  isEdit: boolean;
+}
+
 interface Response {
-  prods: Product[];
+  prods: EditableProduct[];
   currentPage: number;
   lastPage: number;
   length: number,
@@ -59,7 +63,13 @@ export class ProductsService {
           pageSize: params.pageSize,
         }
       }
-    )
+    ).pipe(map(value => {
+      value.prods = value.prods.map(prod => ({
+        ...prod,
+        isEdit: false,
+      }))
+      return value;
+    }))
   }
 
   getProductById(id: string): Observable<Product> {
@@ -90,6 +100,13 @@ export class ProductsService {
     nextProducts[productIndex] = updatedProduct;
     this.products.set(nextProducts);
     return updatedProduct;
+  }
+
+  patchProduct(id: string, payload: Partial<ProductPayload>): Observable<Product> {
+    return this.httpClient.patch<Product>(
+      environment.apiUrl + `v1/products/${id}`,
+      payload,
+    )
   }
 
   deleteProduct(id: string) {

@@ -55,6 +55,37 @@ export const getProduct = (req: Request, res: Response, next: NextFunction) => {
     .catch((err: any) => next(new Error(err)));
 };
 
+export const patchProduct = async (req: Request, res: Response, next: NextFunction) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
+      errorMessage: errors.array(),
+    });
+  }
+
+  const id = req.params.id as string;
+  const {title} = req.body as { title: string };
+
+  const product = await Product.findByIdAndUpdate(
+    id,
+    {
+      $set: {title},
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!product) {
+    return res.status(404).json({
+      message: 'Product not found',
+    });
+  }
+
+  return res.status(200).json(product);
+}
+
 export const getCart = (req: Request, res: Response, next: NextFunction): Promise<unknown> => {
   return UserModel.findById(req?.user).populate({
     path: 'cart.items.productId',

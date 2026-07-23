@@ -1,8 +1,8 @@
 import {Component, OnInit, signal, WritableSignal} from '@angular/core';
-import {Product, ProductsService} from '../products.service';
+import {EditableProduct, ProductsService} from '../products.service';
 import {ProductComponent} from "../product/product.component";
 import {Router, RouterLink} from "@angular/router";
-import {catchError, first, switchMap, take} from "rxjs";
+import {catchError, switchMap, take} from "rxjs";
 import {NotificationService} from "../../services/notification.service";
 import {
   MatCell,
@@ -22,6 +22,15 @@ import {MatPaginator, PageEvent} from "@angular/material/paginator";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
 import {MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
 import {MatIcon} from "@angular/material/icon";
+import {MatInput} from "@angular/material/input";
+
+const columnsToDisplay: string[] = [
+  '_id',
+  'title',
+  'description',
+  'price',
+  'actions',
+];
 
 @Component({
   selector: 'app-products',
@@ -48,22 +57,16 @@ import {MatIcon} from "@angular/material/icon";
     MatMenuItem,
     MatMenu,
     MatIcon,
-    MatMenuContent
+    MatMenuContent,
+    MatInput
   ]
 })
 export class ProductsComponent implements OnInit {
-  products: WritableSignal<Product[]> = signal([]);
-  currentPage?: number;
-  lastPage?: number;
-  length?: number;
-  pageSize?: number;
-  columnsToDisplay: string[] = [
-    '_id',
-    'title',
-    'description',
-    'price',
-    'actions',
-  ]
+  readonly columnsToDisplay: string[] = columnsToDisplay;
+
+  public products: WritableSignal<EditableProduct[]> = signal([]);
+  length: WritableSignal<number> = signal(0);
+  pageSize?: WritableSignal<number> = signal(10);
 
   constructor(
     private readonly productsService: ProductsService,
@@ -74,25 +77,15 @@ export class ProductsComponent implements OnInit {
 
   ngOnInit() {
     this.productsService.getProducts()
-      .pipe(
-        first()
-      )
+      .pipe(take(1))
       .subscribe(value => {
-        this.products?.set(value.prods);
-        this.currentPage = value.currentPage;
-        this.lastPage = value.lastPage;
-        this.length = value.length;
-        this.pageSize = value.pageSize;
+        this.setResponseProducts(value);
         this.notificationService.success('Products successfully loaded!');
       })
   }
 
-  viewProduct(id: string) {
-    return this.router.navigate(['/products', id]);
-  }
-
-  updateProduct(id: string) {
-    return this.router.navigate(['/products', id, 'update']);
+  viewOrUpdateProduct(id: string, update: boolean = false) {
+    return this.router.navigate(['/products', id, update ? 'update' : '',]);
   }
 
   removeProduct(productId?: string) {
@@ -116,12 +109,34 @@ export class ProductsComponent implements OnInit {
       )
       .subscribe(products => {
         this.notificationService.success('Product successfully deleted!');
-        this.currentPage = products.currentPage;
-        this.lastPage = products.lastPage;
-        this.length = products.length;
-        this.pageSize = products.pageSize;
-        this.products?.set(products.prods);
+        this.setResponseProducts(products);
       })
+  }
+
+  onTitleChange(id: string, title: string, prevTitle: string) {
+    const nextTitle = title.trim();
+
+    if (title === prevTitle) {
+      this.markProductAsEdited(id, false);
+      return;
+    }
+
+    if (!nextTitle) {
+      this.notificationService.error('Title cannot be empty.');
+      return;
+    }
+
+    this.productsService.patchProduct(id, {title: nextTitle})
+      .pipe(take(1))
+      .subscribe({
+        next: value => {
+          this.markProductAsEdited(id, false, value.title);
+        },
+        error: error => {
+          console.error(error);
+          this.notificationService.error('Error updating product title: ' + error.message);
+        }
+      });
   }
 
   protected onPageChange($event: PageEvent) {
@@ -129,16 +144,30 @@ export class ProductsComponent implements OnInit {
       pageIndex: $event.pageIndex + 1,
       pageSize: $event.pageSize
     })
-      .pipe(
-        first()
-      )
+      .pipe(take(1))
       .subscribe(value => {
-        this.products?.set(value.prods);
-        this.currentPage = value.currentPage;
-        this.lastPage = value.lastPage;
-        this.length = value.length;
-        this.pageSize = value.pageSize;
+        this.setResponseProducts(value);
         this.notificationService.success('Products successfully loaded!');
       })
+  }
+
+  protected markProductAsEdited(_id: string, isEdited: boolean, value?: string | null) {
+    this.products.update(products => products.map(product => {
+      if (product._id !== _id) {
+        return product;
+      }
+
+      return {
+        ...product,
+        isEdit: isEdited,
+        ...(value !== undefined ? {title: value} : {}),
+      };
+    }));
+  }
+
+  private setResponseProducts(value: any) {
+    this.products.set(value.prods);
+    this.length.set(value.length);
+    this.pageSize?.set(value.pageSize);
   }
 }

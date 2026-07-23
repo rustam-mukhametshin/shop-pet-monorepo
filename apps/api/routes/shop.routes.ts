@@ -42,8 +42,18 @@ shopRoutes.post('/cart', isAuth, ShopController.postAddProductToCart);
 shopRoutes.post('/order-delete-item', isAuth, ShopController.postDeleteOrderItem);
 
 /**
- *  UPDATE
+ *  PATCH
  */
+shopRoutes.patch(
+  '/products/:id',
+  [
+    body('title')
+      .isString()
+      .trim()
+      .isLength({min: 1, max: 100}),
+  ],
+  ShopController.patchProduct
+);
 
 /**
  *  DELETE
@@ -56,4 +66,3 @@ shopRoutes.delete('/products/:id', ShopController.deleteProduct)
 shopRoutes.get('/', ShopController.getIndex);
 
 export default shopRoutes;
-

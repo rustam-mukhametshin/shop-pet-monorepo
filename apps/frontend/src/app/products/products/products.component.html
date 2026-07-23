@@ -14,7 +14,28 @@
       </ng-container>
       <ng-container matColumnDef="title">
         <th mat-header-cell *matHeaderCellDef><strong>Title</strong></th>
-        <td mat-cell *matCellDef="let product"> {{ product.title }}</td>
+        <td mat-cell *matCellDef="let product">
+          @if (product.isEdit) {
+            <input
+                    matInput
+                    #title
+                    placeholder="Title"
+                    [value]="product.title"
+                    (keydown.enter)="onTitleChange(product._id, title.value, product.title)"
+            />
+            <button matButton (click)="onTitleChange(product._id, title.value, product.title)">
+              <mat-icon>done</mat-icon>
+            </button>
+            <button matButton (click)="markProductAsEdited(product._id, false)">
+              <mat-icon>close</mat-icon>
+            </button>
+          } @else {
+            <span>{{ product.title }}</span>
+            <button matButton (click)="markProductAsEdited(product._id, true)">
+              <mat-icon>edit</mat-icon>
+            </button>
+          }
+        </td>
       </ng-container>
       <ng-container matColumnDef="description">
         <th mat-header-cell *matHeaderCellDef><strong>Description</strong></th>
@@ -32,8 +53,8 @@
           </button>
           <mat-menu #menu="matMenu">
             <ng-template matMenuContent>
-              <button mat-menu-item (click)="viewProduct(product._id)">View</button>
-              <button mat-menu-item (click)="updateProduct(product._id)">Update</button>
+              <button mat-menu-item (click)="viewOrUpdateProduct(product._id)">View</button>
+              <button mat-menu-item (click)="viewOrUpdateProduct(product._id, true)">Update</button>
               <button mat-menu-item (click)="removeProduct(product._id)">Delete</button>
             </ng-template>
           </mat-menu>
@@ -42,7 +63,7 @@
     </table>
     <mat-paginator
             [pageSize]="pageSize"
-            [length]="length"
+            [length]="length()"
             [pageSizeOptions]="[5, 10, 25, 100]"
             (page)="onPageChange($event)"
             aria-label="Select page"

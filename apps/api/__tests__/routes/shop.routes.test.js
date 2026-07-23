@@ -11,6 +11,7 @@ jest.mock('../../controllers/shop.controller', () => ({
   postAddProductToCart: jest.fn(),
   postCartDeleteProduct: jest.fn(),
   postDeleteOrderItem: jest.fn(),
+  patchProduct: jest.fn(),
   deleteProduct: jest.fn(),
 }));
 
