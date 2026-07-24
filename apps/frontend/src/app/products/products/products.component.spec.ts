@@ -30,7 +30,7 @@ describe('ProductsComponent', () => {
     } as any;
 
     return {
-      component: new ProductsComponent(productsService, notificationService, router),
+      component: new ProductsComponent(productsService, notificationService, router, null as any),
       productsService,
       notificationService,
       router,

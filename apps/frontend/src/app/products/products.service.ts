@@ -2,6 +2,7 @@ import {Injectable, signal} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {map, Observable} from "rxjs";
+import {StorageService} from "../services/storage.service";
 
 export interface Product {
   _id: string;
@@ -48,6 +49,7 @@ export class ProductsService {
 
   constructor(
     private readonly httpClient: HttpClient,
+    private readonly tokenService: StorageService,
   ) {
   }
 
@@ -84,6 +86,11 @@ export class ProductsService {
     return this.httpClient.post<Product>(
       environment.apiUrl + `v1/add-product`,
       payload,
+      {
+        headers: {
+          'Authorization': this.tokenService.getBearerAuthToken(),
+        }
+      }
     )
   }
 
@@ -112,6 +119,11 @@ export class ProductsService {
   deleteProduct(id: string) {
     return this.httpClient.delete<unknown>(
       environment.apiUrl + `v1/products/${id}`,
+      {
+        headers: {
+          'Authorization': this.tokenService.getBearerAuthToken(),
+        }
+      }
     )
   }
 }

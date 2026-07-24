@@ -23,6 +23,7 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
 import {MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
 import {MatIcon} from "@angular/material/icon";
 import {MatInput} from "@angular/material/input";
+import {AuthService} from "../../auth.service";
 
 const columnsToDisplay: string[] = [
   '_id',
@@ -72,6 +73,7 @@ export class ProductsComponent implements OnInit {
     private readonly productsService: ProductsService,
     private readonly notificationService: NotificationService,
     private readonly router: Router,
+    public readonly authService: AuthService
   ) {
   }
 

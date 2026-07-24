@@ -1,6 +1,7 @@
 import {of} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
 import {ProductsService} from './products.service';
+import {StorageService} from "../services/storage.service";
 
 describe('ProductsService', () => {
   it('should map products to include the inline edit flag', () => {
@@ -15,7 +16,9 @@ describe('ProductsService', () => {
         pageSize: 10,
       })),
     } as any;
-    const service = new ProductsService(httpClient);
+    const tokenService = new StorageService();
+
+    const service = new ProductsService(httpClient, tokenService);
 
     service.getProducts().subscribe(response => {
       expect(httpClient.get).toHaveBeenCalledWith(
@@ -46,9 +49,10 @@ describe('ProductsService', () => {
       description: 'Food',
       price: 10,
     }));
+    const tokenService = new StorageService();
     const service = new ProductsService({
       patch,
-    } as any);
+    } as any, tokenService);
 
     service.patchProduct('1', {title: 'Updated title'}).subscribe(product => {
       expect(patch).toHaveBeenCalledWith(

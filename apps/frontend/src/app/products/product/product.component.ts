@@ -36,6 +36,7 @@ export class ProductComponent implements OnInit {
     transform: booleanAttribute
   }) showActions = true;
   remove = output<string | undefined>();
+  isAuthenticated = input.required<boolean>();
 
   detailView = false;
 

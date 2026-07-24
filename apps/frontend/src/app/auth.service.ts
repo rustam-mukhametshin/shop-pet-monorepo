@@ -1,7 +1,8 @@
-import {HttpClient} from '@angular/common/http';
-import {Injectable, Signal, signal, WritableSignal} from '@angular/core';
-import {Observable, tap} from 'rxjs';
-import {environment} from '../environments/environment';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, Signal, signal, WritableSignal } from '@angular/core';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../environments/environment';
+import { StorageService } from './services/storage.service';
 
 export interface LoginCredentials {
   email: string;
@@ -25,76 +26,67 @@ export interface SignupResponse {
   message: string;
 }
 
+const headers = {
+  'Content-Type': 'application/json',
+};
+
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly tokenKey: string = 'shop-pet-auth-token';
-  private readonly isLoggedIn: WritableSignal<boolean> = signal(this.hasToken());
+  private readonly isLoggedIn: WritableSignal<boolean> = signal(this.storageService.has());
   public readonly isAuth: Signal<boolean> = this.isLoggedIn.asReadonly();
 
-  constructor(private readonly http: HttpClient) {
-  }
+  constructor(
+    private readonly http: HttpClient,
+    private readonly storageService: StorageService,
+  ) {}
 
   login(credentials: LoginCredentials): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}auth/login`, credentials, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        headers,
       })
-      .pipe(tap(response => {
-        if (response.status !== 'MFA_REQUIRED' && response.status === 'success') {
-          this.setToken(response.token);
-          this.isLoggedIn.set(true);
-        }
-      }))
+      .pipe(
+        tap((response) => {
+          if (response.status !== 'MFA_REQUIRED' && response.status === 'success') {
+            this.storageService.set(response.token);
+            this.isLoggedIn.set(true);
+          }
+        }),
+      );
   }
 
   loginWithTwoFA(twoFACode: string, stateToken: string): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(
-        `${environment.apiUrl}auth/login-twofa`, {
+        `${environment.apiUrl}auth/login-twofa`,
+        {
           twoFACode: twoFACode,
           stateToken: stateToken,
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        }
+        },
+        { headers },
       )
-      .pipe(tap((response) => {
-        if (response.message && response.status === 'success') {
-          if (response.token) {
-            this.setToken(response.token);
+      .pipe(
+        tap((response) => {
+          if (response.message && response.status === 'success') {
+            if (response.token) {
+              this.storageService.set(response.token);
+            }
+            this.isLoggedIn.set(true);
           }
-          this.isLoggedIn.set(true);
-        }
-      }))
+        }),
+      );
   }
 
   signup(credentials: SignupCredentials): Observable<SignupResponse> {
     return this.http.post<SignupResponse>(`${environment.apiUrl}auth/signup`, credentials, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     });
   }
 
-  getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
-  }
-
   logout(): void {
-    localStorage.removeItem(this.tokenKey);
-    this.isLoggedIn.set(false);
-  }
-
-  private setToken(token: string): void {
-    localStorage.setItem(this.tokenKey, token);
-  }
-
-  private hasToken(): boolean {
-    return this.getToken() !== null;
+    this.isLoggedIn.set(true);
+    return this.storageService.remove();
   }
 }

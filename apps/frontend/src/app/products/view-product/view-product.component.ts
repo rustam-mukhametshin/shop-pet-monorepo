@@ -4,6 +4,7 @@ import {ActivatedRoute, RouterLink} from "@angular/router";
 import {Observable} from "rxjs";
 import {Product, ProductsService} from "../products.service";
 import {ProductComponent} from "../product/product.component";
+import { AuthService } from '../../auth.service';
 
 @Component({
   selector: "app-view-product",
@@ -21,6 +22,7 @@ export class ViewProductComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly productsService: ProductsService,
+    public readonly authService: AuthService,
   ) {
   }
 

@@ -1,15 +1,20 @@
-import {inject} from '@angular/core';
-import {ActivatedRouteSnapshot, Router, RouterStateSnapshot} from '@angular/router';
-import {AuthService} from '../auth.service';
+import { inject } from '@angular/core';
+import {
+  ActivatedRouteSnapshot,
+  CanActivateFn,
+  Router,
+  RouterStateSnapshot,
+} from '@angular/router';
+import { AuthService } from '../auth.service';
 
-
-export function canActivate() {
+export const canActivate: CanActivateFn = (
+  _: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot,
+) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  return (_: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-    if (authService.isAuth()) {
-      return true;
-    }
-    return router.createUrlTree(['/login'], {queryParams: {returnUrl: state.url}});
+  if (authService.isAuth()) {
+    return true;
   }
-}
+  return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
+};
