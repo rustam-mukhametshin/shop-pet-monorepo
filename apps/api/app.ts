@@ -78,7 +78,9 @@ app.use('/v1', shopRoutes);
 app.get('/500', get500);
 app.use(notFound);
 app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
-  res.redirect('/500');
+  return res.status(500).json({
+    error: err?.message || 'Something went wrong'
+  });
 })
 
 if (require.main === module) {

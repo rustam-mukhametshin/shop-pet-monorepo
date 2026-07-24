@@ -333,12 +333,15 @@ export const postAddProduct = async (req: Request, res: Response, next: NextFunc
       imageUrl,
       description,
       price: parseFloat(price),
-      userId: req.user,
+      userId: typeof req.user === 'string' ? req.user: req.user.userId,
     })
       .save();
     return res.json(product.toObject())
   } catch (err: unknown) {
-    next(new Error(err as string));
+    if (err && typeof err === 'object' && 'message' in err) {
+      return next(new Error(err.message as string));
+    }
+    return next(new Error(err as string));
   }
 };
 
