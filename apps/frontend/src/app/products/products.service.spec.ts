@@ -63,4 +63,49 @@ describe('ProductsService', () => {
       });
     });
   });
+
+  it('should send auth header when creating a product', () => {
+    const post = vi.fn().mockReturnValue(of({
+      _id: '1',
+      title: 'New',
+      description: 'Desc',
+      price: 12,
+    }));
+    const tokenService = {
+      getBearerAuthToken: vi.fn().mockReturnValue('Bearer token'),
+    } as any;
+    const service = new ProductsService({post} as any, tokenService);
+    const formData = new FormData();
+
+    service.createProduct(formData).subscribe();
+
+    expect(post).toHaveBeenCalledWith(
+      'http://localhost:3333/v1/add-product',
+      formData,
+      {
+        headers: {
+          Authorization: 'Bearer token',
+        },
+      },
+    );
+  });
+
+  it('should send auth header when deleting a product', () => {
+    const del = vi.fn().mockReturnValue(of({status: 'success'}));
+    const tokenService = {
+      getBearerAuthToken: vi.fn().mockReturnValue('Bearer token'),
+    } as any;
+    const service = new ProductsService({delete: del} as any, tokenService);
+
+    service.deleteProduct('1').subscribe();
+
+    expect(del).toHaveBeenCalledWith(
+      'http://localhost:3333/v1/products/1',
+      {
+        headers: {
+          Authorization: 'Bearer token',
+        },
+      },
+    );
+  });
 });

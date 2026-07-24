@@ -1,6 +1,11 @@
 const { Product } = require('../../models/product.model.ts');
 const { UserModel } = require('../../models/user.model.ts');
 const { OrderModel } = require('../../models/order.model.ts');
+const mockValidationResult = jest.fn();
+
+jest.mock('express-validator', () => ({
+  validationResult: (...args) => mockValidationResult(...args),
+}));
 
 const VALID_ID = '64b1f1e2a4c3d2e1f0a9b8c7';
 const VALID_ID2 = '64b1f1e2a4c3d2e1f0a9b8c8';
@@ -38,10 +43,18 @@ describe('shop.controller', () => {
     getProducts,
     getProduct,
     getCart,
+    patchProduct,
     postAddProductToCart,
     postCartDeleteProduct,
     getOrders,
   } = require('../../controllers/shop.controller.ts');
+
+  beforeEach(() => {
+    mockValidationResult.mockReturnValue({
+      isEmpty: () => true,
+      array: () => [],
+    });
+  });
 
   describe('getIndex', () => {
     it('returns paginated json via getProducts', async () => {
@@ -159,6 +172,54 @@ describe('shop.controller', () => {
         cart: {},
         products: [],
       });
+    });
+  });
+
+  describe('patchProduct', () => {
+    it('returns 422 json when validator fails', async () => {
+      mockValidationResult.mockReturnValue({
+        isEmpty: () => false,
+        array: () => [{msg: 'Invalid title'}],
+      });
+      const req = mockReq({ params: { id: VALID_ID }, body: { title: '' } });
+      const res = mockRes();
+
+      await patchProduct(req, res, jest.fn());
+
+      expect(res.status).toHaveBeenCalledWith(422);
+      expect(res.json).toHaveBeenCalledWith({
+        errorMessage: [{msg: 'Invalid title'}],
+      });
+    });
+
+    it('returns 404 json when product to patch is missing', async () => {
+      jest.spyOn(Product, 'findByIdAndUpdate').mockResolvedValue(null);
+      const req = mockReq({ params: { id: VALID_ID }, body: { title: 'Updated title' } });
+      const res = mockRes();
+
+      await patchProduct(req, res, jest.fn());
+
+      expect(Product.findByIdAndUpdate).toHaveBeenCalledWith(
+        VALID_ID,
+        {$set: {title: 'Updated title'}},
+        {new: true, runValidators: true},
+      );
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Product not found',
+      });
+    });
+
+    it('returns updated product json when patch succeeds', async () => {
+      const updatedProduct = {_id: VALID_ID, title: 'Updated title'};
+      jest.spyOn(Product, 'findByIdAndUpdate').mockResolvedValue(updatedProduct);
+      const req = mockReq({ params: { id: VALID_ID }, body: { title: 'Updated title' } });
+      const res = mockRes();
+
+      await patchProduct(req, res, jest.fn());
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(updatedProduct);
     });
   });
 

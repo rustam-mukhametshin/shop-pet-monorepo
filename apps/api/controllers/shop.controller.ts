@@ -333,7 +333,7 @@ export const postAddProduct = async (req: Request, res: Response, next: NextFunc
       imageUrl,
       description,
       price: parseFloat(price),
-      userId: typeof req.user === 'string' ? req.user: req.user.userId,
+      userId: typeof req.user === 'string' ? req.user : req.user.userId,
     })
       .save();
     return res.json(product.toObject())
@@ -360,6 +360,13 @@ export const deleteProduct = async (req: Request, res: Response, next: NextFunct
     return res.status(404).json({
       status: 'error',
       message: 'Product not found',
+    } as ResponseJsonType)
+  }
+
+  if (req.user.userId.toString() !== product.userId?.toString()) {
+    return res.status(403).json({
+      status: 'error',
+      message: 'Authenticated but not owner',
     } as ResponseJsonType)
   }
 

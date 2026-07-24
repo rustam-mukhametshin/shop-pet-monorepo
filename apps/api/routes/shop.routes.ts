@@ -7,8 +7,8 @@ const shopRoutes = Router();
 /**
  *  GET
  */
-shopRoutes.get('/products', ShopController.getProducts);
-shopRoutes.get('/products/:id', ShopController.getProduct);
+shopRoutes.get('/products', ShopController.getProducts); // PUBLIC
+shopRoutes.get('/products/:id', ShopController.getProduct); // PUBLIC
 shopRoutes.get('/cart', isAuth, ShopController.getCart);
 shopRoutes.get('/cart-delete-item/:id', isAuth, ShopController.postCartDeleteProduct);
 shopRoutes.get('/checkout', isAuth, ShopController.getCheckout);
@@ -20,6 +20,7 @@ shopRoutes.get('/invoices/:orderId', isAuth, ShopController.getInvoice);
  */
 shopRoutes.post(
   '/add-product',
+  isAuth,
   [
     body('title', 'Only alphanumeric characters for title')
       .isString()
@@ -58,7 +59,7 @@ shopRoutes.patch(
 /**
  *  DELETE
  */
-shopRoutes.delete('/products/:id', ShopController.deleteProduct)
+shopRoutes.delete('/products/:id', isAuth, ShopController.deleteProduct)
 
 /**
  * DEFAULT HOME PAGE

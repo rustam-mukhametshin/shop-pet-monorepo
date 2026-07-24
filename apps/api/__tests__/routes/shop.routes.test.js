@@ -38,6 +38,7 @@ describe('shop.routes', () => {
       { path: '/add-product', methods: ['post'] },
       { path: '/order-delete-item', methods: ['post'] },
       { path: '/invoices/:orderId', methods: ['get'] },
+      { path: '/products/:id', methods: ['patch'] },
       { path: '/products/:id', methods: ['delete'] },
       { path: '/', methods: ['get'] },
     ]));
