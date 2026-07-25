@@ -47,6 +47,7 @@ shopRoutes.post('/order-delete-item', isAuth, ShopController.postDeleteOrderItem
  */
 shopRoutes.patch(
   '/products/:id',
+  isAuth,
   [
     body('title')
       .isString()
