@@ -39,6 +39,8 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@apollo/server": "^5.5.1",
+    "@as-integrations/express5": "^1.1.2",
     "@simplewebauthn/server": "^13.3.2",
     "bcryptjs": "^3.0.3",
     "connect-mongo": "^6.0.0",
@@ -46,6 +48,7 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.2",
     "express-validator": "^7.3.2",
+    "graphql": "^16.14.2",
     "helmet": "^8.1.0",
     "install": "^0.13.0",
     "jsonwebtoken": "^9.0.3",

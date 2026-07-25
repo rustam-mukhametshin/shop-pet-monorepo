@@ -12,6 +12,8 @@ import multer from "multer";
 import helmet from "helmet";
 import {initSocket, type Socket} from "./socket";
 import {rateLimit} from "express-rate-limit";
+import {expressMiddleware} from "@as-integrations/express5";
+import {apolloServer} from "./graphql";
 
 dotenv.config();
 const limiter = rateLimit({
@@ -69,6 +71,12 @@ app.use(multer({
     }
   }
 }).single('image'))
+
+const apolloMiddlewarePromise = apolloServer.start().then(() => expressMiddleware(apolloServer));
+app.use('/graphql', express.json(), async (req, res, next) => {
+  const apolloMiddleware = await apolloMiddlewarePromise;
+  return apolloMiddleware(req, res, next);
+});
 
 // Routes
 app.use('/', (_req: Request, _res: Response, next: NextFunction) => next());
