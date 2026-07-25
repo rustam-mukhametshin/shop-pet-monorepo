@@ -18,7 +18,7 @@ declare global {
         }
     }
     type ResponseJsonType = {
-        status: 'success' | 'error';
+        status: 'success' | 'error' | 'MFA_REQUIRED';
         message: string;
         data?: any;
     }
