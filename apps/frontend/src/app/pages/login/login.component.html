@@ -1,10 +1,5 @@
 <main class="login-page">
   <mat-card class="login-card">
-    <mat-card-header>
-      <mat-card-title>Sign in to your account</mat-card-title>
-      <mat-card-subtitle>Use your email and password to continue.</mat-card-subtitle>
-    </mat-card-header>
-
     <mat-card-content>
       @if (errorMessage) {
         <p class="message message-error">{{ errorMessage }}</p>
@@ -13,52 +8,56 @@
         <p class="message message-success">{{ successMessage }}</p>
       }
 
-      <form [formGroup]="loginForm" (ngSubmit)="isTwoFASubmit ? submitTwoFA() : submit()">
-        @if (!isTwoFASubmit) {
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Email address</mat-label>
-            <input matInput type="email" formControlName="email" />
-            @if (emailControl.touched && emailControl.errors?.['required']) {
-              <mat-error>Email is required.</mat-error>
+      @if (!isTwoFASubmit) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email address</mat-label>
+          <input matInput type="email" [formField]="loginFormNew.email"/>
+          @if (emailControlNew().touched() && emailControlNew().invalid()) {
+            @for (error of loginFormNew.email().errors(); track error) {
+              <mat-error>{{ error.message }}</mat-error>
             }
-            @if (emailControl.touched && emailControl.errors?.['email']) {
-              <mat-error>Enter a valid email address.</mat-error>
-            }
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Password</mat-label>
-            <input matInput type="password" formControlName="password" />
-            @if (passwordControl.touched && passwordControl.errors?.['required']) {
-              <mat-error>Password is required.</mat-error>
-            }
-            @if (passwordControl.touched && passwordControl.errors?.['minlength']) {
-              <mat-error>Password must be at least 6 characters.</mat-error>
-            }
-          </mat-form-field>
-        }
+          }
+        </mat-form-field>
 
-        @if (isTwoFASubmit) {
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>2FA code</mat-label>
-            <input matInput type="text" minlength="6" maxlength="6" formControlName="twoFA" />
-            @if (twoFAControl.touched && twoFAControl.errors?.['minlength']) {
-              <mat-error>2FA must be at least 6 characters.</mat-error>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" [formField]="loginFormNew.password"/>
+          @if (passwordControlNew().touched() && passwordControlNew().invalid()) {
+            @for (error of loginFormNew.password().errors(); track error) {
+              <mat-error>{{ error.message }}</mat-error>
             }
-            @if (twoFAControl.touched && twoFAControl.errors?.['maxlength']) {
-              <mat-error>2FA cannot be more than 6 characters.</mat-error>
+          }
+        </mat-form-field>
+      } @else {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>2FA code</mat-label>
+          <input matInput type="text" [formField]="loginFormNew.twoFA"
+
+          />
+          @if (twoFAControlNew().touched() && twoFAControlNew().invalid()) {
+            @for (error of loginFormNew.twoFA().errors(); track error) {
+              <mat-error>{{ error.message }}</mat-error>
             }
-          </mat-form-field>
-        }
+          }
+        </mat-form-field>
+      }
 
-        <div class="login-actions">
-          <mat-checkbox>Remember me</mat-checkbox>
-          <a href="#" class="forgot-link">Forgot password?</a>
-        </div>
+      <div class="login-actions">
+        <mat-checkbox>Remember me</mat-checkbox>
+        <a href="#" class="forgot-link">Forgot password?</a>
+      </div>
 
-        <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="isSubmitting">
-          {{ isSubmitting ? 'Signing in...' : (isTwoFASubmit ? 'Sign in with 2FA' : 'Sign in') }}
-        </button>
-      </form>
+      <button
+
+              mat-raised-button
+              color="primary"
+              type="submit"
+              class="full-width"
+              [disabled]="isSubmitting"
+              (click)="isTwoFASubmit ? submitTwoFA() : submit()"
+      >
+        {{ isSubmitting ? 'Signing in...' : (isTwoFASubmit ? 'Sign in with 2FA' : 'Sign in') }}
+      </button>
     </mat-card-content>
 
     <mat-card-actions class="signup-link">

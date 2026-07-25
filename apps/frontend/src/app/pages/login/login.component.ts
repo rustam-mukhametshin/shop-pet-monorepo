@@ -1,14 +1,35 @@
-import {HttpErrorResponse} from '@angular/common/http';
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {distinctUntilChanged, filter, finalize, first, shareReplay, Subscription} from 'rxjs';
-import {AuthService} from '../../auth.service';
-import {MatCardModule} from "@angular/material/card";
-import {MatInputModule} from "@angular/material/input";
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  ChangeDetectorRef,
+  Component,
+  effect,
+  OnInit,
+  signal,
+  WritableSignal,
+} from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { finalize, first } from 'rxjs';
+import { AuthService } from '../../auth.service';
+import { MatCardModule } from '@angular/material/card';
+import { MatInputModule } from '@angular/material/input';
 
-import {MatCheckboxModule} from "@angular/material/checkbox";
-import {MatButtonModule} from "@angular/material/button";
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
+import {
+  debounce,
+  email,
+  form,
+  FormField,
+  maxLength,
+  minLength,
+  required,
+} from '@angular/forms/signals';
+
+interface LoginData {
+  email: string;
+  password: string;
+  twoFA: string;
+}
 
 @Component({
   selector: 'app-login-page',
@@ -16,63 +37,84 @@ import {MatButtonModule} from "@angular/material/button";
   styleUrls: ['./login.component.css'],
   imports: [
     MatCardModule,
-    ReactiveFormsModule,
     MatInputModule,
     MatCheckboxModule,
     MatButtonModule,
-    RouterLink
-]
+    RouterLink,
+    FormField,
+  ],
 })
-export class LoginComponent implements OnInit, OnDestroy {
-  readonly loginForm = this.formBuilder.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
-    twoFA: ['', [Validators.minLength(6), Validators.maxLength(6)]],
+export class LoginComponent implements OnInit {
+  public readonly loginModel: WritableSignal<LoginData> = signal<LoginData>({
+    email: '',
+    password: '',
+    twoFA: '',
   });
 
-  isSubmitting = false;
-  errorMessage = '';
-  successMessage = '';
-  isTwoFASubmit = false;
+  public readonly loginFormNew = form(this.loginModel, (schemaPath) => {
+    debounce(schemaPath.email, 200);
+    required(schemaPath.email, {
+      message: 'E-mail address required',
+    });
+    email(schemaPath.email, {
+      message: 'Invalid e-mail address',
+    });
+
+    required(schemaPath.password, {
+      message: 'Password required',
+    });
+    maxLength(schemaPath.password, 50, {
+      message: 'Password is too long',
+    });
+    minLength(schemaPath.password, 6, {
+      message: 'Password is too short',
+    });
+
+    if (schemaPath.twoFA) {
+      minLength(schemaPath.twoFA, 6, {
+        message: 'Two-factor authentication code is too short',
+      });
+      maxLength(schemaPath.twoFA, 6, {
+        message: 'Two-factor authentication code is too long',
+      });
+    }
+  });
+
+  public isSubmitting = false;
+  public errorMessage = '';
+  public successMessage = '';
+  public isTwoFASubmit = false;
   private returnUrl = '';
   private stateToken = '';
-  #twoFASubscription?: Subscription;
 
   constructor(
-    private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly changeDetectorRef: ChangeDetectorRef,
   ) {
-    this.autoSubmitTwoFA();
+    this.onTwoFAChange();
   }
 
-  get emailControl() {
-    return this.loginForm.controls.email;
+  public get emailControlNew() {
+    return this.loginFormNew.email;
   }
 
-  get passwordControl() {
-    return this.loginForm.controls.password;
+  public get passwordControlNew() {
+    return this.loginFormNew.password;
   }
 
-  get twoFAControl() {
-    return this.loginForm.controls.twoFA;
+  public get twoFAControlNew() {
+    return this.loginFormNew.twoFA;
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/products';
   }
 
-  ngOnDestroy() {
-    if (this.#twoFASubscription) {
-      this.#twoFASubscription.unsubscribe();
-    }
-  }
-
-  submit(): void {
-    if (this.loginForm.invalid) {
-      this.loginForm.markAllAsTouched();
+  public submit(): void {
+    if (this.loginFormNew().invalid()) {
+      this.loginFormNew().markAsTouched();
       return;
     }
 
@@ -80,16 +122,21 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     this.successMessage = '';
 
+    const payload = {
+      email: this.loginModel().email,
+      password: this.loginModel().password,
+    };
+
     this.authService
-      .login(this.loginForm.getRawValue())
+      .login(payload)
       .pipe(
         first(),
         finalize(() => {
           this.changeDetectorRef.markForCheck();
-        }))
+        }),
+      )
       .subscribe({
-        next: response => {
-          this.changeDetectorRef.markForCheck();
+        next: (response) => {
           if (response.status === 'success') {
             // loginWithTwoFA
             this.successMessage = response.message;
@@ -107,19 +154,21 @@ export class LoginComponent implements OnInit, OnDestroy {
       });
   }
 
-  submitTwoFA(): void {
+  public submitTwoFA(): void {
     this.isSubmitting = true;
     this.errorMessage = '';
     this.successMessage = '';
 
+    if (this.loginModel().twoFA.length !== 6) {
+      this.isSubmitting = !this.isSubmitting;
+      return;
+    }
+
     this.authService
-      .loginWithTwoFA(
-        this.loginForm.get('twoFA')?.value as string,
-        this.stateToken,
-      )
+      .loginWithTwoFA(this.loginModel().twoFA, this.stateToken)
       .pipe(first())
       .subscribe({
-        next: response => {
+        next: (response) => {
           if (response.status === 'success') {
             this.successMessage = response.message;
             this.router.navigateByUrl(this.returnUrl);
@@ -134,24 +183,20 @@ export class LoginComponent implements OnInit, OnDestroy {
       });
   }
 
-  private autoSubmitTwoFA(): void {
-    this.#twoFASubscription = this.loginForm.get('twoFA')
-      ?.valueChanges
-      ?.pipe(
-        filter(value => value !== null && value.length === 6),
-        distinctUntilChanged(),
-        shareReplay()
-      )
-      .subscribe(_ => {
-        this.submitTwoFA();
-      })
+  private onTwoFAChange(): void {
+    effect(() => {
+      const value = this.loginFormNew.twoFA().value();
+
+      if (!this.isTwoFASubmit || this.isSubmitting || value.length !== 6) {
+        return;
+      }
+      this.submitTwoFA();
+    });
   }
 
   private getErrorMessage(error: HttpErrorResponse): string {
     const body = error.error as
-      | { error?: string | string[]; message?: string }
-      | string
-      | undefined;
+      { error?: string | string[]; message?: string } | string | undefined;
     const errorValue = body && typeof body === 'object' ? body.error : undefined;
 
     if (typeof body === 'string') {
