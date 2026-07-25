@@ -87,7 +87,7 @@ export class ProductsComponent implements OnInit {
   }
 
   viewOrUpdateProduct(id: string, update: boolean = false) {
-    return this.router.navigate(['/products', id, update ? 'update' : '',]);
+    return this.router.navigateByUrl('/products/' + id + (update ? '/update' : ''));
   }
 
   removeProduct(productId?: string) {

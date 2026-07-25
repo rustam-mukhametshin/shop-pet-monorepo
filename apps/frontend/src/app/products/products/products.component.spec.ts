@@ -26,7 +26,7 @@ describe('ProductsComponent', () => {
       error: vi.fn(),
     } as any;
     const router = {
-      navigate: vi.fn(),
+      navigateByUrl: vi.fn(),
     } as any;
 
     return {
@@ -43,8 +43,8 @@ describe('ProductsComponent', () => {
     component.viewOrUpdateProduct('1');
     component.viewOrUpdateProduct('1', true);
 
-    expect(router.navigate).toHaveBeenCalledWith(['/products', '1', '']);
-    expect(router.navigate).toHaveBeenCalledWith(['/products', '1', 'update']);
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/products/1');
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/products/1/update');
   });
 
   it('should patch a changed product title and close edit mode', () => {
