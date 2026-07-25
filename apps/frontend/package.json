@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -9,7 +10,9 @@
     "build": "ng build",
     "test": "ng test --watch=false",
     "test:watch": "ng test --watch=true",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "format:check": "prettier --check .",
+    "format:fix": "prettier --write ."
   },
   "dependencies": {
     "@angular/animations": "~22.0.8",
@@ -36,6 +39,7 @@
     "angular-eslint": "22.1.0",
     "eslint": "^10.6.0",
     "jsdom": "^29.1.1",
+    "prettier": "^3.0.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "8.62.1",
     "vitest": "^4.1.10"

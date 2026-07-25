@@ -1,0 +1,10 @@
+dist/
+node_modules/
+.angular/
+coverage/
+*.min.js
+.prettierrc.ts
+eslint.config.js
+vitest.config.ts
+tsconfig.app.json
+tsconfig.spec.json
