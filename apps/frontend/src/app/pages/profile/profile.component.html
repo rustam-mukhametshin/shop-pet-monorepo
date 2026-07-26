@@ -30,22 +30,20 @@
           class="form-control"
           formControlName="name"
           [class.is-invalid]="nameControl.touched && nameControl.invalid"
-          />
+        />
         @if (nameControl.touched && nameControl.errors?.['required']) {
-          <div class="invalid-feedback">
-            Name is required.
-          </div>
+          <div class="invalid-feedback">Name is required.</div>
         }
       </div>
       <div class="form-check mb-4">
-        <input id="twoFA" type="checkbox" class="form-check-input" formControlName="twoFA"/>
+        <input id="twoFA" type="checkbox" class="form-check-input" formControlName="twoFA" />
         <label for="twoFA" class="form-check-label">Enable 2FA</label>
       </div>
     </form>
   }
 
   @if (showTwoFAModal) {
-    <div class="modal d-block" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal d-block" style="background-color: rgba(0, 0, 0, 0.5)">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
@@ -69,7 +67,13 @@
               <div>
                 <p class="text-muted mb-3">Scan this QR code with your authenticator app:</p>
                 <div class="text-center mb-4">
-                  <img [ngSrc]="twoFAQRCode" alt="2FA QR Code" class="img-fluid" style="max-width: 250px;" fill>
+                  <img
+                    [ngSrc]="twoFAQRCode"
+                    alt="2FA QR Code"
+                    class="img-fluid"
+                    style="max-width: 250px"
+                    fill
+                  />
                 </div>
                 <p class="text-muted small">Can't scan? Enter this code manually:</p>
                 <div class="alert alert-light" role="alert">
@@ -79,7 +83,9 @@
             }
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="closeTwoFAModal()">Close</button>
+            <button type="button" class="btn btn-secondary" (click)="closeTwoFAModal()">
+              Close
+            </button>
           </div>
         </div>
       </div>

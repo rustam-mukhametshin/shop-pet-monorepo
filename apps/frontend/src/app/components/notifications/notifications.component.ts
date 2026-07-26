@@ -1,27 +1,24 @@
-import {Component, OnDestroy, OnInit, signal, WritableSignal} from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 
-import {Notification, NotificationService} from '../../services/notification.service';
-import {Subscription} from "rxjs";
+import { Notification, NotificationService } from '../../services/notification.service';
+import { Subscription } from 'rxjs';
 
 @Component({
-    selector: 'app-notifications',
-    imports: [],
-    templateUrl: './notifications.component.html',
-    styleUrl: './notifications.component.css'
+  selector: 'app-notifications',
+  imports: [],
+  templateUrl: './notifications.component.html',
+  styleUrl: './notifications.component.css',
 })
 export class NotificationsComponent implements OnInit, OnDestroy {
   notifications: WritableSignal<Notification[]> = signal([]);
   sub$?: Subscription;
 
-  constructor(private notificationService: NotificationService) {
-  }
+  constructor(private notificationService: NotificationService) {}
 
   ngOnInit() {
-    this.sub$ = this.notificationService.notifications$.subscribe(
-      notifs => {
-        this.notifications.set(notifs)
-      }
-    );
+    this.sub$ = this.notificationService.notifications$.subscribe((notifs) => {
+      this.notifications.set(notifs);
+    });
   }
 
   ngOnDestroy() {

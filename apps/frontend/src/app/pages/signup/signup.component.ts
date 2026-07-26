@@ -6,28 +6,28 @@ import {
   ReactiveFormsModule,
   ValidationErrors,
   ValidatorFn,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { first } from 'rxjs';
 import { AuthService } from '../../auth.service';
 
-import {RouterLink} from "@angular/router";
+import { RouterLink } from '@angular/router';
 
 @Component({
-    selector: 'app-signup-page',
-    templateUrl: './signup.component.html',
-    styleUrls: ['./signup.component.css'],
-    imports: [
-    ReactiveFormsModule,
-    RouterLink
-]
+  selector: 'app-signup-page',
+  templateUrl: './signup.component.html',
+  styleUrls: ['./signup.component.css'],
+  imports: [ReactiveFormsModule, RouterLink],
 })
 export class SignupComponent {
-  readonly signupForm = this.formBuilder.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
-    confirmPassword: ['', [Validators.required, Validators.minLength(6)]],
-  }, { validators: [this.passwordsMatchValidator()] });
+  readonly signupForm = this.formBuilder.nonNullable.group(
+    {
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required, Validators.minLength(6)]],
+    },
+    { validators: [this.passwordsMatchValidator()] },
+  );
 
   isSubmitting = false;
   errorMessage = '';
@@ -64,7 +64,7 @@ export class SignupComponent {
       .signup(this.signupForm.getRawValue())
       .pipe(first())
       .subscribe({
-        next: response => {
+        next: (response) => {
           this.successMessage = response.message;
           this.isSubmitting = false;
         },
@@ -77,9 +77,7 @@ export class SignupComponent {
 
   private getErrorMessage(error: HttpErrorResponse): string {
     const body = error.error as
-      | { error?: string | string[]; message?: string }
-      | string
-      | undefined;
+      { error?: string | string[]; message?: string } | string | undefined;
     const errorValue = body && typeof body === 'object' ? body.error : undefined;
 
     if (typeof body === 'string') {

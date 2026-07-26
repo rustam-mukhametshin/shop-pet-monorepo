@@ -1,7 +1,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { Notification, NotificationService } from '../../services/notification.service';
 import { NotificationsComponent } from './notifications.component';
-import {vi} from "vitest";
+import { vi } from 'vitest';
 
 function makeService(initial: Notification[] = []): NotificationService {
   const service = new NotificationService();

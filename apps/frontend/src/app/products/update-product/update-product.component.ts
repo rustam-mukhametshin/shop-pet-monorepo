@@ -1,18 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Product, ProductPayload, ProductsService } from '../products.service';
-import {FormProductComponent} from "../form-product/form-product.component";
-import { AsyncPipe } from "@angular/common";
-import {Observable} from "rxjs";
+import { FormProductComponent } from '../form-product/form-product.component';
+import { AsyncPipe } from '@angular/common';
+import { Observable } from 'rxjs';
 
 @Component({
-    selector: 'app-update-product',
-    templateUrl: './update-product.component.html',
-    styleUrls: ['./update-product.component.css'],
-    imports: [
-    FormProductComponent,
-    AsyncPipe
-]
+  selector: 'app-update-product',
+  templateUrl: './update-product.component.html',
+  styleUrls: ['./update-product.component.css'],
+  imports: [FormProductComponent, AsyncPipe],
 })
 export class UpdateProductComponent implements OnInit {
   product$?: Observable<Product>;

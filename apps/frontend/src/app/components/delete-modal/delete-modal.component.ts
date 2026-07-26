@@ -6,6 +6,4 @@ import { Component } from '@angular/core';
   templateUrl: './delete-modal.component.html',
   styleUrl: './delete-modal.component.css',
 })
-export class DeleteModalComponent {
-
-}
+export class DeleteModalComponent {}

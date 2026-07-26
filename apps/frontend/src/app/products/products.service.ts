@@ -1,8 +1,8 @@
-import {Injectable, signal} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
-import {environment} from "../../environments/environment";
-import {map, Observable} from "rxjs";
-import {StorageService} from "../services/storage.service";
+import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
+import { map, Observable } from 'rxjs';
+import { StorageService } from '../services/storage.service';
 
 export interface Product {
   _id: string;
@@ -22,8 +22,8 @@ interface Response {
   prods: EditableProduct[];
   currentPage: number;
   lastPage: number;
-  length: number,
-  pageSize: number
+  length: number;
+  pageSize: number;
 }
 
 export type ProductPayload = Omit<Product, '_id'>;
@@ -50,59 +50,55 @@ export class ProductsService {
   constructor(
     private readonly httpClient: HttpClient,
     private readonly tokenService: StorageService,
-  ) {
-  }
+  ) {}
 
-  getProducts(params = {
-    pageIndex: 0,
-    pageSize: 10,
-  }): Observable<Response> {
-    return this.httpClient.get<Response>(
-      environment.apiUrl + 'v1/products',
-      {
+  getProducts(
+    params = {
+      pageIndex: 0,
+      pageSize: 10,
+    },
+  ): Observable<Response> {
+    return this.httpClient
+      .get<Response>(environment.apiUrl + 'v1/products', {
         params: {
           page: params.pageIndex,
           pageSize: params.pageSize,
-        }
-      }
-    ).pipe(map(value => {
-      value.prods = value.prods.map(prod => ({
-        ...prod,
-        isEdit: false,
-      }))
-      return value;
-    }))
+        },
+      })
+      .pipe(
+        map((value) => {
+          value.prods = value.prods.map((prod) => ({
+            ...prod,
+            isEdit: false,
+          }));
+          return value;
+        }),
+      );
   }
 
   getProductById(id: string): Observable<Product> {
-    return this.httpClient.get<{ product: Product }>(
-      environment.apiUrl + `v1/products/${id}`
-    ).pipe(
-      map(res => res.product)
-    )
+    return this.httpClient
+      .get<{ product: Product }>(environment.apiUrl + `v1/products/${id}`)
+      .pipe(map((res) => res.product));
   }
 
   createProduct(payload: FormData): Observable<Product> {
-    return this.httpClient.post<Product>(
-      environment.apiUrl + `v1/add-product`,
-      payload,
-      {
-        headers: {
-          'Authorization': this.tokenService.getBearerAuthToken(),
-        }
-      }
-    )
+    return this.httpClient.post<Product>(environment.apiUrl + `v1/add-product`, payload, {
+      headers: {
+        Authorization: this.tokenService.getBearerAuthToken(),
+      },
+    });
   }
 
   updateProduct(id: string, payload: ProductPayload): Product | undefined {
     const products = this.products();
-    const productIndex = products.findIndex(product => product._id === id);
+    const productIndex = products.findIndex((product) => product._id === id);
 
     if (productIndex < 0) {
       return undefined;
     }
 
-    const updatedProduct: Product = {_id: id, ...payload};
+    const updatedProduct: Product = { _id: id, ...payload };
     const nextProducts = [...products];
     nextProducts[productIndex] = updatedProduct;
     this.products.set(nextProducts);
@@ -110,20 +106,14 @@ export class ProductsService {
   }
 
   patchProduct(id: string, payload: Partial<ProductPayload>): Observable<Product> {
-    return this.httpClient.patch<Product>(
-      environment.apiUrl + `v1/products/${id}`,
-      payload,
-    )
+    return this.httpClient.patch<Product>(environment.apiUrl + `v1/products/${id}`, payload);
   }
 
   deleteProduct(id: string) {
-    return this.httpClient.delete<unknown>(
-      environment.apiUrl + `v1/products/${id}`,
-      {
-        headers: {
-          'Authorization': this.tokenService.getBearerAuthToken(),
-        }
-      }
-    )
+    return this.httpClient.delete<unknown>(environment.apiUrl + `v1/products/${id}`, {
+      headers: {
+        Authorization: this.tokenService.getBearerAuthToken(),
+      },
+    });
   }
 }

@@ -1,8 +1,16 @@
-import {booleanAttribute, Component, input, Input, InputSignal, OnInit, output} from '@angular/core';
-import {ActivatedRoute, RouterLink} from '@angular/router';
-import {Product, ProductsService} from '../products.service';
-import {DecimalPipe} from "@angular/common";
-import {MatButtonModule} from "@angular/material/button";
+import {
+  booleanAttribute,
+  Component,
+  input,
+  Input,
+  InputSignal,
+  OnInit,
+  output,
+} from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Product, ProductsService } from '../products.service';
+import { DecimalPipe } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
 import {
   MatCard,
   MatCardActions,
@@ -10,8 +18,8 @@ import {
   MatCardFooter,
   MatCardHeader,
   MatCardSubtitle,
-  MatCardTitle
-} from "@angular/material/card";
+  MatCardTitle,
+} from '@angular/material/card';
 
 @Component({
   selector: 'app-product',
@@ -27,14 +35,15 @@ import {
     MatCardFooter,
     MatCardActions,
     MatCardTitle,
-    MatCardSubtitle
-  ]
+    MatCardSubtitle,
+  ],
 })
 export class ProductComponent implements OnInit {
-  product: InputSignal<Product | undefined> = input.required<Product | undefined>()
+  product: InputSignal<Product | undefined> = input.required<Product | undefined>();
   @Input({
-    transform: booleanAttribute
-  }) showActions = true;
+    transform: booleanAttribute,
+  })
+  showActions = true;
   remove = output<string | undefined>();
   isAuthenticated = input.required<boolean>();
 
@@ -43,8 +52,7 @@ export class ProductComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly productsService: ProductsService,
-  ) {
-  }
+  ) {}
 
   ngOnInit(): void {
     if (this.product()) {

@@ -6,11 +6,11 @@
   <!--Todo: refactor on angular 18-->
   @if (product$ | async; as product) {
     <app-form-product
-          [initialValue]="{
-      title: product.title,
-      description: product.description,
-      price: product.price
-    }"
+      [initialValue]="{
+        title: product.title,
+        description: product.description,
+        price: product.price,
+      }"
       submitLabel="Update product"
       (formSubmit)="updateProduct($event)"
     ></app-form-product>

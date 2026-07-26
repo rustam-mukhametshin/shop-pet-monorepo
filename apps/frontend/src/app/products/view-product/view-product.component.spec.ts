@@ -1,9 +1,9 @@
-import {ViewProductComponent} from "./view-product.component";
-import {ActivatedRoute} from "@angular/router";
-import {ProductsService} from "../products.service";
-import {describe, beforeEach, it, expect} from "vitest";
+import { ViewProductComponent } from './view-product.component';
+import { ActivatedRoute } from '@angular/router';
+import { ProductsService } from '../products.service';
+import { describe, beforeEach, it, expect } from 'vitest';
 
-describe("ViewProductComponent", () => {
+describe('ViewProductComponent', () => {
   let component: ViewProductComponent;
 
   beforeEach(async () => {
@@ -14,7 +14,7 @@ describe("ViewProductComponent", () => {
     );
   });
 
-  it("should create", () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 });

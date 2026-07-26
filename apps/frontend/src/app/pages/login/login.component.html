@@ -11,7 +11,7 @@
       @if (!isTwoFASubmit) {
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Email address</mat-label>
-          <input matInput type="email" [formField]="loginFormNew.email"/>
+          <input matInput type="email" [formField]="loginFormNew.email" />
           @if (emailControlNew().touched() && emailControlNew().invalid()) {
             @for (error of loginFormNew.email().errors(); track error) {
               <mat-error>{{ error.message }}</mat-error>
@@ -21,7 +21,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Password</mat-label>
-          <input matInput type="password" [formField]="loginFormNew.password"/>
+          <input matInput type="password" [formField]="loginFormNew.password" />
           @if (passwordControlNew().touched() && passwordControlNew().invalid()) {
             @for (error of loginFormNew.password().errors(); track error) {
               <mat-error>{{ error.message }}</mat-error>
@@ -31,9 +31,7 @@
       } @else {
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>2FA code</mat-label>
-          <input matInput type="text" [formField]="loginFormNew.twoFA"
-
-          />
+          <input matInput type="text" [formField]="loginFormNew.twoFA" />
           @if (twoFAControlNew().touched() && twoFAControlNew().invalid()) {
             @for (error of loginFormNew.twoFA().errors(); track error) {
               <mat-error>{{ error.message }}</mat-error>
@@ -48,15 +46,14 @@
       </div>
 
       <button
-
-              mat-raised-button
-              color="primary"
-              type="submit"
-              class="full-width"
-              [disabled]="isSubmitting"
-              (click)="isTwoFASubmit ? submitTwoFA() : submit()"
+        mat-raised-button
+        color="primary"
+        type="submit"
+        class="full-width"
+        [disabled]="isSubmitting"
+        (click)="isTwoFASubmit ? submitTwoFA() : submit()"
       >
-        {{ isSubmitting ? 'Signing in...' : (isTwoFASubmit ? 'Sign in with 2FA' : 'Sign in') }}
+        {{ isSubmitting ? 'Signing in...' : isTwoFASubmit ? 'Sign in with 2FA' : 'Sign in' }}
       </button>
     </mat-card-content>
 

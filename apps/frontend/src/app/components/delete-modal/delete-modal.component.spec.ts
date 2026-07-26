@@ -1,4 +1,4 @@
-import {DeleteModalComponent} from './delete-modal.component';
+import { DeleteModalComponent } from './delete-modal.component';
 
 describe('DeleteModalComponent', () => {
   let component: DeleteModalComponent;

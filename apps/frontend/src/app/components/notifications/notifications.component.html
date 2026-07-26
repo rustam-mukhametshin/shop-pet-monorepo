@@ -1,8 +1,7 @@
 <div class="notification-container">
   @for (notif of notifications(); track notif.id) {
     @let notificationClass = 'notification-' + notif.type;
-    <div class="notification"
-         [class]="notificationClass">
+    <div class="notification" [class]="notificationClass">
       <span>{{ notif.message }}</span>
       <button (click)="close(notif.id)" class="close-btn">&times;</button>
     </div>

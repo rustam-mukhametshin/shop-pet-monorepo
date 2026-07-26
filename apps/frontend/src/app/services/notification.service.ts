@@ -1,5 +1,5 @@
-import {Injectable, Signal, signal} from '@angular/core';
-import {BehaviorSubject, Observable} from 'rxjs';
+import { Injectable, Signal, signal } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
@@ -11,13 +11,13 @@ export interface Notification {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NotificationService {
   private notificationsSubject = new BehaviorSubject<Notification[]>([]);
   public notifications$: Observable<Notification[]> = this.notificationsSubject.asObservable();
 
-  constructor() { }
+  constructor() {}
 
   show(message: string, type: NotificationType = 'info', duration = 3000) {
     const id = Date.now().toString();
@@ -49,7 +49,7 @@ export class NotificationService {
 
   remove(id: string) {
     const current = this.notificationsSubject.value;
-    this.notificationsSubject.next(current.filter(n => n.id !== id));
+    this.notificationsSubject.next(current.filter((n) => n.id !== id));
   }
 
   clear() {

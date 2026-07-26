@@ -1,15 +1,15 @@
-import {HttpClient} from '@angular/common/http';
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {environment} from '../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Profile {
   name: string;
   _id: string;
-  twoFA: boolean,
-  userId: string
-  createdAt: Date,
-  updatedAt: Date,
+  twoFA: boolean;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface TwoFactorStatus {
@@ -32,15 +32,14 @@ export class ProfileService {
   private readonly profileUrl = `${environment.apiUrl}auth/profile`;
   private readonly twoFactorUrl = `${environment.apiUrl}auth/2fa`;
 
-  constructor(private readonly http: HttpClient) {
-  }
+  constructor(private readonly http: HttpClient) {}
 
   getProfile(): Observable<Profile> {
     return this.http.get<Profile>(this.profileUrl, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('shop-pet-auth-token')}`,
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Bearer ${localStorage.getItem('shop-pet-auth-token')}`,
+        'Content-Type': 'application/json',
+      },
     });
   }
 
@@ -48,7 +47,7 @@ export class ProfileService {
     return this.http.put<Profile>(this.profileUrl, payload, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('shop-pet-auth-token')}`,
+        Authorization: `Bearer ${localStorage.getItem('shop-pet-auth-token')}`,
       },
     });
   }
@@ -56,7 +55,7 @@ export class ProfileService {
   get2fa(): Observable<TwoFactorSetup> {
     return this.http.get<TwoFactorSetup>(this.twoFactorUrl, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('shop-pet-auth-token')}`,
+        Authorization: `Bearer ${localStorage.getItem('shop-pet-auth-token')}`,
       },
     });
   }
@@ -64,7 +63,7 @@ export class ProfileService {
   set2fa(enabled: boolean): Observable<TwoFactorStatus> {
     return this.http.put<TwoFactorStatus>(
       this.twoFactorUrl,
-      {enabled},
+      { enabled },
       {
         headers: {
           'Content-Type': 'application/json',

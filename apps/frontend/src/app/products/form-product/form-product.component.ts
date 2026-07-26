@@ -1,21 +1,14 @@
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ProductPayload} from '../products.service';
-import {MatError, MatFormField, MatInput, MatLabel} from "@angular/material/input";
-import {MatButton} from "@angular/material/button";
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ProductPayload } from '../products.service';
+import { MatError, MatFormField, MatInput, MatLabel } from '@angular/material/input';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-    selector: 'app-form-product',
-    templateUrl: './form-product.component.html',
-    styleUrls: ['./form-product.component.css'],
-    imports: [
-        ReactiveFormsModule,
-        MatFormField,
-        MatInput,
-        MatLabel,
-        MatError,
-        MatButton
-    ]
+  selector: 'app-form-product',
+  templateUrl: './form-product.component.html',
+  styleUrls: ['./form-product.component.css'],
+  imports: [ReactiveFormsModule, MatFormField, MatInput, MatLabel, MatError, MatButton],
 })
 export class FormProductComponent implements OnChanges {
   @Input() initialValue?: Partial<ProductPayload>;
@@ -29,8 +22,7 @@ export class FormProductComponent implements OnChanges {
     image: new FormControl<File | null>(null, [Validators.required]),
   });
 
-  constructor() {
-  }
+  constructor() {}
 
   get titleControl() {
     return this.productForm.controls.title;
@@ -63,7 +55,7 @@ export class FormProductComponent implements OnChanges {
   onFileChange(event: any) {
     const file = event.target.files[0];
     if (file) {
-      this.productForm.patchValue({image: file});
+      this.productForm.patchValue({ image: file });
     }
   }
 

@@ -1,9 +1,9 @@
-import {Component, OnInit, signal, WritableSignal} from '@angular/core';
-import {EditableProduct, ProductsService} from '../products.service';
-import {ProductComponent} from "../product/product.component";
-import {Router, RouterLink} from "@angular/router";
-import {catchError, switchMap, take} from "rxjs";
-import {NotificationService} from "../../services/notification.service";
+import { Component, OnInit, signal, WritableSignal } from '@angular/core';
+import { EditableProduct, ProductsService } from '../products.service';
+import { ProductComponent } from '../product/product.component';
+import { Router, RouterLink } from '@angular/router';
+import { catchError, switchMap, take } from 'rxjs';
+import { NotificationService } from '../../services/notification.service';
 import {
   MatCell,
   MatCellDef,
@@ -14,24 +14,18 @@ import {
   MatHeaderRowDef,
   MatRow,
   MatRowDef,
-  MatTable
-} from "@angular/material/table";
-import {CurrencyPipe} from "@angular/common";
-import {MatButton} from "@angular/material/button";
-import {MatPaginator, PageEvent} from "@angular/material/paginator";
-import {MatProgressSpinner} from "@angular/material/progress-spinner";
-import {MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
-import {MatIcon} from "@angular/material/icon";
-import {MatInput} from "@angular/material/input";
-import {AuthService} from "../../auth.service";
+  MatTable,
+} from '@angular/material/table';
+import { CurrencyPipe } from '@angular/common';
+import { MatButton } from '@angular/material/button';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
+import { MatInput } from '@angular/material/input';
+import { AuthService } from '../../auth.service';
 
-const columnsToDisplay: string[] = [
-  '_id',
-  'title',
-  'description',
-  'price',
-  'actions',
-];
+const columnsToDisplay: string[] = ['_id', 'title', 'description', 'price', 'actions'];
 
 @Component({
   selector: 'app-products',
@@ -59,8 +53,8 @@ const columnsToDisplay: string[] = [
     MatMenu,
     MatIcon,
     MatMenuContent,
-    MatInput
-  ]
+    MatInput,
+  ],
 })
 export class ProductsComponent implements OnInit {
   readonly columnsToDisplay: string[] = columnsToDisplay;
@@ -73,17 +67,17 @@ export class ProductsComponent implements OnInit {
     private readonly productsService: ProductsService,
     private readonly notificationService: NotificationService,
     private readonly router: Router,
-    public readonly authService: AuthService
-  ) {
-  }
+    public readonly authService: AuthService,
+  ) {}
 
   ngOnInit() {
-    this.productsService.getProducts()
+    this.productsService
+      .getProducts()
       .pipe(take(1))
-      .subscribe(value => {
+      .subscribe((value) => {
         this.setResponseProducts(value);
         this.notificationService.success('Products successfully loaded!');
-      })
+      });
   }
 
   viewOrUpdateProduct(id: string, update: boolean = false) {
@@ -94,7 +88,8 @@ export class ProductsComponent implements OnInit {
     if (!productId) {
       return;
     }
-    this.productsService.deleteProduct(productId)
+    this.productsService
+      .deleteProduct(productId)
       .pipe(
         take(1),
         switchMap((response: any) => {
@@ -107,12 +102,12 @@ export class ProductsComponent implements OnInit {
           console.error(error);
           this.notificationService.error('Error deleting product: ' + error.message);
           throw error;
-        })
+        }),
       )
-      .subscribe(products => {
+      .subscribe((products) => {
         this.notificationService.success('Product successfully deleted!');
         this.setResponseProducts(products);
-      })
+      });
   }
 
   onTitleChange(id: string, title: string, prevTitle: string) {
@@ -128,43 +123,47 @@ export class ProductsComponent implements OnInit {
       return;
     }
 
-    this.productsService.patchProduct(id, {title: nextTitle})
+    this.productsService
+      .patchProduct(id, { title: nextTitle })
       .pipe(take(1))
       .subscribe({
-        next: value => {
+        next: (value) => {
           this.markProductAsEdited(id, false, value.title);
         },
-        error: error => {
+        error: (error) => {
           console.error(error);
           this.notificationService.error('Error updating product title: ' + error.message);
-        }
+        },
       });
   }
 
   protected onPageChange($event: PageEvent) {
-    this.productsService.getProducts({
-      pageIndex: $event.pageIndex + 1,
-      pageSize: $event.pageSize
-    })
+    this.productsService
+      .getProducts({
+        pageIndex: $event.pageIndex + 1,
+        pageSize: $event.pageSize,
+      })
       .pipe(take(1))
-      .subscribe(value => {
+      .subscribe((value) => {
         this.setResponseProducts(value);
         this.notificationService.success('Products successfully loaded!');
-      })
+      });
   }
 
   protected markProductAsEdited(_id: string, isEdited: boolean, value?: string | null) {
-    this.products.update(products => products.map(product => {
-      if (product._id !== _id) {
-        return product;
-      }
+    this.products.update((products) =>
+      products.map((product) => {
+        if (product._id !== _id) {
+          return product;
+        }
 
-      return {
-        ...product,
-        isEdit: isEdited,
-        ...(value !== undefined ? {title: value} : {}),
-      };
-    }));
+        return {
+          ...product,
+          isEdit: isEdited,
+          ...(value !== undefined ? { title: value } : {}),
+        };
+      }),
+    );
   }
 
   private setResponseProducts(value: any) {
