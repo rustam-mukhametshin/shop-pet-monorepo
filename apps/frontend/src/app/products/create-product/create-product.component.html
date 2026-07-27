@@ -3,7 +3,18 @@
   <p class="text-muted mb-0">Fill in product details and save.</p>
 </div>
 
+<button
+  class="mb-3"
+  mat-button="tonal"
+  type="button"
+  [disabled]="isGeneratingDescription"
+  (click)="generateDescription(productForm)"
+>
+  {{ isGeneratingDescription ? 'Generating...' : 'Generate description' }}
+</button>
+
 <app-form-product
+  #productForm
   submitLabel="Create product"
   (formSubmit)="createProduct($event)"
 ></app-form-product>

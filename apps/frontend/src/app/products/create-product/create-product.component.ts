@@ -2,17 +2,24 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProductPayload, ProductsService } from '../products.service';
 import { FormProductComponent } from '../form-product/form-product.component';
-import { first } from 'rxjs';
+import { finalize, first } from 'rxjs';
+import { MatButton } from '@angular/material/button';
+import { AiGenerationService } from '../../services/ai-generation.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-create-product',
   templateUrl: './create-product.component.html',
   styleUrls: ['./create-product.component.css'],
-  imports: [FormProductComponent],
+  imports: [FormProductComponent, MatButton],
 })
 export class CreateProductComponent {
+  isGeneratingDescription = false;
+
   constructor(
     private readonly productsService: ProductsService,
+    private readonly aiGenerationService: AiGenerationService,
+    private readonly notificationService: NotificationService,
     private readonly router: Router,
   ) {}
 
@@ -28,8 +35,37 @@ export class CreateProductComponent {
     this.productsService
       .createProduct(formData)
       .pipe(first())
-      .subscribe((value) => {
+      .subscribe(() => {
         void this.router.navigate(['/products']);
+      });
+  }
+
+  generateDescription(formProduct: FormProductComponent): void {
+    this.isGeneratingDescription = true;
+
+    this.aiGenerationService
+      .generateProductDescription(formProduct.getTitleValue())
+      .pipe(
+        first(),
+        finalize(() => {
+          this.isGeneratingDescription = false;
+        }),
+      )
+      .subscribe({
+        next: (payload) => {
+          if (payload.status !== 'success') {
+            throw new Error(payload.message || 'Failed to generate description');
+          }
+
+          if (payload.data) {
+            formProduct.setDescriptionValue(payload.data);
+          }
+          this.notificationService.success('Description generated successfully!');
+        },
+        error: (error: Error) => {
+          console.error(error);
+          this.notificationService.error('Error generating description: ' + error.message);
+        },
       });
   }
 }

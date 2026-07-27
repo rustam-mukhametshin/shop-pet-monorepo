@@ -40,6 +40,17 @@ export class FormProductComponent implements OnChanges {
     return this.productForm.controls.image;
   }
 
+  getTitleValue(): string {
+    return this.titleControl.value?.trim() ?? '';
+  }
+
+  setDescriptionValue(description: string): void {
+    this.descriptionControl.setValue(description);
+    this.descriptionControl.markAsDirty();
+    this.descriptionControl.markAsTouched();
+    this.descriptionControl.updateValueAndValidity();
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes['initialValue'] || !this.initialValue) {
       return;
