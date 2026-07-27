@@ -8,6 +8,10 @@
         <p class="message message-success">{{ successMessage }}</p>
       }
 
+      @if (this.isLoading()) {
+        <mat-progress-spinner mode="indeterminate" />
+      }
+
       @if (!isTwoFASubmit) {
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Email address</mat-label>

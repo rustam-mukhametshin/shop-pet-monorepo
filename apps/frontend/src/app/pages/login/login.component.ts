@@ -24,6 +24,7 @@ import {
   minLength,
   required,
 } from '@angular/forms/signals';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 interface LoginData {
   email: string;
@@ -42,6 +43,7 @@ interface LoginData {
     MatButtonModule,
     RouterLink,
     FormField,
+    MatProgressSpinner,
   ],
 })
 export class LoginComponent implements OnInit {
@@ -84,6 +86,7 @@ export class LoginComponent implements OnInit {
   public errorMessage = '';
   public successMessage = '';
   public isTwoFASubmit = false;
+  isLoading = signal(false);
   private returnUrl = '';
   private stateToken = '';
 
@@ -121,6 +124,7 @@ export class LoginComponent implements OnInit {
     this.isSubmitting = true;
     this.errorMessage = '';
     this.successMessage = '';
+    this.isLoading.set(true);
 
     const payload = {
       email: this.loginModel().email,
@@ -133,6 +137,7 @@ export class LoginComponent implements OnInit {
         first(),
         finalize(() => {
           this.changeDetectorRef.markForCheck();
+          this.isLoading.set(false);
         }),
       )
       .subscribe({
@@ -163,22 +168,26 @@ export class LoginComponent implements OnInit {
       this.isSubmitting = !this.isSubmitting;
       return;
     }
+    this.isLoading.set(true);
 
     this.authService
       .loginWithTwoFA(this.loginModel().twoFA, this.stateToken)
-      .pipe(first())
+      .pipe(
+        first(),
+        finalize(() => {
+          this.isLoading.set(false);
+          this.isSubmitting = false;
+        }),
+      )
       .subscribe({
         next: (response) => {
           if (response.status === 'success') {
             this.successMessage = response.message;
             this.router.navigateByUrl(this.returnUrl);
           }
-
-          this.isSubmitting = false;
         },
         error: (error: HttpErrorResponse) => {
           this.errorMessage = this.getErrorMessage(error);
-          this.isSubmitting = false;
         },
       });
   }
