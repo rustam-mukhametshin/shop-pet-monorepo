@@ -2,7 +2,7 @@ import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { EditableProduct, ProductsService } from '../products.service';
 import { ProductComponent } from '../product/product.component';
 import { Router, RouterLink } from '@angular/router';
-import { catchError, switchMap, take } from 'rxjs';
+import { catchError, delay, switchMap, take } from 'rxjs';
 import { NotificationService } from '../../services/notification.service';
 import {
   MatCell,
@@ -19,11 +19,11 @@ import {
 import { CurrencyPipe } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { AuthService } from '../../auth.service';
+import { LoaderComponent } from '../../components/loader/loader.component';
 
 const columnsToDisplay: string[] = ['_id', 'title', 'description', 'price', 'actions'];
 
@@ -47,13 +47,13 @@ const columnsToDisplay: string[] = ['_id', 'title', 'description', 'price', 'act
     CurrencyPipe,
     MatButton,
     MatPaginator,
-    MatProgressSpinner,
     MatMenuTrigger,
     MatMenuItem,
     MatMenu,
     MatIcon,
     MatMenuContent,
     MatInput,
+    LoaderComponent,
   ],
 })
 export class ProductsComponent implements OnInit {
@@ -73,7 +73,7 @@ export class ProductsComponent implements OnInit {
   ngOnInit() {
     this.productsService
       .getProducts()
-      .pipe(take(1))
+      .pipe(take(1), delay(50000))
       .subscribe((value) => {
         this.setResponseProducts(value);
         this.notificationService.success('Products successfully loaded!');
