@@ -54,7 +54,10 @@ export class CreateProductComponent {
       .subscribe({
         next: (payload) => {
           if (payload.status !== 'success') {
-            throw new Error(payload.message || 'Failed to generate description');
+            this.notificationService.error(
+              'Error generating description: ' + (payload.message || 'Failed to generate description'),
+            );
+            return;
           }
 
           if (payload.data) {

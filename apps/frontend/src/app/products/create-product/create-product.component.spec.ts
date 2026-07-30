@@ -8,7 +8,13 @@ describe('CreateProductComponent', () => {
       createProduct: vi.fn().mockReturnValue(of({ _id: '1' })),
     } as any;
     const aiGenerationService = {
-      generateProductDescription: vi.fn().mockReturnValue(of('Generated description')),
+      generateProductDescription: vi.fn().mockReturnValue(
+        of({
+          status: 'success',
+          message: 'Successfully generated description',
+          data: 'Generated description',
+        }),
+      ),
     } as any;
     const notificationService = {
       success: vi.fn(),
@@ -81,6 +87,31 @@ describe('CreateProductComponent', () => {
     expect(formProduct.setDescriptionValue).not.toHaveBeenCalled();
     expect(notificationService.error).toHaveBeenCalledWith(
       'Error generating description: Backend unavailable',
+    );
+    expect(component.isGeneratingDescription).toBe(false);
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should show an error when the AI response is unsuccessful', () => {
+    const { component, aiGenerationService, notificationService } = createComponent();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    aiGenerationService.generateProductDescription.mockReturnValue(
+      of({
+        status: 'error',
+        message: 'Failed to generate description',
+        data: '',
+      }),
+    );
+    const formProduct = {
+      getTitleValue: vi.fn().mockReturnValue('Dog Food'),
+      setDescriptionValue: vi.fn(),
+    } as any;
+
+    component.generateDescription(formProduct);
+
+    expect(formProduct.setDescriptionValue).not.toHaveBeenCalled();
+    expect(notificationService.error).toHaveBeenCalledWith(
+      'Error generating description: Failed to generate description',
     );
     expect(component.isGeneratingDescription).toBe(false);
     consoleErrorSpy.mockRestore();

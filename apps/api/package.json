@@ -39,9 +39,11 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@ai-sdk/xai": "^4.0.22",
     "@apollo/server": "^5.5.1",
     "@as-integrations/express5": "^1.1.2",
     "@simplewebauthn/server": "^13.3.2",
+    "ai": "^7.0.42",
     "bcryptjs": "^3.0.3",
     "connect-mongo": "^6.0.0",
     "dotenv": "^17.4.2",
