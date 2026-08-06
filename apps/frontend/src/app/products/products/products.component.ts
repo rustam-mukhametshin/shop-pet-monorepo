@@ -2,7 +2,7 @@ import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { EditableProduct, ProductsService } from '../products.service';
 import { ProductComponent } from '../product/product.component';
 import { Router, RouterLink } from '@angular/router';
-import { catchError, delay, switchMap, take } from 'rxjs';
+import { catchError, switchMap, take } from 'rxjs';
 import { NotificationService } from '../../services/notification.service';
 import {
   MatCell,
@@ -73,7 +73,7 @@ export class ProductsComponent implements OnInit {
   ngOnInit() {
     this.productsService
       .getProducts()
-      .pipe(take(1), delay(50000))
+      .pipe(take(1))
       .subscribe((value) => {
         this.setResponseProducts(value);
         this.notificationService.success('Products successfully loaded!');
