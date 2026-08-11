@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ProductPayload, ProductsService } from '../products.service';
 import { FormProductComponent } from '../form-product/form-product.component';
 import { finalize, first } from 'rxjs';
@@ -11,7 +11,7 @@ import { NotificationService } from '../../services/notification.service';
   selector: 'app-create-product',
   templateUrl: './create-product.component.html',
   styleUrls: ['./create-product.component.css'],
-  imports: [FormProductComponent, MatButton],
+  imports: [FormProductComponent, MatButton, RouterLink],
 })
 export class CreateProductComponent {
   isGeneratingDescription = false;
@@ -55,7 +55,8 @@ export class CreateProductComponent {
         next: (payload) => {
           if (payload.status !== 'success') {
             this.notificationService.error(
-              'Error generating description: ' + (payload.message || 'Failed to generate description'),
+              'Error generating description: ' +
+                (payload.message || 'Failed to generate description'),
             );
             return;
           }
