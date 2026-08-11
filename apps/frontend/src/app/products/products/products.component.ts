@@ -24,6 +24,9 @@ import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { AuthService } from '../../auth.service';
 import { LoaderComponent } from '../../components/loader/loader.component';
+import { MatTab, MatTabGroup } from '@angular/material/tabs';
+import { AgGridProductsComponent } from './ag-grid-products/ag-grid-products.component';
+import type { ColDef } from 'ag-grid-community';
 
 const columnsToDisplay: string[] = ['_id', 'title', 'description', 'price', 'actions'];
 
@@ -54,10 +57,14 @@ const columnsToDisplay: string[] = ['_id', 'title', 'description', 'price', 'act
     MatMenuContent,
     MatInput,
     LoaderComponent,
+    MatTabGroup,
+    MatTab,
+    AgGridProductsComponent,
   ],
 })
 export class ProductsComponent implements OnInit {
   readonly columnsToDisplay: string[] = columnsToDisplay;
+  readonly columnsToDisplayAgGrid: ColDef[] = columnsToDisplay.map((col) => ({ field: col }));
 
   public products: WritableSignal<EditableProduct[]> = signal([]);
   length: WritableSignal<number> = signal(0);

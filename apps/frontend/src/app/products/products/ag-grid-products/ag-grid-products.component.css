@@ -1,0 +1,9 @@
+:host {
+  display: block;
+}
+
+.products-grid {
+  display: block;
+  width: 100%;
+  min-height: 24rem;
+}
