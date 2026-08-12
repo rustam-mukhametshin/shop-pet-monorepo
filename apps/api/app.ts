@@ -27,7 +27,11 @@ const limiter = rateLimit({
   ipv6Subnet: 56,
 })
 const app = express()
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:4200', process.env.FRONTEND_URL!]
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:4200',
+  process.env.FRONTEND_URL!,
+].filter(Boolean) as string[]
 
 app.use(limiter)
 app.use(helmet())
