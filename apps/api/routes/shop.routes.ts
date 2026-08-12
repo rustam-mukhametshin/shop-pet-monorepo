@@ -3,6 +3,7 @@ import * as ShopController from '../controllers/shop.controller'
 import { isAuth } from '../middleware/is-auth'
 import { body } from 'express-validator'
 import { TEXT_MAX_LENGTH, TEXT_MIN_LENGTH, TITLE_MAX_LENGTH } from '../util/settings'
+import { isUserCreatedProduct } from '../middleware/is-user-created-product'
 
 const shopRoutes = Router()
 /**
@@ -50,6 +51,7 @@ shopRoutes.post('/order-delete-item', isAuth, ShopController.postDeleteOrderItem
 shopRoutes.patch(
   '/products/:id',
   isAuth,
+  isUserCreatedProduct,
   [body('title').isString().trim().isLength({ min: TEXT_MIN_LENGTH, max: TITLE_MAX_LENGTH })],
   ShopController.patchProduct
 )
