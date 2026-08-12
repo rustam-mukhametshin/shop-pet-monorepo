@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -11,7 +11,7 @@ import {
 import { first } from 'rxjs';
 import { AuthService } from '../../auth.service';
 
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-signup-page',
@@ -36,6 +36,8 @@ export class SignupComponent {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly router: Router,
   ) {}
 
   get emailControl() {
@@ -67,6 +69,10 @@ export class SignupComponent {
         next: (response) => {
           this.successMessage = response.message;
           this.isSubmitting = false;
+          this.changeDetectorRef.detectChanges();
+          setTimeout(() => {
+            return this.router.navigateByUrl('/login');
+          }, 2000);
         },
         error: (error: HttpErrorResponse) => {
           this.errorMessage = this.getErrorMessage(error);
