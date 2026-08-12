@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   debounceTime,
@@ -42,6 +42,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private readonly profileService: ProfileService,
     private readonly authService: AuthService,
     private readonly router: Router,
+    private readonly changeDetectorRef: ChangeDetectorRef,
   ) {}
 
   get nameControl() {
@@ -139,6 +140,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
             { emitEvent: false },
           );
           this.isLoading = false;
+          this.changeDetectorRef.markForCheck();
         },
         error: (error: HttpErrorResponse) => {
           if (error.status === 401) {
