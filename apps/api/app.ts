@@ -16,7 +16,9 @@ import { rateLimit } from 'express-rate-limit'
 import { expressMiddleware } from '@as-integrations/express5'
 import { apolloServer } from './graphql'
 
-dotenv.config()
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config()
+}
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 100,
