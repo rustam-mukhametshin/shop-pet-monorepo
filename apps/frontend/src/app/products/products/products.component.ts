@@ -28,7 +28,7 @@ import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { AgGridProductsComponent } from './ag-grid-products/ag-grid-products.component';
 import type { ColDef } from 'ag-grid-community';
 
-const columnsToDisplay: string[] = ['_id', 'title', 'description', 'price', 'actions'];
+const columnsToDisplay: string[] = ['_id', 'title', 'description', 'price', 'createdBy', 'actions'];
 
 @Component({
   selector: 'app-products',
