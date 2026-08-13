@@ -66,12 +66,6 @@ jest.mock('@simplewebauthn/server', () => ({
   verifyRegistrationResponse: jest.fn(),
 }));
 
-jest.mock('otplib', () => ({
-  generateSecret: jest.fn(),
-  generateURI: jest.fn(),
-  verify: jest.fn(),
-}));
-
 const {UserModel} = require('../../models/user.model');
 const {ProfileModel} = require('../../models/profile.model');
 const {
