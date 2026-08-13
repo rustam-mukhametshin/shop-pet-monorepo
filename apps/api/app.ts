@@ -30,6 +30,7 @@ const app = express()
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:4200',
+  'https://shop-pet-monorepo-frontend.vercel.app',
   process.env.FRONTEND_URL!,
 ].filter(Boolean) as string[]
 
@@ -85,6 +86,7 @@ app.use(
 )
 
 const apolloMiddlewarePromise = apolloServer.start().then(() => expressMiddleware(apolloServer))
+// graphiql: true
 app.use('/graphql', express.json(), async (req, res, next) => {
   const apolloMiddleware = await apolloMiddlewarePromise
   return apolloMiddleware(req, res, next)
